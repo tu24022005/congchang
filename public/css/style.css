@@ -1,0 +1,1382 @@
+/* ==========================================
+    NEN TANG CHUNG: BODY VA LAYOUT
+    ========================================== */
+body {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Đẩy nội dung chính để footer luôn bám đáy */
+main {
+    flex: 1;
+}
+
+/* ==========================================
+    NAVBAR VA FOOTER: GIAO DIEN KINH MO
+    ========================================== */
+.glass-navbar {
+    background: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    position: relative; 
+    z-index: 1050; /* Đẩy menu lên lớp cao nhất */
+}
+.glass-navbar .navbar-brand {
+    color: #2c3e50 !important;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+.glass-navbar .nav-link {
+    color: #34495e !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.glass-navbar .nav-link:hover, .glass-navbar .nav-link.active {
+    color: #0082c8 !important;
+    transform: translateY(-2px);
+}
+
+.glass-footer {
+    background: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+}
+.footer-link {
+    transition: all 0.3s ease;
+}
+.footer-link:hover {
+    color: #0082c8 !important;
+    padding-left: 5px;
+}
+
+/* ==========================================
+    TIM KIEM: GOI Y VA THANH CUON
+    ========================================== */
+.search-item-hover:hover { background-color: rgba(0, 198, 255, 0.1); border-radius: 8px; margin: 0 8px; }
+#search-suggestions::-webkit-scrollbar { width: 6px; }
+#search-suggestions::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+.live-search-form { max-width: 450px; }
+.live-search-group { background-color: white; border-radius: 50px; overflow: hidden; height: 42px; }
+.search-icon { font-size: 1.1rem; }
+.live-search-input { font-size: 0.95rem; font-weight: 500; }
+.search-suggestions { top: 50px; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); }
+.search-result-image { width: 40px; height: 40px; object-fit: contain; }
+.search-result-name { max-width: 300px; }
+.cart-count-badge { font-size: 0.7rem; margin-top: 10px; }
+.footer-shop-title { color: #2c3e50; }
+.footer-heading { color: #34495e; }
+.social-button { width: 35px; height: 35px; line-height: 22px; }
+.footer-divider { border-color: rgba(0,0,0,0.1); }
+.glass-footer { position: relative; overflow: hidden; padding: 0 0 1.25rem; background: linear-gradient(115deg, rgba(230, 250, 249, 0.94), rgba(255, 239, 246, 0.96)) !important; border-top: 1px solid rgba(255,255,255,0.8); }
+.footer-promise-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 1.35rem 0; border-bottom: 1px solid rgba(44,62,80,0.1); }
+.footer-promise { display: flex; align-items: center; gap: 0.75rem; padding: 0.25rem 1rem; border-right: 1px solid rgba(44,62,80,0.1); }
+.footer-promise:last-child { border-right: 0; }
+.footer-promise > i { color: #0082c8; font-size: 1.55rem; }
+.footer-promise strong, .footer-promise small { display: block; }
+.footer-promise strong { color: #2c3e50; font-size: 0.88rem; }
+.footer-promise small { margin-top: 0.15rem; color: #6c757d; font-size: 0.75rem; }
+.footer-main-row { padding: 3rem 0 2.5rem; }
+.footer-brand-lockup { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.1rem; }
+.footer-brand-mark { display: grid; place-items: center; width: 42px; height: 42px; color: white; font-size: 1.35rem; background: linear-gradient(135deg, #00a6c7, #6f42c1); border-radius: 13px; box-shadow: 0 8px 16px rgba(0,130,200,0.2); }
+.footer-brand-lockup strong, .footer-brand-lockup small { display: block; }
+.footer-brand-lockup strong { color: #2c3e50; font-size: 1.25rem; letter-spacing: 0.02em; }
+.footer-brand-lockup small { color: #0082c8; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; }
+.footer-about { max-width: 360px; color: #5c6873; font-size: 0.84rem; line-height: 1.75; }
+.footer-contact-list { display: grid; gap: 0.7rem; margin-top: 1.25rem; }
+.footer-contact-list a { display: flex; align-items: center; gap: 0.65rem; color: #56616c; font-size: 0.8rem; text-decoration: none; }
+.footer-contact-list a:hover { color: #0082c8; }
+.footer-contact-list i { width: 20px; color: #0082c8; text-align: center; }
+.footer-contact-list small { color: #8a959f; }
+.footer-column-title { margin-bottom: 1.1rem; color: #2c3e50; font-size: 0.83rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+.footer-menu { display: grid; gap: 0.65rem; }
+.footer-menu a { color: #65717c; font-size: 0.81rem; text-decoration: none; transition: color 0.2s ease, padding-left 0.2s ease; }
+.footer-menu a:hover { padding-left: 4px; color: #0082c8; }
+.footer-connect-panel { padding: 1.35rem; background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.75); border-radius: 18px; box-shadow: 0 10px 24px rgba(31,38,135,0.06); }
+.footer-panel-kicker { color: #0082c8; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.15em; }
+.footer-connect-panel h6 { margin: 0.45rem 0; color: #2c3e50; font-size: 1rem; }
+.footer-connect-panel p { margin-bottom: 1rem; color: #6c757d; font-size: 0.78rem; line-height: 1.6; }
+.footer-social { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.48rem 0.7rem; color: white; font-size: 0.73rem; text-decoration: none; border-radius: 999px; transition: transform 0.2s ease, opacity 0.2s ease; }
+.footer-social:hover { color: white; opacity: 0.88; transform: translateY(-2px); }
+.footer-social-facebook { background: #1877f2; }
+.footer-social-youtube { background: #e62117; }
+.footer-social-x { background: #1f2937; }
+.footer-payment-line { display: flex; align-items: center; justify-content: space-between; padding-top: 0.85rem; border-top: 1px solid rgba(44,62,80,0.1); }
+.footer-payment-line > span { color: #6c757d; font-size: 0.74rem; }
+.footer-payment-line div { display: flex; gap: 0.7rem; color: #0082c8; font-size: 1.25rem; }
+.footer-policy-strip { display: flex; justify-content: center; gap: 2rem; padding: 0.95rem 0; color: #66727d; font-size: 0.73rem; border-top: 1px solid rgba(44,62,80,0.1); border-bottom: 1px solid rgba(44,62,80,0.1); }
+.footer-bottom { display: flex; justify-content: space-between; gap: 1rem; padding-top: 1rem; color: #8a959f; font-size: 0.7rem; }
+.admin-order-link { color: #2c3e50; }
+.admin-user-menu { background: rgba(255,255,255,0.9); border-radius: 12px; }
+
+/* ==========================================
+    CHAT: KHUNG CHAT VA TIN NHAN
+    ========================================== */
+#chat-user-list::-webkit-scrollbar, #chat-messages::-webkit-scrollbar { width: 5px; }
+#chat-user-list::-webkit-scrollbar-thumb, #chat-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+.msg-bubble { max-width: 80%; padding: 10px 15px; border-radius: 20px; font-size: 0.95rem; display: inline-block; clear: both; }
+.msg-mine { background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white; float: right; border-bottom-right-radius: 5px; margin-bottom: 10px; }
+.msg-other { background: #e9ecef; color: #333; float: left; border-bottom-left-radius: 5px; margin-bottom: 10px; }
+.chat-widget-button { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 9999; transition: transform 0.3s; }
+.chat-widget-button-admin { background: linear-gradient(135deg, #FF416C, #FF4B2B); }
+.chat-widget-button-user { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+.chat-widget-window { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; border-radius: 20px; z-index: 9998; overflow: hidden; backdrop-filter: blur(15px); background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(255, 255, 255, 0.5); display: flex; flex-direction: column; }
+.chat-header-admin { background: linear-gradient(135deg, #FF416C, #FF4B2B); }
+.chat-header-user { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+.chat-back-button, .chat-close-button, .chat-user-item { cursor: pointer; }
+.chat-back-button { font-size: 1.2rem; }
+.chat-user-list, .chat-messages { overflow-y: auto; }
+.chat-user-list { background: rgba(255,255,255,0.9); }
+.chat-input-area { background: rgba(255,255,255,0.9); }
+.chat-send-button { width: 40px; height: 40px; padding: 0; }
+.chat-message-row { overflow: hidden; }
+.chat-sender-label { font-size: 0.75rem; }
+
+/* ==========================================
+    SAN PHAM: HIEU UNG CARD
+    ========================================== */
+.product-hover:hover {
+     transform: translateY(-8px);
+     box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+}
+.admin-product-card:hover {
+     transform: translateY(-5px);
+     box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* ==========================================
+    ADMIN: DASHBOARD, BANG VA HINH ANH
+    ========================================== */
+.admin-thumb-image, .admin-thumb-placeholder { width: 60px; height: 60px; }
+.admin-thumb-image { object-fit: cover; }
+.admin-thumb-placeholder { margin: 0 auto; }
+.admin-category-image { max-height: 250px; object-fit: cover; }
+.admin-dashboard { background-color: #f8f9fa; }
+.admin-year-filter { background: transparent; outline: none; cursor: pointer; }
+.admin-stat-note { font-size: 0.8rem; }
+.admin-chart-card, .admin-panel-card { background: rgba(255, 255, 255, 0.95); }
+.revenue-chart { min-height: 350px; }
+.payment-chart { width: 100%; }
+.admin-product-label { width: 200px; }
+.admin-product-image { max-width: 150px; height: auto; }
+.admin-product-title { color: #2c3e50; }
+.admin-recommended-image, .admin-recommended-placeholder { height: 200px; }
+.admin-recommended-image { object-fit: cover; }
+
+/* ==========================================
+    AUTH: DANG NHAP, DANG KY VA XAC THUC
+    ========================================== */
+.auth-glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(15px); }
+.auth-title { color: #2c3e50; }
+.auth-submit-button { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); border: none; }
+.auth-success-alert { border-radius: 12px; background: rgba(209, 231, 221, 0.8); border: none; }
+.auth-danger-alert { border-radius: 12px; background: rgba(248, 215, 218, 0.8); border: none; }
+.auth-divider-label { font-size: 0.85rem; }
+.auth-google-button { transition: 0.3s; background: white; }
+.auth-register-divider { border-top: 1px solid rgba(255,255,255,0.4); }
+.auth-register-label { color: #555; font-size: 0.9rem; }
+.auth-register-link { margin-left: 5px; }
+.auth-register-card { background: linear-gradient(135deg, #f12711 0%, #f5af19 100%); border-radius: 20px; }
+.auth-register-icon { font-size: 3.5rem; color: #fffde4; filter: drop-shadow(0 0 15px rgba(255,255,255,0.9)); }
+.auth-register-heading { text-shadow: 2px 2px 4px rgba(0,0,0,0.3); letter-spacing: 1px; }
+.auth-register-input { border-radius: 12px; border: 2px solid #fff; }
+.auth-register-submit { background-color: #ffe000; border-radius: 50px; box-shadow: 0 5px 15px rgba(255, 224, 0, 0.6); transition: all 0.3s; }
+.auth-register-login-link { color: #fffde4; text-decoration: underline; text-underline-offset: 3px; }
+.auth-verify-card { max-width: 500px; width: 100%; }
+
+/* ==========================================
+    ADMIN REPORTS: CAC THE THONG KE
+    ========================================== */
+.report-card { color: white; }
+.report-revenue-card { background-color: #4CAF50; }
+.report-pending-card { background-color: #FF9800; }
+.report-orders-card { background-color: #2196F3; }
+.report-customers-card { background-color: #9C27B0; }
+.report-label { font-size: 0.85rem; }
+.report-icon { width: 50px; height: 50px; }
+.admin-dashboard-panel { background: rgba(255, 255, 255, 0.94); }
+.admin-dashboard-table thead th { padding: 0.85rem 0.75rem; font-size: 0.75rem; color: #6c757d; text-transform: uppercase; }
+.admin-dashboard-table tbody td { padding: 0.85rem 0.75rem; }
+.top-product-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem; height: 100%; background: #f8fbff; border: 1px solid #e7f0ff; border-radius: 12px; }
+.top-product-rank { display: grid; place-items: center; flex: 0 0 32px; height: 32px; color: white; font-weight: 700; background: #0d6efd; border-radius: 50%; }
+
+/* ==========================================
+    STOREFRONT: GIO HANG, DON HANG VA THANH TOAN
+    ========================================== */
+.storefront-title { color: #2c3e50; }
+.storefront-panel-card, .order-panel-card { background: rgba(255, 255, 255, 0.9); }
+.storefront-thumb-placeholder, .storefront-thumb-image { width: 60px; height: 60px; }
+.storefront-thumb-image { object-fit: cover; }
+.storefront-thumb-placeholder { margin: 0 auto; }
+.quantity-input { width: 60px; }
+.voucher-input { text-transform: uppercase; }
+.voucher-submit { background: #198754; }
+.empty-cart-icon, .empty-search-icon { font-size: 4rem; }
+.checkout-card { max-width: 450px; }
+.checkout-qr-image { max-width: 250px; }
+.order-panel-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); }
+.order-total { font-size: 1.1rem; }
+.order-image-column { width: 100px; }
+.order-payment-card { background: rgba(255, 255, 255, 0.95); }
+.order-payment-header { border-top-left-radius: 1rem; border-top-right-radius: 1rem; }
+
+/* ==========================================
+    STOREFRONT: DANH SACH VA CHI TIET SAN PHAM
+    ========================================== */
+.product-page-title { color: #2c3e50; font-family: serif; font-size: 2.5rem; }
+.product-list-image { max-height: 120px; object-fit: contain; }
+.product-icon-placeholder { width: 60px; height: 60px; background: rgba(0,198,255,0.1); border: 2px solid #00c6ff; }
+.product-category-badge { background: rgba(0, 198, 255, 0.1); font-size: 0.75rem; }
+.product-description { display: -webkit-box; line-clamp: 2; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.product-main-image { max-height: 400px; object-fit: cover; }
+.product-gallery-image { height: 60vh; object-fit: contain; }
+.product-detail-description { white-space: pre-line; }
+.recommended-product-card { background: rgba(255, 255, 255, 0.9); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.recommended-product-image, .recommended-product-placeholder { height: 200px; }
+.recommended-product-image { object-fit: cover; }
+.welcome-carousel-icon { width: 3rem; height: 3rem; }
+.hot-products-kicker { color: #e05a33; font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+.hot-products-track { display: flex; gap: 1rem; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; padding: .25rem .1rem .8rem; }
+.hot-products-track::-webkit-scrollbar { display: none; }
+.hot-product-card { flex: 0 0 220px; overflow: hidden; color: #2c3e50; text-decoration: none; background: rgba(255,255,255,.92); border: 1px solid rgba(255,255,255,.95); border-radius: 16px; box-shadow: 0 8px 20px rgba(38,60,80,.08); transition: transform .2s ease, box-shadow .2s ease; }
+.hot-product-card:hover { color: #2c3e50; transform: translateY(-4px); box-shadow: 0 14px 28px rgba(38,60,80,.15); }
+.hot-product-image { display: grid; place-items: center; height: 170px; background: #f4f7fa; }
+.hot-product-image img { width: 100%; height: 100%; object-fit: cover; }
+.hot-product-image i { color: #08a9d2; font-size: 2rem; }
+.hot-product-card h5 { min-height: 42px; margin: 0 0 .55rem; font-size: .94rem; font-weight: 800; }
+.hot-product-card strong { color: #e63950; }
+.hot-scroll-button { width: 36px; height: 36px; }
+
+/* ==========================================
+   CART CHECKOUT: GIO HANG VA CHON DIA CHI
+   ========================================== */
+.cart-page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.cart-eyebrow { color: #0d6efd; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; }
+.cart-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.35rem; }
+.cart-secure-badge { padding: 0.45rem 0.7rem; color: #198754; font-size: 0.75rem; font-weight: 700; background: #eaf8f0; border-radius: 999px; }
+.step-badge { display: grid; place-items: center; width: 32px; height: 32px; color: #0d6efd; font-weight: 800; background: #e8f1ff; border-radius: 50%; }
+.delivery-map { height: 270px; overflow: hidden; border: 1px solid #dbe4ef; border-radius: 14px; z-index: 1; }
+.delivery-map .leaflet-control-zoom { border: 0; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
+.delivery-map-tools .input-group .form-control { border-right: 0; }
+.cart-items-card .table tbody tr { transition: background-color 0.2s ease; }
+.cart-items-card .table tbody tr:hover { background-color: #f7fbff; }
+.customer-orders-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.customer-order-stat { position: relative; display: block; min-height: 106px; padding: 1rem; overflow: hidden; color: white; text-decoration: none; background: linear-gradient(135deg, #0d6efd, #38bdf8); border-radius: 16px; box-shadow: 0 8px 20px rgba(13,110,253,0.14); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.customer-order-stat:hover, .customer-order-stat.active { color: white; transform: translateY(-3px); box-shadow: 0 12px 24px rgba(13,110,253,0.24); }
+.customer-order-stat i { position: absolute; right: 1rem; bottom: 0.65rem; font-size: 2.8rem; opacity: 0.18; }
+.customer-order-stat strong, .customer-order-stat span { position: relative; z-index: 1; display: block; }
+.customer-order-stat strong { margin: 0.25rem 0; font-size: 1.8rem; }
+.customer-order-stat span { font-size: 0.78rem; font-weight: 700; opacity: 0.88; }
+.customer-order-stat.stat-amber { background: linear-gradient(135deg, #f59e0b, #f97316); }
+.customer-order-stat.stat-green { background: linear-gradient(135deg, #059669, #34d399); }
+.customer-order-stat.stat-red { background: linear-gradient(135deg, #dc3545, #fb7185); }
+.customer-order-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.35rem; border-bottom: 1px solid #edf0f3; }
+.customer-order-table-card thead th { font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.customer-order-table-card tbody td { padding-top: 1rem; padding-bottom: 1rem; }
+.quantity-control { display: inline-flex; align-items: center; overflow: hidden; vertical-align: middle; border: 1px solid #dbe4ef; border-radius: 8px; }
+.quantity-control .quantity-input { width: 42px; margin: 0; border: 0; border-radius: 0; }
+.quantity-step { width: 28px; height: 30px; color: #0d6efd; background: #f5f8fc; border: 0; font-weight: 700; }
+.quantity-step:hover { background: #e7f0ff; }
+
+@media (max-width: 576px) {
+    .customer-orders-heading { align-items: flex-start; flex-direction: column; }
+    .customer-orders-heading .btn { width: 100%; }
+    .customer-order-toolbar { align-items: flex-start; flex-direction: column; gap: 0.75rem; }
+}
+
+@media (max-width: 576px) {
+    .cart-page-heading { align-items: flex-start; flex-direction: column; }
+    .cart-page-heading .btn { width: 100%; }
+    .cart-card-heading { align-items: flex-start; }
+}
+
+/* ==========================================
+   DANH MUC SAN PHAM: KHU VUC NGUOI DUNG
+   ========================================== */
+.product-categories { position: relative; }
+.category-view-all { color: #0082c8; font-weight: 600; }
+.category-card {
+    min-height: 128px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    color: #2c3e50;
+    text-align: center;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(31, 38, 135, 0.08);
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+.category-card:hover, .category-card.active {
+    color: #0072ff;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 24px rgba(0, 114, 255, 0.16);
+    transform: translateY(-4px);
+}
+.category-card-icon { color: #00a6c7; font-size: 1.65rem; line-height: 1; }
+.category-card-name { font-weight: 700; }
+.category-card small { color: #6c757d; }
+
+/* ==========================================
+   ADMIN CATEGORY DETAIL: SAN PHAM THUOC NHOM
+   ========================================== */
+.admin-product-list-image, .admin-product-list-placeholder {
+    width: 52px;
+    height: 52px;
+}
+.admin-product-list-image {
+    object-fit: cover;
+    border-radius: 8px;
+}
+.admin-product-list-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f3f5;
+    border-radius: 8px;
+}
+
+/* ==========================================
+    ADMIN ORDERS: BANG DIEU HANH DON HANG
+    ========================================== */
+.admin-orders-page { max-width: 1440px; }
+.admin-eyebrow { color: #0d6efd; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; }
+.order-kpi { position: relative; min-height: 142px; padding: 1.25rem; overflow: hidden; color: white; border-radius: 18px; box-shadow: 0 10px 24px rgba(31, 38, 135, 0.1); }
+.order-kpi span, .order-kpi small { position: relative; z-index: 1; display: block; }
+.order-kpi span { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; opacity: 0.88; }
+.order-kpi strong { position: relative; z-index: 1; display: block; margin: 0.45rem 0 0.2rem; font-size: clamp(1.35rem, 2.5vw, 2rem); }
+.order-kpi small { opacity: 0.78; }
+.order-kpi i { position: absolute; right: 1rem; bottom: 0.7rem; font-size: 3.8rem; opacity: 0.16; }
+.order-kpi-blue { background: linear-gradient(135deg, #2563eb, #38bdf8); }
+.order-kpi-amber { background: linear-gradient(135deg, #f59e0b, #f97316); }
+.order-kpi-green { background: linear-gradient(135deg, #059669, #34d399); }
+.order-kpi-violet { background: linear-gradient(135deg, #7c3aed, #c084fc); }
+.order-filter-card { background: rgba(255, 255, 255, 0.88); }
+.order-table-card thead th { color: #6c757d; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.order-table-card tbody td { padding-top: 1rem; padding-bottom: 1rem; }
+.order-status-form { min-width: 138px; }
+.order-status-select { border-radius: 999px; font-weight: 600; }
+
+/* ==========================================
+   ORDER DETAIL: CHI TIET DON HANG
+   ========================================== */
+.order-detail-page { max-width: 1100px; }
+.order-detail-eyebrow { color: #0d6efd; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; }
+.order-hero-card { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 2rem; color: white; background: linear-gradient(120deg, #0d6efd, #6f42c1 58%, #d63384); border-radius: 22px; box-shadow: 0 14px 30px rgba(13, 110, 253, 0.2); }
+.order-hero-label { display: block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; opacity: 0.8; }
+.order-hero-card strong { display: block; margin: 0.2rem 0; font-size: 2rem; }
+.order-hero-card small { opacity: 0.8; }
+.order-hero-meta { display: flex; align-items: center; gap: 0.55rem; padding: 0.7rem 1rem; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; font-size: 0.85rem; }
+.order-live-dot { width: 9px; height: 9px; background: #9ef01a; border-radius: 50%; box-shadow: 0 0 0 5px rgba(158,240,26,0.18); }
+.order-timeline { position: relative; display: flex; justify-content: space-between; gap: 0.75rem; }
+.order-timeline::before { content: ''; position: absolute; top: 19px; left: 8%; right: 8%; height: 3px; background: #e9ecef; z-index: 0; }
+.order-timeline-step { position: relative; z-index: 1; display: flex; flex: 1; flex-direction: column; align-items: center; gap: 0.55rem; color: #adb5bd; text-align: center; font-size: 0.8rem; }
+.order-timeline-icon { display: grid; place-items: center; width: 40px; height: 40px; color: #adb5bd; background: white; border: 3px solid #e9ecef; border-radius: 50%; }
+.order-timeline-step.is-done { color: #0d6efd; }
+.order-timeline-step.is-done .order-timeline-icon { color: white; background: #0d6efd; border-color: #0d6efd; }
+.order-timeline-step.is-current .order-timeline-icon { box-shadow: 0 0 0 6px rgba(13,110,253,0.12); }
+.order-summary-box { padding: 0.85rem 1rem; background: #f8fbff; border: 1px solid #e7f0ff; border-radius: 12px; }
+.order-summary-box > div { display: flex; justify-content: space-between; padding: 0.35rem 0; color: #6c757d; }
+.order-summary-box strong { color: #212529; }
+.order-summary-total { margin-top: 0.45rem; padding-top: 0.75rem !important; color: #212529 !important; border-top: 1px dashed #cfd8e3; }
+.order-summary-total strong { color: #dc3545; font-size: 1.15rem; }
+.receiver-info { display: flex; align-items: center; gap: 0.8rem; }
+.receiver-avatar { display: grid; place-items: center; width: 44px; height: 44px; color: white; font-weight: 800; background: linear-gradient(135deg, #0d6efd, #6f42c1); border-radius: 50%; }
+.receiver-info strong, .receiver-info small { display: block; }
+.receiver-info small { margin-top: 0.2rem; color: #6c757d; }
+.order-address { display: flex; align-items: flex-start; padding: 0.8rem; color: #495057; background: #f8f9fa; border-radius: 10px; }
+.order-copy-notice { position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 1080; padding: 0.8rem 1rem; color: white; background: #198754; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.16); }
+
+@media (max-width: 576px) {
+    .order-hero-card { align-items: flex-start; flex-direction: column; gap: 1rem; padding: 1.25rem; }
+    .order-hero-card strong { font-size: 1.6rem; }
+    .order-timeline { gap: 0.2rem; }
+    .order-timeline-step { font-size: 0.65rem; }
+    .order-timeline-icon { width: 34px; height: 34px; }
+    .order-timeline::before { top: 16px; left: 5%; right: 5%; }
+}
+
+@media print {
+    .navbar, .glass-footer, .chat-widget-button, .order-detail-eyebrow, .order-detail-page > .d-flex .btn, .order-payment-card { display: none !important; }
+    body { background: white !important; }
+    .order-detail-page { max-width: 100%; }
+    .card, .order-hero-card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+}
+
+/* ==========================================
+   ALOHA SIGNATURE THEME: LAYER CUOI CUNG
+   ========================================== */
+:root {
+    --aloha-ink: #263238;
+    --aloha-muted: #71808a;
+    --aloha-paper: #fbfaf7;
+    --aloha-panel: rgba(255, 255, 255, .88);
+    --aloha-line: rgba(38, 50, 56, .11);
+    --aloha-teal: #117c83;
+    --aloha-teal-dark: #0b5961;
+    --aloha-coral: #d76559;
+    --aloha-gold: #bd8b42;
+    --aloha-shadow: 0 18px 45px rgba(38, 50, 56, .09);
+}
+
+html { scroll-behavior: smooth; }
+body {
+    color: var(--aloha-ink) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    background:
+        radial-gradient(circle at 8% 6%, rgba(190, 231, 225, .62), transparent 29rem),
+        radial-gradient(circle at 93% 22%, rgba(245, 218, 216, .54), transparent 31rem),
+        var(--aloha-paper) !important;
+    background-attachment: fixed !important;
+}
+
+h1, h2, h3, .product-page-title { font-family: 'Playfair Display', Georgia, serif; }
+a { transition: color .2s ease, transform .2s ease, opacity .2s ease; }
+.container { max-width: 1180px; }
+.navbar { min-height: 66px; }
+.glass-navbar {
+    background: rgba(251, 250, 247, .86) !important;
+    border-bottom: 1px solid var(--aloha-line);
+    box-shadow: 0 8px 28px rgba(38, 50, 56, .06) !important;
+    backdrop-filter: blur(18px);
+}
+.glass-navbar .navbar-brand { color: var(--aloha-ink) !important; font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; letter-spacing: .01em; text-shadow: none; }
+.glass-navbar .navbar-brand i { color: var(--aloha-teal); }
+.glass-navbar .nav-link { color: #53636a !important; font-size: .84rem; font-weight: 600; }
+.glass-navbar .nav-link:hover, .glass-navbar .nav-link.active { color: var(--aloha-teal) !important; transform: none; }
+.live-search-group { height: 44px; border: 1px solid var(--aloha-line); border-radius: 12px; box-shadow: none !important; background: white; }
+.live-search-input { font-size: .84rem; font-weight: 500; }
+.search-suggestions { top: 52px; border: 1px solid var(--aloha-line); border-radius: 14px !important; box-shadow: var(--aloha-shadow) !important; }
+.btn-cyan, .chill-btn { color: #fff !important; background: linear-gradient(135deg, var(--aloha-teal), #25a1a0) !important; border: 0 !important; box-shadow: 0 8px 18px rgba(17, 124, 131, .2) !important; }
+.btn-cyan:hover, .chill-btn:hover { background: linear-gradient(135deg, var(--aloha-teal-dark), var(--aloha-teal)) !important; transform: translateY(-2px); }
+.btn-primary { background-color: var(--aloha-teal) !important; border-color: var(--aloha-teal) !important; }
+.btn-outline-primary { color: var(--aloha-teal) !important; border-color: var(--aloha-teal) !important; }
+.btn-outline-primary:hover { color: #fff !important; background: var(--aloha-teal) !important; }
+.card, .storefront-panel-card, .order-panel-card, .admin-panel-card, .product-card { border: 1px solid var(--aloha-line) !important; border-radius: 16px !important; box-shadow: var(--aloha-shadow) !important; }
+.product-card { background: var(--aloha-panel); backdrop-filter: blur(8px); }
+.product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 42px rgba(38, 50, 56, .14) !important; }
+.product-card .text-danger, .hot-product-card strong, .detail-price { color: var(--aloha-coral) !important; }
+.product-category-badge, .category-card-icon { color: var(--aloha-teal) !important; }
+.category-card { background: rgba(255, 255, 255, .72); border: 1px solid var(--aloha-line); box-shadow: 0 10px 26px rgba(38, 50, 56, .06); }
+.category-card:hover, .category-card.active { color: var(--aloha-teal-dark); background: #fff; box-shadow: 0 16px 32px rgba(17, 124, 131, .13); }
+.hero-carousel { border-radius: 22px; box-shadow: 0 22px 50px rgba(38, 50, 56, .16); }
+.carousel-item img { opacity: .7; }
+.carousel-caption h1 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -.02em; }
+.hot-product-card { border: 1px solid var(--aloha-line); box-shadow: 0 10px 26px rgba(38, 50, 56, .07); }
+.hot-products-kicker, .admin-eyebrow, .cart-eyebrow { color: var(--aloha-coral); }
+.glass-footer { background: rgba(247, 244, 238, .9) !important; border-top: 1px solid var(--aloha-line); }
+.footer-promise > i, .footer-contact-list i, .footer-panel-kicker { color: var(--aloha-teal); }
+.footer-brand-mark { background: linear-gradient(135deg, var(--aloha-teal), var(--aloha-gold)); box-shadow: 0 8px 18px rgba(17, 124, 131, .18); }
+.footer-connect-panel { background: rgba(255, 255, 255, .66); border: 1px solid var(--aloha-line); box-shadow: none; }
+.chill-card, .auth-glass-card { background: rgba(255, 255, 255, .78); border: 1px solid var(--aloha-line); border-radius: 18px; box-shadow: var(--aloha-shadow); }
+.chill-header h3, .auth-title { color: var(--aloha-ink); }
+.chill-input, .form-control, .form-select { border-color: var(--aloha-line); }
+.chill-input:focus, .form-control:focus, .form-select:focus { border-color: var(--aloha-teal) !important; box-shadow: 0 0 0 .2rem rgba(17, 124, 131, .12) !important; }
+.admin-dashboard, .admin-dashboard-panel { background: transparent; }
+.admin-dashboard-panel, .admin-chart-card, .admin-panel-card { background: rgba(255, 255, 255, .84); }
+.table thead th { color: #64727a; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
+.badge.bg-success, .badge.bg-info { background-color: var(--aloha-teal) !important; }
+.admin-chat-dock, .storefront-admin-chat-dock, .home-admin-chat-dock { background: linear-gradient(135deg, var(--aloha-teal-dark), var(--aloha-teal)) !important; }
+
+@media (max-width: 768px) {
+    .glass-navbar .navbar-brand { font-size: 1.1rem; }
+    .carousel-item { height: 360px; }
+    .carousel-caption { bottom: 13%; left: 8%; right: 8%; }
+    .carousel-caption h1 { font-size: 2.2rem; }
+    .footer-promise-row { grid-template-columns: 1fr; gap: .6rem; }
+    .footer-promise { border-right: 0; border-bottom: 1px solid var(--aloha-line); padding: .65rem 0; }
+    .footer-promise:last-child { border-bottom: 0; }
+}
+/* ========================================== */
+/* GIAO DIỆN CHILL - ĐĂNG NHẬP / ĐĂNG KÝ      */
+/* ========================================== */
+body {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+    background-attachment: fixed !important;
+}
+
+.chill-container {
+    margin-top: 8vh;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chill-card {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 25px;
+    padding: 40px 35px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+}
+
+.chill-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+.chill-header h3 {
+    color: #2c3e50;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+.chill-header p {
+    color: #555;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    font-style: italic;
+}
+
+.chill-input {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 12px !important;
+    padding: 12px 18px !important;
+    color: #2c3e50 !important;
+    box-shadow: none !important;
+    transition: all 0.3s ease;
+}
+.chill-input:focus {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: #a8edea !important;
+    box-shadow: 0 0 15px rgba(168, 237, 234, 0.5) !important;
+}
+
+.chill-label {
+    color: #34495e;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.chill-link {
+    color: #2c3e50;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+.chill-link:hover {
+    color: #0082c8;
+}
+
+.chill-checkbox-label {
+    font-size: 0.85rem;
+    color: #34495e;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.chill-btn {
+    background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+    border: none;
+    border-radius: 30px;
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all 0.4s ease;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+}
+.chill-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+    color: white;
+}
+/* =========================================
+   GIAO DIỆN TRANG CHỦ (WELCOME)
+   ========================================= */
+
+/* Tuỳ chỉnh Banner trượt */
+.hero-carousel {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+.carousel-item {
+    height: 450px;
+    background-color: #000;
+}
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.65;
+    transition: transform 0.5s ease;
+}
+.carousel-caption {
+    bottom: 20%;
+    text-align: left;
+    left: 8%;
+    right: 8%;
+}
+.carousel-caption h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+}
+.carousel-caption p {
+    font-size: 1.2rem;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+}
+
+/* Tuỳ chỉnh Card Sản phẩm kính mờ */
+.product-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    background: rgba(255, 255, 255, 0.85);
+}
+.btn-cyan {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    border: none;
+    font-weight: bold;
+}
+.btn-cyan:hover {
+    background: linear-gradient(135deg, #0072ff, #00c6ff);
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 114, 255, 0.4);
+}
+/* CSS làm đẹp cho thanh phân trang Laravel */
+    .custom-pagination .pagination {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        border-radius: 50px;
+        overflow: hidden;
+    }
+    .custom-pagination .page-link {
+        color: #2c3e50;
+        border: none;
+        padding: 10px 20px;
+        font-weight: bold;
+    }
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #00c6ff, #0072ff);
+        color: white;
+    }
+
+    /* Use one dependable typeface so Vietnamese text and dashboard numbers align consistently. */
+    body,
+    body * {
+        font-family: "Times New Roman", Times, serif !important;
+    }
+
+    .bi,
+    .bi::before,
+    .bi::after {
+        font-family: "bootstrap-icons" !important;
+    }
+
+    body {
+        line-height: 1.45;
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    h1, h2, h3, h4, h5, h6,
+    p, span, strong, small, label, a, button, input, select, textarea, th, td {
+        line-height: 1.45;
+    }
+
+    .admin-dashboard h2,
+    .admin-dashboard h3,
+    .admin-dashboard h4,
+    .admin-dashboard h5,
+    .admin-dashboard h6,
+    .admin-dashboard p {
+        margin-top: 0;
+    }
+
+    .admin-dashboard .card-body h3,
+    .admin-dashboard .card-body h4,
+    .admin-dashboard .text-success,
+    .admin-dashboard .text-danger,
+    .admin-dashboard .text-dark {
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .admin-dashboard .card-body h3,
+    .admin-dashboard .card-body h4 {
+        line-height: 1.2;
+    }
+
+    .admin-dashboard .admin-stat-note {
+        line-height: 1.35;
+    }
+
+    .hot-products-track {
+        align-items: stretch;
+    }
+
+    .hot-product-card {
+        display: flex;
+        flex-direction: column;
+        min-width: 220px;
+        height: 318px;
+    }
+
+    .hot-product-image {
+        flex: 0 0 170px;
+        height: 170px;
+        overflow: hidden;
+    }
+
+    .hot-product-card > .p-3 {
+        display: flex;
+        min-height: 148px;
+        flex: 1;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .hot-product-card .badge {
+        align-self: flex-start;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hot-product-card h5 {
+        display: -webkit-box;
+        min-height: 0;
+        max-height: 2.9em;
+        overflow: hidden;
+        line-height: 1.45;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .hot-product-card strong {
+        margin-top: auto;
+        line-height: 1.2;
+    }
+
+    .product-card .card-body {
+        min-width: 0;
+    }
+
+    .product-card .mb-3:first-child {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 150px;
+        margin-bottom: 1rem !important;
+    }
+
+    .product-card .product-list-image {
+        width: 100%;
+        height: 150px;
+        max-height: 150px;
+        object-fit: contain;
+    }
+
+    .product-card h5,
+    .product-card .product-description {
+        overflow: hidden;
+    }
+
+    .product-card h5 {
+        min-height: 2.9em;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    @media (max-width: 576px) {
+        .hot-product-card {
+            min-width: 205px;
+            height: 308px;
+        }
+
+        .hot-product-image {
+            flex-basis: 160px;
+            height: 160px;
+        }
+    }
+    
+    /* CSS hiệu ứng chọn sao đánh giá */
+    .star-rating-custom { display: inline-flex; flex-direction: row-reverse; gap: 5px; }
+    .star-rating-custom input { display: none; }
+    .star-rating-custom label { color: #e4e5e9; font-size: 2rem; cursor: pointer; transition: color 0.2s; }
+    .star-rating-custom input:checked ~ label,
+    .star-rating-custom label:hover,
+    .star-rating-custom label:hover ~ label { color: #ffc107; }
+
+/* ==========================================
+   FINAL UI REFINEMENT: ORDER VA ADMIN
+   ========================================== */
+main.container,
+main > .container-fluid {
+    position: relative;
+    z-index: 1;
+}
+
+main > .container-fluid {
+    max-width: 1180px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.glass-navbar {
+    min-height: 74px;
+    background: rgba(251, 250, 247, .9) !important;
+    box-shadow: 0 10px 30px rgba(38, 50, 56, .08) !important;
+}
+
+.glass-navbar .navbar-brand {
+    font-size: 1.38rem;
+}
+
+.glass-navbar .nav-link {
+    padding: .62rem .8rem !important;
+    border-radius: 10px;
+}
+
+.glass-navbar .nav-link:hover,
+.glass-navbar .nav-link.active {
+    background: rgba(17, 124, 131, .08);
+}
+
+.customer-orders-heading,
+.cart-page-heading,
+.admin-orders-page > .d-flex:first-child,
+main > .container-fluid > .d-flex:first-child {
+    position: relative;
+    padding: 1.65rem 1.8rem;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .48);
+    border: 1px solid rgba(255, 255, 255, .78);
+    border-radius: 22px;
+    box-shadow: 0 16px 38px rgba(38, 50, 56, .07);
+}
+
+.customer-orders-heading::after,
+.cart-page-heading::after,
+.admin-orders-page > .d-flex:first-child::after,
+main > .container-fluid > .d-flex:first-child::after {
+    position: absolute;
+    right: 1.6rem;
+    bottom: -2.6rem;
+    width: 8rem;
+    height: 8rem;
+    border: 1px solid rgba(17, 124, 131, .12);
+    border-radius: 50%;
+    content: '';
+    pointer-events: none;
+}
+
+.customer-orders-heading h2,
+.cart-page-heading h2,
+.admin-orders-page h2,
+main > .container-fluid > .d-flex:first-child h2 {
+    position: relative;
+    z-index: 1;
+    letter-spacing: -.025em;
+}
+
+.customer-orders-heading .btn,
+.cart-page-heading .btn,
+.admin-orders-page > .d-flex:first-child .btn,
+main > .container-fluid > .d-flex:first-child .btn {
+    position: relative;
+    z-index: 1;
+    padding: .72rem 1.05rem;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(17, 124, 131, .16);
+}
+
+.customer-order-stat {
+    min-height: 118px;
+    padding: 1.15rem 1.25rem;
+    border-radius: 18px;
+    box-shadow: 0 14px 26px rgba(38, 50, 56, .11);
+}
+
+.customer-order-stat strong {
+    font-size: 2rem;
+    letter-spacing: -.04em;
+}
+
+.customer-order-table-card,
+main > .container-fluid > .card,
+.admin-dashboard .card,
+.container > .card {
+    overflow: hidden;
+    border-radius: 18px !important;
+    box-shadow: 0 16px 38px rgba(38, 50, 56, .08) !important;
+}
+
+.customer-order-toolbar {
+    padding: 1.35rem 1.5rem;
+    background: rgba(255, 255, 255, .62);
+}
+
+.table {
+    --bs-table-hover-bg: rgba(17, 124, 131, .045);
+}
+
+.table thead th {
+    padding-top: .9rem !important;
+    padding-bottom: .9rem !important;
+    color: #75838a;
+    background: #f5f8f7;
+    border-bottom: 1px solid rgba(38, 50, 56, .1);
+}
+
+.table tbody tr {
+    transition: background-color .2s ease, transform .2s ease;
+}
+
+.table tbody tr:hover {
+    position: relative;
+    z-index: 1;
+    box-shadow: inset 3px 0 var(--aloha-teal);
+}
+
+.admin-thumb-image,
+.admin-thumb-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px !important;
+}
+
+.admin-thumb-image {
+    border: 1px solid var(--aloha-line) !important;
+    box-shadow: 0 6px 14px rgba(38, 50, 56, .1) !important;
+}
+
+.admin-dashboard .card-body {
+    padding: 1.25rem;
+}
+
+.admin-dashboard .card:hover,
+.report-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 42px rgba(38, 50, 56, .13) !important;
+}
+
+.report-card {
+    border: 0 !important;
+    box-shadow: 0 14px 30px rgba(38, 50, 56, .12) !important;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.report-kpi-action {
+    width: 100%;
+    padding: 0;
+    color: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.report-kpi-action:focus-visible {
+    outline: 3px solid rgba(17, 124, 131, .35);
+    outline-offset: 3px;
+}
+
+.report-metric-modal {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(38, 50, 56, .2);
+}
+
+.report-kpi-detail {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    min-height: 78px;
+    padding: 1rem 1.2rem;
+    background: rgba(255, 255, 255, .9);
+    border: 1px solid var(--aloha-line);
+    border-left: 4px solid #cbd8d8;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(38, 50, 56, .05);
+    transition: border-color .2s ease, background-color .2s ease;
+}
+
+.report-kpi-detail.is-active { background: #fff; }
+.report-detail-view { display: none; width: 100%; }
+.report-detail-view.is-visible { display: block; }
+.report-detail-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; }
+.report-detail-grid > div { display: grid; grid-template-columns: auto 1fr; column-gap: .5rem; align-items: center; padding: .7rem .8rem; background: #f7fafa; border: 1px solid #e8eeee; border-radius: 12px; }
+.report-detail-grid i { grid-row: span 2; color: var(--aloha-teal); font-size: 1.1rem; }
+.report-detail-grid span { color: #71808a; font-size: .68rem; }
+.report-detail-grid strong { color: var(--aloha-ink); font-size: .9rem; }
+.report-detail-view .table { font-size: .78rem; }
+.report-detail-view .table thead th { background: #f5f8f7; }
+.report-kpi-detail-icon { display: grid; flex: 0 0 38px; place-items: center; width: 38px; height: 38px; color: #71808a; background: #eef3f3; border-radius: 12px; }
+.report-kpi-detail.accent-success { border-left-color: #238b5c; }
+.report-kpi-detail.accent-success .report-kpi-detail-icon { color: #238b5c; background: #e8f7ef; }
+.report-kpi-detail.accent-pending { border-left-color: #d97706; }
+.report-kpi-detail.accent-pending .report-kpi-detail-icon { color: #d97706; background: #fff4dc; }
+.report-kpi-detail.accent-orders { border-left-color: #1769aa; }
+.report-kpi-detail.accent-orders .report-kpi-detail-icon { color: #1769aa; background: #e8f3fb; }
+.report-kpi-detail.accent-customers { border-left-color: #8c3b99; }
+.report-kpi-detail.accent-customers .report-kpi-detail-icon { color: #8c3b99; background: #f5eafa; }
+
+@media (max-width: 900px) {
+    .report-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 576px) {
+    .report-detail-grid { grid-template-columns: 1fr; }
+}
+
+.report-revenue-card { background: linear-gradient(135deg, #35a765, #70c77d); }
+.report-pending-card { background: linear-gradient(135deg, #ed8b17, #f4b34e); }
+.report-orders-card { background: linear-gradient(135deg, #1688d4, #50b8e8); }
+.report-customers-card { background: linear-gradient(135deg, #a542ae, #d277c9); }
+
+@media (max-width: 768px) {
+    .customer-orders-heading,
+    .cart-page-heading,
+    .admin-orders-page > .d-flex:first-child,
+    main > .container-fluid > .d-flex:first-child {
+        align-items: flex-start !important;
+        flex-direction: column;
+        padding: 1.25rem;
+    }
+
+    .customer-orders-heading .btn,
+    .cart-page-heading .btn,
+    .admin-orders-page > .d-flex:first-child .btn,
+    main > .container-fluid > .d-flex:first-child .btn {
+        width: 100%;
+    }
+
+    .table { min-width: 720px; }
+    .table-responsive { border-radius: 0 0 18px 18px; }
+}
+
+body,
+body * {
+    font-family: 'DM Sans', sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.navbar-brand,
+.storefront-title,
+.product-page-title {
+    font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+.bi,
+.bi::before,
+.bi::after {
+    font-family: 'bootstrap-icons' !important;
+}
+
+/* Product variations use a stable grid so labels and controls never overlap. */
+.variation-row {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) 96px;
+    gap: .7rem;
+    align-items: end;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    padding: 1rem;
+    background: #f8fbfb;
+    border: 1px solid var(--aloha-line);
+    border-radius: 14px;
+}
+
+.variation-row > [class*='col-'] {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+.variation-row .form-label {
+    display: block;
+    min-height: 1.25rem;
+    margin-bottom: .35rem;
+    color: #617078;
+    font-size: .68rem !important;
+    font-weight: 800;
+    letter-spacing: .02em;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+.variation-row .form-control,
+.variation-row .form-select {
+    min-width: 0;
+    width: 100%;
+    height: 44px;
+}
+
+.variation-row .btn {
+    width: 100%;
+    height: 44px;
+}
+
+.variation-actions {
+    display: flex;
+    gap: .4rem;
+    min-width: 0;
+}
+
+.variation-actions .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-right: .35rem;
+    padding-left: .35rem;
+}
+
+@media (max-width: 1100px) {
+    .variation-row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .variation-row > :last-child {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 640px) {
+    .variation-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .65rem;
+    }
+
+    .variation-row > :last-child {
+        grid-column: span 2;
+    }
+}
+
+/* ==========================================
+   REPORTS: READABLE ANALYTICS WORKSPACE
+   ========================================== */
+.report-page-heading {
+    padding: 1.4rem 1.5rem;
+    background: rgba(255, 255, 255, .58);
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: 20px;
+    box-shadow: 0 14px 34px rgba(38, 50, 56, .07);
+}
+
+.report-page-heading h2 {
+    color: var(--aloha-ink) !important;
+    letter-spacing: -.025em;
+}
+
+.report-kicker,
+.report-section-kicker {
+    display: block;
+    color: var(--aloha-coral);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.report-kicker { margin-bottom: .35rem; }
+
+.report-filter-panel {
+    padding: 1.2rem 1.35rem;
+    background: rgba(255, 255, 255, .92);
+    border: 1px solid var(--aloha-line);
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(38, 50, 56, .07);
+}
+
+.report-filter-panel .form-label {
+    margin-bottom: .4rem;
+    color: #617078;
+    font-size: .74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.report-filter-active {
+    padding: .42rem .7rem;
+    color: var(--aloha-teal-dark);
+    background: #e8f6f4;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 800;
+}
+
+.report-card {
+    min-height: 132px;
+    color: #fff !important;
+    border: 0 !important;
+    box-shadow: 0 16px 30px rgba(38, 50, 56, .13) !important;
+}
+
+.report-card .report-label,
+.report-card h4 {
+    color: #fff !important;
+    opacity: 1;
+}
+
+.report-card .report-label { font-size: .7rem; letter-spacing: .08em; }
+.report-card h4 { font-size: 1.55rem; letter-spacing: -.025em; }
+.report-revenue-card { background: linear-gradient(135deg, #238b5c, #42b477) !important; }
+.report-pending-card { background: linear-gradient(135deg, #d97706, #f59e0b) !important; }
+.report-orders-card { background: linear-gradient(135deg, #1769aa, #2496d2) !important; }
+.report-customers-card { background: linear-gradient(135deg, #8c3b99, #b95ab5) !important; }
+
+.report-status-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem 1.35rem;
+    background: rgba(255, 255, 255, .92);
+    border: 1px solid var(--aloha-line);
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(38, 50, 56, .06);
+}
+
+.report-section-kicker { margin-bottom: .3rem; color: var(--aloha-teal); font-size: .62rem; }
+.report-status-items { display: flex; flex: 1; justify-content: flex-end; gap: .65rem; }
+.report-status-item { display: flex; align-items: center; gap: .55rem; min-width: 108px; padding: .55rem .7rem; background: #f7f9f9; border: 1px solid #e8eeee; border-radius: 12px; }
+.report-status-item > i { font-size: 1.15rem; }
+.report-status-item strong, .report-status-item span { display: block; }
+.report-status-item strong { color: var(--aloha-ink); font-size: 1.08rem; line-height: 1; }
+.report-status-item span { margin-top: .2rem; color: #71808a; font-size: .66rem; white-space: nowrap; }
+.report-status-item.is-amber > i { color: #d97706; }
+.report-status-item.is-blue > i { color: #1d78b5; }
+.report-status-item.is-green > i, .report-status-item.is-teal > i { color: var(--aloha-teal); }
+.report-status-item.is-red > i { color: #d64d59; }
+
+.report-money-panel {
+    padding: 1.35rem;
+    background: rgba(255, 255, 255, .94);
+    border: 1px solid var(--aloha-line);
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(38, 50, 56, .06);
+}
+
+.report-money-heading-icon {
+    color: var(--aloha-teal);
+    font-size: 1.4rem;
+}
+
+.report-money-card {
+    min-height: 124px;
+    padding: 1rem 1.1rem;
+    border-radius: 14px;
+}
+
+.report-money-card span,
+.report-money-card strong,
+.report-money-card small { display: block; }
+.report-money-card span { font-size: .75rem; font-weight: 800; }
+.report-money-card strong { margin: .45rem 0 .25rem; font-size: 1.35rem; letter-spacing: -.025em; }
+.report-money-card small { font-size: .7rem; opacity: .78; }
+.report-money-card.is-success { color: #125a3d; background: #e8f7ef; border: 1px solid #c8ead7; }
+.report-money-card.is-cancelled { color: #8d2938; background: #fff0f2; border: 1px solid #f3cfd5; }
+.report-money-card.is-total { color: #0b5961; background: #e8f6f4; border: 1px solid #c8e8e4; }
+.report-revenue-chart { min-height: 250px; }
+
+.container > .report-filter-panel + .row .report-card { transition: transform .2s ease, box-shadow .2s ease; }
+.container > .report-filter-panel + .row .report-card:hover { transform: translateY(-4px); box-shadow: 0 22px 38px rgba(38, 50, 56, .17) !important; }
+
+@media (max-width: 900px) {
+    .report-status-strip { align-items: flex-start; flex-direction: column; }
+    .report-status-items { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+}
+
+@media (max-width: 576px) {
+    .report-page-heading { align-items: flex-start !important; flex-direction: column; gap: 1rem; }
+    .report-page-heading .btn { width: 100%; }
+    .report-status-item { flex: 1 1 42%; }
+}
+
+.order-search-form {
+    flex: 1 1 420px;
+    max-width: 600px;
+}
+
+.order-search-form .input-group-text {
+    color: var(--aloha-teal);
+    background: #fff;
+    border-color: var(--aloha-line);
+}
+
+.order-search-form .form-control {
+    min-width: 0;
+    border-color: var(--aloha-line);
+}
+
+.order-search-form .btn {
+    white-space: nowrap;
+}
+
+.order-product-preview {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-width: 190px;
+    max-width: 280px;
+}
+
+.order-product-preview img {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    background: #f5f8f8;
+    border: 1px solid var(--aloha-line);
+    border-radius: 10px;
+}
+
+.order-product-preview strong,
+.order-product-preview small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.order-product-preview strong {
+    color: var(--aloha-ink);
+    font-size: .78rem;
+}
+
+.order-product-preview small {
+    margin-top: .2rem;
+    color: #71808a;
+    font-size: .68rem;
+}
+
+@media (max-width: 576px) {
+    .order-search-form {
+        width: 100%;
+        max-width: none;
+    }
+}

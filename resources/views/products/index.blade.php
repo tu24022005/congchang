@@ -1,0 +1,79 @@
+@extends('layouts.app')
+@section('title', 'Mỹ phẩm & chăm sóc cá nhân - Aloha Beauty')
+
+@section('content')
+<!-- LỜI CHÀO -->
+<div class="text-center mb-5 animate__animated animate__fadeInDown">
+    <h2 class="fw-bold product-page-title">ALOHA! KHÁM PHÁ SẢN PHẨM</h2>
+    <p class="text-muted">Khám phá mỹ phẩm và sản phẩm chăm sóc cá nhân dành cho bạn</p>
+</div>
+
+<!-- DANH MỤC SẢN PHẨM -->
+<section class="product-categories mb-5" aria-labelledby="product-categories-title">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 id="product-categories-title" class="fw-bold mb-0 storefront-title">Danh mục sản phẩm</h4>
+        <a href="{{ route('products.index') }}" class="small text-decoration-none category-view-all">Xem tất cả</a>
+    </div>
+    <div class="row g-3">
+        @foreach($categories as $category)
+            <div class="col-6 col-md-3">
+                <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card {{ (string) request('category') === (string) $category->id ? 'active' : '' }}">
+                    <span class="category-card-icon"><i class="bi bi-bag-heart"></i></span>
+                    <span class="category-card-name">{{ $category->name }}</span>
+                    <small>{{ $category->products_count }} sản phẩm</small>
+                </a>
+            </div>
+        @endforeach
+    </div>
+</section>
+
+<!-- DANH SÁCH SẢN PHẨM -->
+<div class="row g-4">
+    @forelse($products as $product)
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card product-card text-center h-100 shadow-sm">
+            <div class="card-body p-4 d-flex flex-column">
+                
+                <div class="mb-3">
+                    @if($product->image)
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image">
+                    @else
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-2 product-icon-placeholder">
+                            <i class="bi bi-bag-heart text-primary fs-3"></i>
+                        </div>
+                    @endif
+                </div>
+                
+                <span class="badge text-primary rounded-pill mb-2 mx-auto product-category-badge">
+                    {{ $product->category->name ?? 'Mỹ phẩm chăm sóc da' }}
+                </span>
+
+                <h5 class="fw-bold text-dark mb-2">{{ $product->name }}</h5>
+                <p class="text-muted small mb-3 flex-grow-1 product-description">
+                    {{ $product->description ?? 'Sản phẩm chăm sóc cá nhân chất lượng cho vẻ đẹp rạng ngời mỗi ngày.' }}
+                </p>
+
+                <h5 class="fw-bold text-danger mb-1">{{ number_format($product->price, 0, ',', '.') }} ₫</h5>
+                <p class="text-muted small mb-3"><i class="bi bi-box-seam me-1"></i>Còn lại: {{ $product->quantity > 0 ? $product->quantity : 'Hết hàng' }}</p>
+
+                <a href="{{ route('products.show', $product->id) }}" class="btn btn-cyan w-100 rounded-pill py-2 mt-auto">KHÁM PHÁ NGAY</a>
+            </div>
+        </div>
+    </div>
+    @empty
+    <!-- Hiển thị khi không tìm thấy kết quả -->
+    <div class="col-12 text-center py-5">
+        <i class="bi bi-search text-muted mb-3 empty-search-icon"></i>
+        <h4 class="text-muted">Không tìm thấy sản phẩm nào phù hợp với từ khóa của bạn.</h4>
+        <a href="{{ route('products.index') }}" class="btn btn-outline-primary mt-3 rounded-pill px-4">Xem tất cả sản phẩm</a>
+    </div>
+    @endforelse
+</div>
+
+<!-- THANH CHUYỂN TRANG -->
+<div class="d-flex justify-content-center mt-5 mb-4 custom-pagination">
+    {{ $products->links('pagination::bootstrap-5') }}
+</div>
+
+
+@endsection

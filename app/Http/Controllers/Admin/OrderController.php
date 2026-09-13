@@ -41,10 +41,26 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id) 
     { 
         $request->validate([ 
-            'status' => 'required|in:processing,confirmed,packing,shipping,paid,cancelled',
+            'status' => 'required|in:processing,confirmed,packing,shipping,paid,completed,cancelled',
         ]); 
         
         $order = Order::findOrFail($id); 
+        $allowedTransitions = [
+            'processing' => ['confirmed', 'cancelled'],
+            'confirmed' => ['paid', 'packing', 'cancelled'],
+            'paid' => ['packing', 'cancelled'],
+            'packing' => ['shipping', 'cancelled'],
+            'shipping' => ['completed'],
+        ];
+
+        if ($request->status !== $order->status && !in_array($request->status, $allowedTransitions[$order->status] ?? [], true)) {
+            return back()->with('error', 'Không thể chuyển đơn hàng sang trạng thái này.');
+        }
+
+        if ($request->status === 'paid' && $order->payment_method === 'COD') {
+            return back()->with('error', 'Đơn COD chỉ được ghi nhận thanh toán khi khách đã nhận hàng.');
+        }
+
         $order->status = $request->status; 
         $order->save(); 
         

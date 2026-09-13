@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log; 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller 
 { 
@@ -116,6 +117,10 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'))) { 
             $request->session()->regenerate(); 
 
+            if (!Auth::user()->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
+
             if (Auth::user()->role === 'admin') { 
                 return redirect()->intended(route('admin.dashboard')); 
             } 
@@ -131,6 +136,43 @@ class AuthController extends Controller
     public function showChangePasswordForm()
     {
         return view('auth.change-password');
+    }
+
+    public function account(Request $request)
+    {
+        return view('account.index', ['user' => $request->user()]);
+    }
+
+    public function updateAccount(Request $request)
+    {
+        $user = $request->user();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+        ], [
+            'name.required' => 'Vui lòng nhập họ và tên.',
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Email không đúng định dạng.',
+            'email.unique' => 'Email này đã được sử dụng.',
+        ]);
+
+        $emailChanged = $validated['email'] !== $user->email;
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+
+            return redirect()->route('verification.notice')->with('success', 'Email đã được cập nhật. Vui lòng xác thực email mới.');
+        }
+
+        return back()->with('success', 'Thông tin tài khoản đã được cập nhật.');
     }
 
     // Xử lý logic đổi mật khẩu

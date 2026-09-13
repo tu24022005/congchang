@@ -106,7 +106,8 @@
                                 <i class="bi bi-person-circle fs-5 me-1 text-primary"></i> {{ Auth::user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
-                                <li><a class="dropdown-item fw-bold py-2" href="/change-password"><i class="bi bi-key text-warning me-2"></i> Đổi mật khẩu</a></li>
+                                <li><a class="dropdown-item fw-bold py-2" href="{{ route('account') }}"><i class="bi bi-person-vcard text-primary me-2"></i> Tài khoản của tôi</a></li>
+                                <li><a class="dropdown-item fw-bold py-2" href="{{ route('password.change') }}"><i class="bi bi-key text-warning me-2"></i> Đổi mật khẩu</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item text-danger fw-bold py-2" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

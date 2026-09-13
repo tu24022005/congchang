@@ -76,23 +76,6 @@ class OrderController extends Controller
 
         return view('orders.index', compact('orders', 'orderStats', 'search'));
     }
-public function confirmReceipt($id)
-{
-    $order = \App\Models\Order::findOrFail($id);
-
-    // Bảo mật: Đảm bảo đơn hàng này đúng là của user đang đăng nhập
-    if ($order->user_id !== auth()->id()) {
-        abort(403, 'Bạn không có quyền thao tác trên đơn hàng này.');
-    }
-
-    // Cập nhật trạng thái thành Đã nhận hàng/Hoàn thành
-    // Thay 'completed' bằng giá trị trạng thái đúng trong Database của bạn (vd: 'delivered', 4...)
-    $order->update([
-        'status' => 'completed' 
-    ]);
-
-    return back()->with('success', 'Cảm ơn bạn! Đã xác nhận nhận hàng thành công.');
-}
     // ==================================================
     // XỬ LÝ LƯU ĐƠN HÀNG (CÓ VOUCHER & PAYOS)
     // ==================================================
@@ -233,7 +216,24 @@ public function confirmReceipt($id)
             abort(403, 'Chỉ Admin mới có quyền thực hiện thao tác này.');
         }
 
-        $order->status = $request->status;
+        $requestedStatus = $request->status;
+        $allowedTransitions = [
+            'processing' => ['confirmed', 'cancelled'],
+            'confirmed' => ['paid', 'packing', 'cancelled'],
+            'paid' => ['packing', 'cancelled'],
+            'packing' => ['shipping', 'cancelled'],
+            'shipping' => ['completed'],
+        ];
+
+        if ($requestedStatus !== $order->status && !in_array($requestedStatus, $allowedTransitions[$order->status] ?? [], true)) {
+            return back()->with('error', 'Không thể chuyển đơn hàng sang trạng thái này.');
+        }
+
+        if ($requestedStatus === 'paid' && $order->payment_method === 'COD') {
+            return back()->with('error', 'Đơn COD chỉ được ghi nhận thanh toán khi khách đã nhận hàng.');
+        }
+
+        $order->status = $requestedStatus;
         $order->shipping_provider = $request->shipping_provider;
         $order->shipping_date = $request->shipping_date;
         $order->save();
@@ -247,7 +247,7 @@ public function confirmReceipt($id)
             abort(403, 'Bạn không có quyền cập nhật đơn hàng này.');
         }
 
-        if (!in_array($order->status, ['shipping', 'paid'], true)) {
+        if ($order->status !== 'shipping') {
             return back()->with('error', 'Đơn hàng chưa ở trạng thái có thể xác nhận nhận hàng.');
         }
 

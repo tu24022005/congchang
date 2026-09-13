@@ -57,6 +57,14 @@
     .review-filter { padding: .45rem .7rem; color: #526170; background: #fff; border: 1px solid #d8dee8; border-radius: 4px; }
     .review-filter.active, .review-filter:hover { color: #ee4d2d; border-color: #ee4d2d; }
     .review-item { display: flex; gap: .75rem; padding: 1.2rem 0; border-bottom: 1px solid #edf0f3; }
+    .review-image-button { padding: 0; background: transparent; border: 0; cursor: zoom-in; }
+    .review-image-button img { width: 76px; height: 76px; object-fit: cover; border: 1px solid #e2e8f0; border-radius: 8px; transition: transform .2s, box-shadow .2s; }
+    .review-image-button:hover img { transform: scale(1.04); box-shadow: 0 8px 18px rgba(38,60,80,.18); }
+    .review-image-preview { display: block; max-width: min(92vw, 1100px); max-height: 82vh; margin: 0 auto; border-radius: 12px; object-fit: contain; }
+        .review-image-lightbox { display: none; position: fixed; inset: 0; z-index: 1080; align-items: center; justify-content: center; padding: 3rem 1rem 1rem; background: rgba(0,0,0,.72); }
+        .review-image-lightbox.is-open { display: flex; }
+        .review-image-back-button { position: fixed; top: 1rem; right: 3.5rem; z-index: 1082; color: #263238; background: #fff; border: 0; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+        .review-image-lightbox .review-image-close { position: fixed; top: 1.2rem; right: 1.2rem; z-index: 1082; }
     .review-avatar { display: grid; flex: 0 0 38px; place-items: center; width: 38px; height: 38px; color: #0b5961; background: #dff5f2; border-radius: 50%; font-weight: 700; }
     .review-meta { color: #8a959f; font-size: .78rem; }
     .review-verified { color: #15966a; font-size: .78rem; }
@@ -180,7 +188,7 @@
                         @if($review->is_verified_purchase)<div class="review-verified"><i class="bi bi-patch-check-fill me-1"></i>Đã mua hàng</div>@endif
                         <p class="review-comment">{{ $review->comment }}</p>
                         @if($review->media_paths)
-                            <div class="d-flex flex-wrap gap-2 mt-2">@foreach($review->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" style="width:76px;height:76px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0">@endforeach</div>
+                            <div class="d-flex flex-wrap gap-2 mt-2">@foreach($review->media_paths as $path)<button type="button" class="review-image-button" data-review-image="{{ request()->getSchemeAndHttpHost() . '/storage/' . ltrim($path, '/') }}" aria-label="Xem ảnh đánh giá"><img src="{{ request()->getSchemeAndHttpHost() . '/storage/' . ltrim($path, '/') }}" alt="Ảnh đánh giá" onerror="this.closest('.review-image-button').style.display='none'"></button>@endforeach</div>
                         @endif
                     </div>
                 </article>
@@ -190,6 +198,12 @@
         </div>
 
     </section>
+
+    <div id="reviewImageModal" class="review-image-lightbox" aria-hidden="true" role="dialog" aria-label="Ảnh đánh giá phóng to">
+        <button type="button" class="btn btn-light rounded-pill px-3 review-image-back-button" onclick="window.closeReviewImage(event)"><i class="bi bi-arrow-left me-1"></i>Quay lại</button>
+        <button type="button" class="btn-close btn-close-white review-image-close" aria-label="Đóng" title="Đóng ảnh" onclick="window.closeReviewImage(event)"></button>
+        <img id="reviewImagePreview" src="" alt="Ảnh đánh giá phóng to" class="review-image-preview">
+    </div>
 
     @if(isset($recommendations) && $recommendations->count() > 0)
         <section class="recommendation-band">
@@ -205,6 +219,13 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    // TRICK GIẢI CỨU MÀN HÌNH ĐEN: Đưa Lightbox tự code ra ngoài thẻ body
+    const reviewLightbox = document.getElementById('reviewImageModal');
+    if (reviewLightbox) {
+        document.body.appendChild(reviewLightbox);
+    }
+
     const mainImage = document.getElementById('detail-main-image');
     document.querySelectorAll('.detail-thumb').forEach(function (thumb) {
         thumb.addEventListener('click', function () {
@@ -248,6 +269,36 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    const reviewImageModal = document.getElementById('reviewImageModal');
+    const reviewImagePreview = document.getElementById('reviewImagePreview');
+    document.querySelectorAll('[data-review-image]').forEach(function (imageButton) {
+        imageButton.addEventListener('click', function () {
+            reviewImagePreview.src = this.dataset.reviewImage;
+            reviewImageModal.classList.add('is-open');
+            reviewImageModal.setAttribute('aria-hidden', 'false');
+        });
+    });
+    reviewImageModal?.addEventListener('click', function (event) {
+        if (!event.target.closest('.review-image-preview')) {
+            window.closeReviewImage(event);
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && reviewImageModal?.classList.contains('is-open')) {
+            window.closeReviewImage(event);
+        }
+    });
+
+    window.closeReviewImage = function (event) {
+        event?.stopPropagation();
+        if (!reviewImageModal) return;
+        reviewImageModal.classList.remove('is-open');
+        reviewImageModal.setAttribute('aria-hidden', 'true');
+        reviewImagePreview?.removeAttribute('src');
+    };
+
     document.querySelectorAll('[data-quantity-step]').forEach(function (button) {
         button.addEventListener('click', function () {
             const step = Number(this.dataset.quantityStep);

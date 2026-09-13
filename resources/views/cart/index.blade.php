@@ -169,7 +169,7 @@
                             <label class="form-label text-muted small"><i class="bi bi-ticket-perforated text-warning me-1"></i> Mã giảm giá Miu Voucher</label>
                             <div class="d-flex gap-2">
                                 <input type="text" name="voucher_code" class="form-control rounded-3 border-secondary voucher-input" placeholder="Nhập mã..." value="{{ old('voucher_code', session('voucher')['code'] ?? '') }}">
-                                <button type="submit" formaction="{{ route('cart.apply_voucher') }}" formmethod="POST" class="btn btn-dark rounded-3 px-3 text-nowrap">Áp dụng</button>
+                                <button type="submit" formaction="{{ route('cart.apply_voucher') }}" formmethod="POST" formnovalidate class="btn btn-dark rounded-3 px-3 text-nowrap">Áp dụng</button>
                             </div>
                         </div>
 

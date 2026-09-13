@@ -6,9 +6,13 @@
     $statusSteps = [
         'processing' => ['label' => 'Chờ xác nhận', 'icon' => 'bi-hourglass-split'],
         'confirmed' => ['label' => 'Đã xác nhận', 'icon' => 'bi-check2'],
+    ];
+    if ($order->payment_method !== 'COD') {
+        $statusSteps['paid'] = ['label' => 'Đã thanh toán', 'icon' => 'bi-credit-card'];
+    }
+    $statusSteps += [
         'packing' => ['label' => 'Đang đóng gói', 'icon' => 'bi-box-seam'],
         'shipping' => ['label' => 'Đang giao hàng', 'icon' => 'bi-truck'],
-        'paid' => ['label' => 'Đã thanh toán', 'icon' => 'bi-credit-card'],
         'completed' => ['label' => 'Đã nhận hàng', 'icon' => 'bi-check2-circle'],
     ];
     $currentStep = array_search($order->status, array_keys($statusSteps), true);
@@ -98,9 +102,9 @@
                         <div class="order-summary-total"><span>Tổng thanh toán</span><strong>{{ number_format($order->total, 0, ',', '.') }} đ</strong></div>
                     </div>
 
-                    @if($order->status !== 'completed' && $order->status !== 'cancelled')
+                    @if($order->status === 'shipping')
                         <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
-                        <form action="{{ route('orders.confirm_receipt', $order->id) }}" method="POST" class="d-grid animate__animated animate__fadeInUp">
+                        <form action="{{ route('orders.confirm_received', $order->id) }}" method="POST" class="d-grid animate__animated animate__fadeInUp">
                             @csrf
                             <button type="submit" class="btn text-white fw-bold py-2 shadow-sm" 
                                     style="background: linear-gradient(135deg, #00b09b, #96c93d); border-radius: 12px; letter-spacing: 0.5px;" 
@@ -159,19 +163,21 @@
                                         <small class="d-block text-primary">SKU: {{ $item->variation->sku ?: 'Chưa có SKU' }}{{ $item->variation->color ? ' · ' . $item->variation->color : '' }}{{ $item->variation->size_value ? ' · ' . rtrim(rtrim($item->variation->size_value, '0'), '.') . $item->variation->size_unit : '' }}</small>
                                     @endif
 
-                                    @php $existingReview = $item->product ? $item->product->reviews->where('user_id', Auth::id())->first() : null; @endphp
-                                    @if($existingReview)
-                                        <div class="my-review-box mt-2">
-                                            <div class="small fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>Bạn đã đánh giá sản phẩm này</div>
-                                            <div class="text-warning">{{ str_repeat('★', $existingReview->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $existingReview->rating) }}</span></div>
-                                            @if($existingReview->comment)<div class="small text-muted">{{ $existingReview->comment }}</div>@endif
-                                            @if($existingReview->media_paths)<div class="d-flex gap-1 mt-1">@foreach($existingReview->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" class="review-thumbnail">@endforeach</div>@endif
-                                            <button type="button" class="btn btn-link btn-sm p-0 mt-1 text-decoration-none" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item->product->id }}"><i class="bi bi-pencil-square me-1"></i>Chỉnh sửa / thêm ảnh</button>
-                                        </div>
-                                    @elseif(strtolower($order->status) == 'completed' && $item->product)
-                                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill mt-2 fw-bold" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item->product->id }}">
-                                            <i class="bi bi-star-fill me-1"></i> Đánh giá sản phẩm
-                                        </button>
+                                    @if(Auth::user()->role !== 'admin')
+                                        @php $existingReview = $item->product ? $item->product->reviews->where('user_id', Auth::id())->first() : null; @endphp
+                                        @if($existingReview)
+                                            <div class="my-review-box mt-2">
+                                                <div class="small fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>Bạn đã đánh giá sản phẩm này</div>
+                                                <div class="text-warning">{{ str_repeat('★', $existingReview->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $existingReview->rating) }}</span></div>
+                                                @if($existingReview->comment)<div class="small text-muted">{{ $existingReview->comment }}</div>@endif
+                                                @if($existingReview->media_paths)<div class="d-flex gap-1 mt-1">@foreach($existingReview->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" class="review-thumbnail">@endforeach</div>@endif
+                                                <button type="button" class="btn btn-link btn-sm p-0 mt-1 text-decoration-none" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item->product->id }}"><i class="bi bi-pencil-square me-1"></i>Chỉnh sửa / thêm ảnh</button>
+                                            </div>
+                                        @elseif(strtolower($order->status) == 'completed' && $item->product)
+                                            <button type="button" class="btn btn-sm btn-outline-warning rounded-pill mt-2 fw-bold" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item->product->id }}">
+                                                <i class="bi bi-star-fill me-1"></i> Đánh giá sản phẩm
+                                            </button>
+                                        @endif
                                     @endif
                                 </td>
                                 <td>{{ number_format($item->price, 0, ',', '.') }} đ</td>
@@ -197,13 +203,23 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-secondary small">TRẠNG THÁI HIỆN TẠI</label>
+                        @php
+                            $nextStatuses = [
+                                'processing' => ['confirmed', 'cancelled'],
+                                'confirmed' => $order->payment_method === 'COD' ? ['packing', 'cancelled'] : ['paid', 'packing', 'cancelled'],
+                                'paid' => ['packing', 'cancelled'],
+                                'packing' => ['shipping', 'cancelled'],
+                                'shipping' => ['completed'],
+                                'completed' => [],
+                                'cancelled' => [],
+                            ][$order->status] ?? [];
+                            $statusLabels = ['processing' => 'Chờ xác nhận (Đang xử lý)', 'confirmed' => 'Đã xác nhận đơn', 'packing' => 'Đang gói hàng', 'shipping' => 'Đang vận chuyển', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã huỷ'];
+                        @endphp
                         <select name="status" class="form-select border-primary shadow-sm">
-                            <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Chờ xác nhận (Đang xử lý)</option>
-                            <option value="confirmed" {{ $order->status == 'confirmed' ? 'selected' : '' }}>Đã xác nhận đơn</option>
-                            <option value="packing" {{ $order->status == 'packing' ? 'selected' : '' }}>Đang gói hàng</option>
-                            <option value="shipping" {{ $order->status == 'shipping' ? 'selected' : '' }}>Đang vận chuyển</option>
-                            <option value="paid" {{ $order->status == 'paid' ? 'selected' : '' }}>Đã thanh toán (Hoàn thành)</option>
-                            <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Đã huỷ</option>
+                            <option value="{{ $order->status }}" selected>{{ $statusLabels[$order->status] ?? ucfirst($order->status) }}</option>
+                            @foreach($nextStatuses as $nextStatus)
+                                <option value="{{ $nextStatus }}">{{ $statusLabels[$nextStatus] }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -233,9 +249,9 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- KHU VỰC CHỨA CÁC MODAL ĐÁNH GIÁ (BẮT BUỘC ĐỂ Ở NGOÀI CÙNG) -->
+<!-- KHU VỰC CHỨA CÁC MODAL ĐÁNH GIÁ -->
 <!-- ========================================================================= -->
-@if(strtolower($order->status) == 'completed')
+@if(Auth::user()->role !== 'admin' && strtolower($order->status) == 'completed')
     @foreach($order->items as $item)
         @if($item->product)
             <div class="modal fade" id="reviewModal{{ $item->product->id }}" tabindex="-1" aria-hidden="true">
@@ -253,21 +269,19 @@
                             <input type="hidden" name="order_id" value="{{ $order->id }}">
                             
                             <div class="modal-body text-center pt-2">
+                                @if($errors->any())
+                                    <div class="alert alert-danger text-start border-0 rounded-3 small"><i class="bi bi-exclamation-circle me-1"></i>{{ $errors->first() }}</div>
+                                @endif
                                 <img src="{{ asset('storage/' . $item->product->image) }}" width="70" class="rounded-3 mb-3 shadow-sm">
                                 <h6 class="fw-bold mb-3">{{ $item->product->name }}</h6>
                                 
-                                <div class="star-rating-custom mb-3">
-                                    <input type="radio" id="star5_{{ $item->product->id }}" name="rating" value="5" @checked($existingReview?->rating === 5) required />
-                                    <label for="star5_{{ $item->product->id }}" title="Tuyệt vời"><i class="bi bi-star-fill"></i></label>
-                                    <input type="radio" id="star4_{{ $item->product->id }}" name="rating" value="4" @checked($existingReview?->rating === 4) />
-                                    <label for="star4_{{ $item->product->id }}" title="Rất tốt"><i class="bi bi-star-fill"></i></label>
-                                    <input type="radio" id="star3_{{ $item->product->id }}" name="rating" value="3" @checked($existingReview?->rating === 3) />
-                                    <label for="star3_{{ $item->product->id }}" title="Bình thường"><i class="bi bi-star-fill"></i></label>
-                                    <input type="radio" id="star2_{{ $item->product->id }}" name="rating" value="2" @checked($existingReview?->rating === 2) />
-                                    <label for="star2_{{ $item->product->id }}" title="Tệ"><i class="bi bi-star-fill"></i></label>
-                                    <input type="radio" id="star1_{{ $item->product->id }}" name="rating" value="1" @checked($existingReview?->rating === 1) />
-                                    <label for="star1_{{ $item->product->id }}" title="Rất tệ"><i class="bi bi-star-fill"></i></label>
+                                <div class="star-rating-custom mb-3" role="radiogroup" aria-label="Chọn số sao">
+                                    <input type="hidden" name="rating" value="{{ $existingReview?->rating ?? '' }}">
+                                    @for($rating = 1; $rating <= 5; $rating++)
+                                        <button type="button" class="rating-star-button {{ (($existingReview?->rating ?? 0) >= $rating) ? 'is-selected' : '' }}" data-rating="{{ $rating }}" aria-label="{{ $rating }} sao" aria-pressed="{{ (($existingReview?->rating ?? 0) >= $rating) ? 'true' : 'false' }}" onclick="selectReviewRating(this)"><i class="bi bi-star-fill"></i></button>
+                                    @endfor
                                 </div>
+                                <div class="rating-required-message d-none text-danger small mb-3">Vui lòng chọn số sao trước khi gửi đánh giá.</div>
 
                                 <textarea name="comment" class="form-control rounded-3 bg-light border-0 p-3" rows="3" placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm này nhé! (Tùy chọn)">{{ old('comment', $existingReview?->comment) }}</textarea>
                                 <div class="text-start mt-3">
@@ -277,7 +291,7 @@
                                 </div>
                             </div>
                             <div class="modal-footer border-top-0 pt-0">
-                                <button type="submit" class="btn text-white w-100 rounded-pill fw-bold" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);">{{ $existingReview ? 'Cập nhật đánh giá' : 'Gửi Đánh Giá' }}</button>
+                                <button type="submit" class="btn text-white w-100 rounded-pill fw-bold review-submit-button" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);">{{ $existingReview ? 'Cập nhật đánh giá' : 'Gửi Đánh Giá' }}</button>
                             </div>
                         </form>
                     </div>
@@ -290,16 +304,23 @@
 <style>
     /* CSS hiệu ứng chọn sao đánh giá */
     .star-rating-custom { display: inline-flex; flex-direction: row-reverse; gap: 5px; }
-    .star-rating-custom input { display: none; }
-    .star-rating-custom label { color: #e4e5e9; font-size: 2rem; cursor: pointer; transition: color 0.2s; }
-    .star-rating-custom input:checked ~ label,
-    .star-rating-custom label:hover,
-    .star-rating-custom label:hover ~ label { color: #ffc107; }
+    .rating-star-button { padding: 0 .15rem; color: #e4e5e9; background: transparent; border: 0; font-size: 2rem; cursor: pointer; transition: color .2s, transform .2s; }
+    .rating-star-button:hover, .rating-star-button.is-selected { color: #ffc107; transform: translateY(-2px); }
+    .rating-star-button:focus-visible { outline: 2px solid #117c83; outline-offset: 3px; border-radius: .25rem; }
     .my-review-box { padding: .45rem .65rem; background: #f0fbf5; border: 1px solid #cceedd; border-radius: .5rem; }
     .review-thumbnail { width: 42px; height: 42px; object-fit: cover; border-radius: .35rem; border: 1px solid #dbe4ef; }
 </style>
 
 <script>
+// =========================================================================
+// TRICK VÀNG: Đẩy toàn bộ Modal ra thẳng thẻ <body> để thoát khỏi lỗi xám màn hình
+// =========================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.modal').forEach(function(modal) {
+        document.body.appendChild(modal);
+    });
+});
+
 function copyOrderText(value) {
     navigator.clipboard.writeText(value).then(function () {
         const notice = document.createElement('div');
@@ -308,6 +329,54 @@ function copyOrderText(value) {
         document.body.appendChild(notice);
         setTimeout(() => notice.remove(), 1800);
     });
+}
+
+document.querySelectorAll('.review-submit-button').forEach(function (button) {
+    button.closest('form').addEventListener('submit', function (event) {
+        const form = event.currentTarget;
+        const rating = form.querySelector('input[name="rating"]').value;
+        const message = form.querySelector('.rating-required-message');
+
+        if (!rating) {
+            event.preventDefault();
+            message.classList.remove('d-none');
+            form.querySelector('.rating-star-button').focus();
+        } else {
+            message.classList.add('d-none');
+        }
+    });
+});
+
+document.querySelectorAll('.star-rating-custom').forEach(function (ratingGroup) {
+    const ratingInput = ratingGroup.querySelector('input[name="rating"]');
+    const buttons = ratingGroup.querySelectorAll('.rating-star-button');
+
+    buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const selectedRating = Number(button.dataset.rating);
+            ratingInput.value = selectedRating;
+            buttons.forEach(function (star) {
+                const isSelected = Number(star.dataset.rating) <= selectedRating;
+                star.classList.toggle('is-selected', isSelected);
+                star.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+            });
+            ratingGroup.closest('form').querySelector('.rating-required-message').classList.add('d-none');
+        });
+    });
+});
+
+function selectReviewRating(button) {
+    const ratingGroup = button.closest('.star-rating-custom');
+    const ratingInput = ratingGroup.querySelector('input[name="rating"]');
+    const selectedRating = Number(button.dataset.rating);
+
+    ratingInput.value = selectedRating;
+    ratingGroup.querySelectorAll('.rating-star-button').forEach(function (star) {
+        const isSelected = Number(star.dataset.rating) <= selectedRating;
+        star.classList.toggle('is-selected', isSelected);
+        star.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    });
+    ratingGroup.closest('form').querySelector('.rating-required-message').classList.add('d-none');
 }
 </script>
 @endsection

@@ -15,6 +15,9 @@
     @if(session('success'))
         <div class="alert alert-success border-0 shadow-sm rounded-4"><i class="bi bi-check-circle me-2"></i>{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger border-0 shadow-sm rounded-4"><i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}</div>
+    @endif
 
     <div class="row g-3 mb-4">
         <div class="col-6 col-xl-3"><div class="order-kpi order-kpi-blue"><span>Tổng đơn hàng</span><strong>{{ $totalOrders }}</strong><small>Toàn hệ thống</small><i class="bi bi-receipt"></i></div></div>
@@ -89,15 +92,24 @@
                                 <td><span class="d-block">{{ $order->created_at->format('d/m/Y') }}</span><small class="text-muted">{{ $order->created_at->format('H:i') }}</small></td>
                                 <td class="text-end pe-4">
                                     <div class="d-inline-flex align-items-center gap-2">
+                                        @php
+                                            $nextStatuses = [
+                                                'processing' => ['confirmed', 'cancelled'],
+                                                'confirmed' => $order->payment_method === 'COD' ? ['packing', 'cancelled'] : ['paid', 'packing', 'cancelled'],
+                                                'paid' => ['packing', 'cancelled'],
+                                                'packing' => ['shipping', 'cancelled'],
+                                                'shipping' => ['completed'],
+                                                'completed' => [],
+                                                'cancelled' => [],
+                                            ][$order->status] ?? [];
+                                        @endphp
                                         <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="order-status-form">
                                             @csrf @method('PATCH')
                                             <select name="status" class="form-select form-select-sm order-status-select" onchange="this.form.submit()" title="Đổi trạng thái">
-                                                <option value="processing" @selected($order->status === 'processing')>Chờ xử lý</option>
-                                                <option value="confirmed" @selected($order->status === 'confirmed')>Đã xác nhận</option>
-                                                <option value="packing" @selected($order->status === 'packing')>Đang đóng gói</option>
-                                                <option value="shipping" @selected($order->status === 'shipping')>Đang giao hàng</option>
-                                                <option value="paid" @selected($order->status === 'paid')>Đã thanh toán</option>
-                                                <option value="cancelled" @selected($order->status === 'cancelled')>Đã hủy</option>
+                                                <option value="{{ $order->status }}" selected>{{ ['processing' => 'Chờ xử lý', 'confirmed' => 'Đã xác nhận', 'packing' => 'Đang đóng gói', 'shipping' => 'Đang giao hàng', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã hủy'][$order->status] ?? ucfirst($order->status) }}</option>
+                                                @foreach($nextStatuses as $nextStatus)
+                                                    <option value="{{ $nextStatus }}">{{ ['confirmed' => 'Đã xác nhận', 'packing' => 'Đang đóng gói', 'shipping' => 'Đang giao hàng', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã hủy'][$nextStatus] }}</option>
+                                                @endforeach
                                             </select>
                                         </form>
                                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" title="Xem chi tiết"><i class="bi bi-eye"></i></a>

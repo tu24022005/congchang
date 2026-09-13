@@ -96,6 +96,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 // 6. KHU VỰC NGƯỜI DÙNG 
 // ==================================================
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Tài khoản người dùng
+    Route::get('/account', [AuthController::class, 'account'])->name('account');
+    Route::put('/account', [AuthController::class, 'updateAccount'])->name('account.update');
+    Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::put('/change-password', [AuthController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
     
     // Sản phẩm & Danh mục
     Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
@@ -126,7 +131,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/chat/presence', [App\Http\Controllers\ChatController::class, 'presence']);
 
 Route::get('/search-suggestions', [App\Http\Controllers\ProductController::class, 'suggestions'])->name('products.suggestions');
-Route::post('/orders/{id}/confirm-receipt', [App\Http\Controllers\OrderController::class, 'confirmReceipt'])->name('orders.confirm_receipt');
     // Đơn hàng của người dùng
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');

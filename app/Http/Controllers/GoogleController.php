@@ -42,6 +42,10 @@ class GoogleController extends Controller
                 Auth::login($newUser);
             }
 
+            if (!Auth::user()->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
+
             return redirect()->intended('/');
         } catch (\Exception $e) {
             return redirect('/login')->with('error', 'Lỗi đăng nhập Google: ' . $e->getMessage());

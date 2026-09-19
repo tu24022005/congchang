@@ -65,15 +65,10 @@
                         @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label for="quantity" class="form-label editor-label">Tồn kho</label>
                             <div class="input-group"><span class="input-group-text bg-light border-end-0">#</span><input type="number" name="quantity" id="quantity" min="0" class="form-control editor-input border-start-0 @error('quantity') is-invalid @enderror" value="{{ old('quantity', $product->quantity) }}" required></div>
                             @error('quantity')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="price" class="form-label editor-label">Giá bán (VNĐ)</label>
-                            <div class="input-group"><input type="number" step="1" name="price" id="price" min="0" class="form-control editor-input border-end-0 @error('price') is-invalid @enderror" value="{{ old('price', $product->price) }}" required><span class="input-group-text bg-light border-start-0">đ</span></div>
-                            @error('price')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -83,7 +78,7 @@
                 @endphp
                 <div class="editor-panel p-4 mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div><h2 class="h5 editor-panel-title mb-1">Mã và phân loại sản phẩm</h2><small class="text-muted">Quản lý nhiều SKU, màu, gam/ml và tồn kho theo từng phiên bản.</small></div>
+                        <div><h2 class="h5 editor-panel-title mb-1">Mã và phân loại sản phẩm</h2><small class="text-muted">Giá và tồn kho được quản lý riêng cho từng mã loại.</small></div>
                         <button type="button" class="btn btn-sm btn-outline-primary" id="add-variation"><i class="bi bi-plus-lg me-1"></i>Thêm dòng</button>
                     </div>
                     <div id="variations-list">
@@ -95,8 +90,9 @@
                                 <div class="col-md-2"><label class="form-label small">Bộ nhớ / loại</label><input name="variations[{{ $index }}][storage]" class="form-control editor-input" value="{{ $variation['storage'] ?? '' }}" placeholder="256GB"></div>
                                 <div class="col-md-2"><label class="form-label small">Khối lượng</label><input type="number" step="0.01" min="0" name="variations[{{ $index }}][size_value]" class="form-control editor-input" value="{{ $variation['size_value'] ?? '' }}" placeholder="250"></div>
                                 <div class="col-md-1"><label class="form-label small">Đơn vị</label><select name="variations[{{ $index }}][size_unit]" class="form-select editor-input"><option value="">-</option>@foreach(['g', 'kg', 'ml', 'l'] as $unit)<option value="{{ $unit }}" @selected(($variation['size_unit'] ?? '') === $unit)>{{ $unit }}</option>@endforeach</select></div>
-                                <div class="col-md-1"><label class="form-label small">Giá</label><input type="number" min="0" name="variations[{{ $index }}][price]" class="form-control editor-input" value="{{ $variation['price'] ?? $product->price }}"></div>
+                                <div class="col-md-1"><label class="form-label small">Giá bán</label><input type="number" min="0" name="variations[{{ $index }}][price]" class="form-control editor-input" value="{{ $variation['price'] ?? '' }}" required></div>
                                 <div class="col-md-1"><label class="form-label small">Tồn</label><input type="number" min="0" name="variations[{{ $index }}][stock]" class="form-control editor-input" value="{{ $variation['stock'] ?? 0 }}"></div>
+                                <div class="col-md-2"><label class="form-label small">Ảnh biến thể</label>@if(!empty($variation['image']))<img src="{{ asset('storage/' . $variation['image']) }}" class="rounded mb-1" style="width:42px;height:42px;object-fit:cover" alt="Ảnh hiện tại">@endif<input type="file" name="variations[{{ $index }}][image]" class="form-control form-control-sm" accept="image/*"><small class="text-muted">Để trống để giữ ảnh</small></div>
                                 <div class="col-md-1 variation-actions"><button type="button" class="btn btn-outline-primary duplicate-variation" title="Nhân bản dòng"><i class="bi bi-copy"></i></button><button type="button" class="btn btn-outline-danger remove-variation" title="Xóa dòng"><i class="bi bi-trash"></i></button></div>
                             </div>
                         @endforeach
@@ -184,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('add-variation').addEventListener('click', function () {
         const index = list.querySelectorAll('.variation-row').length;
         list.insertAdjacentHTML('beforeend', `<div class="row g-2 align-items-end variation-row mb-2"><div class="col-md-2"><label class="form-label small">Mã SKU</label><input name="variations[${index}][sku]" class="form-control editor-input" placeholder="SON-RED-01"></div><div class="col-md-2"><label class="form-label small">Màu</label><input name="variations[${index}][color]" class="form-control editor-input" placeholder="Đỏ"></div><div class="col-md-2"><label class="form-label small">Bộ nhớ / loại</label><input name="variations[${index}][storage]" class="form-control editor-input" placeholder="256GB"></div><div class="col-md-2"><label class="form-label small">Khối lượng</label><input type="number" step="0.01" min="0" name="variations[${index}][size_value]" class="form-control editor-input" placeholder="250"></div><div class="col-md-1"><label class="form-label small">Đơn vị</label><select name="variations[${index}][size_unit]" class="form-select editor-input"><option value="">-</option><option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option></select></div><div class="col-md-1"><label class="form-label small">Giá</label><input type="number" min="0" name="variations[${index}][price]" class="form-control editor-input"></div><div class="col-md-1"><label class="form-label small">Tồn</label><input type="number" min="0" name="variations[${index}][stock]" class="form-control editor-input" value="0"></div><div class="col-md-1 variation-actions"><button type="button" class="btn btn-outline-primary duplicate-variation" title="Nhân bản dòng"><i class="bi bi-copy"></i></button><button type="button" class="btn btn-outline-danger remove-variation" title="Xóa dòng"><i class="bi bi-trash"></i></button></div></div>`);
+        list.lastElementChild.insertAdjacentHTML('afterbegin', `<div class="col-md-2"><label class="form-label small">Ảnh biến thể</label><input type="file" name="variations[${index}][image]" class="form-control form-control-sm" accept="image/*"></div>`);
         variationIndex++;
     });
     list.addEventListener('click', event => {

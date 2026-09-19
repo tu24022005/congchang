@@ -10,9 +10,15 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\LoyaltyPointService;
+use App\Services\CartService;
 
 class OrderController extends Controller
 {
+    public function __construct(private CartService $cartService)
+    {
+    }
+
     // ==================================================
     // HIỂN THỊ DANH SÁCH ĐƠN HÀNG VÀ XỬ LÝ KẾT QUẢ PAYOS
     // ==================================================
@@ -39,8 +45,7 @@ class OrderController extends Controller
                 } 
                 // Nếu khách bấm nút Hủy giao dịch
                 elseif ($status === 'CANCELLED' || $isCancelled == 'true') {
-                    $order->status = 'cancelled';
-                    $order->save();
+                    $this->cancelOrder($order);
                     return redirect()->route('orders.index')->with('error', 'Bạn đã hủy thanh toán cho đơn hàng #' . $orderId);
                 }
             }
@@ -71,17 +76,31 @@ class OrderController extends Controller
             'all' => Order::where('user_id', Auth::id())->count(),
             'processing' => Order::where('user_id', Auth::id())->whereIn('status', ['processing', 'confirmed', 'packing', 'shipping'])->count(),
             'paid' => Order::where('user_id', Auth::id())->whereIn('status', ['paid', 'completed'])->count(),
-            'cancelled' => Order::where('user_id', Auth::id())->where('status', 'cancelled')->count(),
+            'cancelled' => Order::where('user_id', Auth::id())->whereIn('status', ['cancelled', 'refund_pending', 'refunded'])->count(),
         ];
 
         return view('orders.index', compact('orders', 'orderStats', 'search'));
+    }
+
+    public function refunds()
+    {
+        $orders = Order::where('user_id', Auth::id())
+            ->whereIn('status', ['refund_pending', 'refunded'])
+            ->latest('refunded_at')
+            ->latest()
+            ->get();
+
+        $pendingTotal = $orders->where('status', 'refund_pending')->sum('total');
+        $refundedTotal = $orders->where('status', 'refunded')->sum('total');
+
+        return view('orders.refunds', compact('orders', 'pendingTotal', 'refundedTotal'));
     }
     // ==================================================
     // XỬ LÝ LƯU ĐƠN HÀNG (CÓ VOUCHER & PAYOS)
     // ==================================================
     public function store(Request $request)
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->syncSession(Auth::user());
         
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn trống.');
@@ -98,30 +117,35 @@ class OrderController extends Controller
             // 2. Tính toán trừ tiền Voucher (nếu có) để lưu vào DB cho chuẩn
             $discount = 0;
             $voucher = null;
-            if (session()->has('voucher')) {
-                $voucher = Voucher::where('code', session('voucher')['code'])->lockForUpdate()->first();
+            $voucherCodes = collect([session('voucher_discount.code'), session('voucher_shipping.code')])
+                ->filter()
+                ->unique()
+                ->values();
+            foreach ($voucherCodes as $voucherCode) {
+                $voucher = Voucher::where('code', $voucherCode)->lockForUpdate()->first();
 
-                if (!$voucher || !$voucher->isAvailable()) {
+                if (!$voucher || ($voucher->user_id && $voucher->user_id !== Auth::id()) || !$voucher->isAvailable()) {
                     DB::rollBack();
-                    session()->forget('voucher');
-                    return redirect()->route('cart.index')->with('error', 'Voucher vừa hết hạn hoặc hết lượt sử dụng. Vui lòng chọn mã khác.');
+                    session()->forget(['voucher', 'voucher_discount', 'voucher_shipping']);
+                    return redirect()->route('cart.index')->with('error', 'Voucher vừa hết hạn hoặc hết lượt sử dụng.');
                 }
-
                 if ($total < $voucher->min_order_value) {
                     DB::rollBack();
-                    session()->forget('voucher');
+                    session()->forget(['voucher', 'voucher_discount', 'voucher_shipping']);
                     return redirect()->route('cart.index')->with('error', 'Đơn hàng chưa đạt mức tối thiểu để dùng voucher này.');
                 }
 
-                if ($voucher->type === 'fixed') {
-                    $discount = $voucher->value;
-                } else {
-                    $discount = $total * ($voucher->value / 100);
+                if ($voucher->type !== 'free_shipping') {
+                    $voucherDiscount = $voucher->type === 'fixed'
+                        ? $voucher->value
+                        : $total * ($voucher->value / 100);
+                    $discount += min($voucherDiscount, $total - $discount);
                 }
-                $discount = min($discount, $total); // Không cho giảm âm tiền
+                $voucher->increment('used_count');
             }
             $serviceFee = config('shop.service_fee', 3000);
-            $finalTotal = $total - $discount + $serviceFee;
+            $shippingFee = session()->has('voucher_shipping') ? 0 : $serviceFee;
+            $finalTotal = $total - $discount + $shippingFee;
 
             // 3. Tạo đơn hàng và lưu tổng tiền đã giảm
             $order = new Order();
@@ -165,13 +189,9 @@ class OrderController extends Controller
                 ]);
             }
 
-            if ($voucher) {
-                $voucher->increment('used_count');
-            }
-
             // 5. Dọn dẹp session
-            session()->forget('cart');
-            session()->forget('voucher');
+            $this->cartService->clear(Auth::user());
+            session()->forget(['voucher', 'voucher_discount', 'voucher_shipping']);
             
             DB::commit(); 
             
@@ -223,6 +243,7 @@ class OrderController extends Controller
             'paid' => ['packing', 'cancelled'],
             'packing' => ['shipping', 'cancelled'],
             'shipping' => ['completed'],
+            'refund_pending' => ['refunded'],
         ];
 
         if ($requestedStatus !== $order->status && !in_array($requestedStatus, $allowedTransitions[$order->status] ?? [], true)) {
@@ -231,6 +252,18 @@ class OrderController extends Controller
 
         if ($requestedStatus === 'paid' && $order->payment_method === 'COD') {
             return back()->with('error', 'Đơn COD chỉ được ghi nhận thanh toán khi khách đã nhận hàng.');
+        }
+
+        if ($requestedStatus === 'refunded' && $order->payment_method === 'COD') {
+            return back()->with('error', 'Đơn COD không có khoản thanh toán online cần hoàn.');
+        }
+
+        if ($requestedStatus === 'refunded' && $order->status !== 'refund_pending') {
+            return back()->with('error', 'Chỉ có thể xác nhận hoàn tiền cho đơn đang chờ hoàn.');
+        }
+
+        if ($requestedStatus === 'cancelled' && $order->payment_method !== 'COD' && $order->status === 'paid') {
+            return back()->with('error', 'Đơn online đã thanh toán cần chuyển sang Chờ hoàn tiền, không hủy trực tiếp.');
         }
 
         $order->status = $requestedStatus;
@@ -252,8 +285,87 @@ class OrderController extends Controller
         }
 
         $order->update(['status' => 'completed']);
+        app(LoyaltyPointService::class)->awardForCompletedOrder($order);
 
         return back()->with('success', 'Đã xác nhận nhận hàng. Bạn có thể đánh giá sản phẩm ngay bây giờ.');
+    }
+
+    public function cancel(Request $request, Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền hủy đơn hàng này.');
+        }
+
+        if (!in_array($order->status, ['processing', 'confirmed', 'paid'], true)) {
+            return back()->with('error', 'Đơn hàng chỉ có thể hủy trước khi shop bắt đầu đóng gói.');
+        }
+
+        $refundDetails = [];
+        if ($order->payment_method !== 'COD' && $order->status === 'paid') {
+            $refundDetails = $request->validate([
+                'refund_bank_name' => 'required|string|max:120',
+                'refund_account_number' => 'required|string|max:40',
+                'refund_account_holder' => 'required|string|max:120',
+            ], [
+                'refund_bank_name.required' => 'Vui lòng nhập tên ngân hàng nhận hoàn tiền.',
+                'refund_account_number.required' => 'Vui lòng nhập số tài khoản nhận hoàn tiền.',
+                'refund_account_holder.required' => 'Vui lòng nhập tên chủ tài khoản.',
+            ]);
+        }
+
+        try {
+            DB::transaction(function () use ($order, $refundDetails) {
+                $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+                if (!in_array($lockedOrder->status, ['processing', 'confirmed', 'paid'], true)) {
+                    throw new \RuntimeException('Đơn hàng đã chuyển sang đóng gói hoặc trạng thái mới hơn.');
+                }
+
+                $this->restoreOrderStock($lockedOrder);
+                $isRefundRequest = $lockedOrder->payment_method !== 'COD' && $lockedOrder->status === 'paid';
+                $nextStatus = $isRefundRequest
+                    ? 'refund_pending'
+                    : 'cancelled';
+                $lockedOrder->update(array_merge($refundDetails, [
+                    'status' => $nextStatus,
+                    'refund_status' => $isRefundRequest ? 'requested' : null,
+                ]));
+                $order->status = $nextStatus;
+            });
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            report($exception);
+            return back()->with('error', 'Không thể hủy đơn hàng lúc này. Vui lòng thử lại.');
+        }
+
+        $message = $order->payment_method !== 'COD' && $order->status === 'refund_pending'
+            ? 'Đơn đã được hủy và chuyển sang trạng thái chờ hoàn tiền. Shop sẽ xác nhận sau khi chuyển khoản.'
+            : 'Đã hủy đơn hàng thành công.';
+
+        return redirect()->route('orders.show', $order)->with('success', $message);
+    }
+
+    private function cancelOrder(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if ($lockedOrder->status === 'cancelled') {
+                return;
+            }
+            $this->restoreOrderStock($lockedOrder);
+            $lockedOrder->update(['status' => 'cancelled']);
+        });
+    }
+
+    private function restoreOrderStock(Order $order): void
+    {
+        foreach ($order->items()->lockForUpdate()->get() as $item) {
+            if ($item->variation_id) {
+                ProductVariation::whereKey($item->variation_id)->lockForUpdate()->increment('stock', $item->quantity);
+            } else {
+                Product::whereKey($item->product_id)->lockForUpdate()->increment('quantity', $item->quantity);
+            }
+        }
     }
 
     // ==================================================

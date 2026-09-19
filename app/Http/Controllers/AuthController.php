@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
+use App\Services\CartService;
 
 class AuthController extends Controller 
 { 
@@ -45,6 +46,7 @@ class AuthController extends Controller
             
             // 3. Đăng nhập luôn cho người dùng sau khi đăng ký
             Auth::login($user);
+            app(CartService::class)->mergeSession($user);
 
             // 4. Chuyển hướng đến trang thông báo xác thực email
             return redirect()->route('verification.notice');
@@ -116,14 +118,21 @@ class AuthController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'))) { 
             $request->session()->regenerate(); 
+            app(CartService::class)->mergeSession(Auth::user());
 
             if (!Auth::user()->hasVerifiedEmail()) {
                 return redirect()->route('verification.notice');
             }
 
-            if (Auth::user()->role === 'admin') { 
-                return redirect()->intended(route('admin.dashboard')); 
-            } 
+            $roleHome = [
+                'admin' => 'admin.dashboard',
+                'manager' => 'admin.dashboard',
+                'warehouse_staff' => 'admin.products.index',
+                'customer_service' => 'admin.orders.index',
+            ][Auth::user()->role] ?? null;
+            if ($roleHome) {
+                return redirect()->intended(route($roleHome)); 
+            }
             return redirect()->intended(route('welcome')); 
         } 
 
@@ -140,7 +149,11 @@ class AuthController extends Controller
 
     public function account(Request $request)
     {
-        return view('account.index', ['user' => $request->user()]);
+        $user = $request->user();
+        $completedSpend = $user->orders()->where('status', 'completed')->sum('total');
+        $membershipTier = User::membershipTierFor($completedSpend);
+
+        return view('account.index', compact('user', 'completedSpend', 'membershipTier'));
     }
 
     public function updateAccount(Request $request)

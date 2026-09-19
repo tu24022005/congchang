@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Voucher extends Model
 {
-    protected $fillable = ['code', 'type', 'value', 'min_order_value', 'usage_limit', 'expires_at'];
+    protected $fillable = ['code', 'scope', 'user_id', 'type', 'value', 'min_order_value', 'usage_limit', 'expires_at'];
 
     protected $casts = [
         'expires_at' => 'date',

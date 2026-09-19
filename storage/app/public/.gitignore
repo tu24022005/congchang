@@ -1,2 +1,6 @@
 *
 !.gitignore
+!products/
+!products/*.svg
+!reviews/
+!reviews/*.svg

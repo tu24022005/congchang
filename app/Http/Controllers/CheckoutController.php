@@ -8,15 +8,20 @@ use App\Models\ProductVariation;
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\DB; 
 use PayOS\PayOS; 
+use App\Services\CartService;
 
 class CheckoutController extends Controller 
 { 
+    public function __construct(private CartService $cartService)
+    {
+    }
+
     public function index() { return view('cart.index'); } 
 
     public function process(Request $request) 
     { 
         $paymentMethod = $request->input('payment_method'); 
-        $cart = session()->get('cart', []); 
+        $cart = $this->cartService->syncSession(Auth::user());
         if (empty($cart)) return redirect()->route('cart.index')->with('error', 'Giỏ trống.'); 
         
         $paymentMethodNormalized = strtoupper($paymentMethod) === 'COD' ? 'COD' : 'online'; 
@@ -59,7 +64,7 @@ class CheckoutController extends Controller
                 ]); 
             } 
             
-            session()->forget('cart'); 
+            $this->cartService->clear(Auth::user());
             DB::commit(); 
             
             if ($paymentMethodNormalized === 'COD') { 

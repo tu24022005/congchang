@@ -13,7 +13,7 @@ class AdminMiddleware
  return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.'); 
  } 
  // Kiểm tra 2: Đã đăng nhập nhưng role CÓ PHẢI là admin không? (Dùng ===) 
- if (Auth::user()->role === 'admin') { 
+ if (in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff', 'customer_service'], true)) {
  return $next($request); // Cho phép đi tiếp 
  } 
   
@@ -21,4 +21,3 @@ class AdminMiddleware
  return redirect()->route('welcome')->with('error', 'Bạn không có quyền truy cập vào khu vực quản trị.'); 
  } 
 }
-

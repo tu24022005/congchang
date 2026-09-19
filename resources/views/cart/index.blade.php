@@ -6,6 +6,19 @@
 
 @section('content')
 <div class="container py-4">
+    @php
+        $discountVoucher = session('voucher_discount');
+        $shippingVoucher = session('voucher_shipping');
+        $discount = 0;
+        if ($discountVoucher) {
+            $discount = $discountVoucher['type'] === 'fixed'
+                ? $discountVoucher['value']
+                : $total * ($discountVoucher['value'] / 100);
+            $discount = min($discount, $total);
+        }
+        $serviceFee = $shippingVoucher ? 0 : config('shop.service_fee', 3000);
+        $finalTotal = $total - $discount + $serviceFee;
+    @endphp
     <div class="cart-page-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / GIỎ HÀNG</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn</h2><p class="text-muted mb-0">Kiểm tra sản phẩm và hoàn tất địa chỉ nhận hàng.</p></div><a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a></div>
 
     @if(session('success'))
@@ -44,7 +57,7 @@
                                     @php $total = 0; @endphp
                                     @foreach(session('cart') as $id => $details)
                                         @php $total += $details['price'] * $details['quantity']; @endphp
-                                        <tr>
+                                        <tr class="cart-item-row" data-unit-price="{{ $details['price'] }}">
                                             <td class="text-start ps-4">
                                                 <div class="d-flex align-items-center">
                                                     @if(isset($details['image']) && $details['image'])
@@ -70,7 +83,7 @@
                                                     <div class="quantity-control"><button type="button" class="quantity-step" data-step="-1">-</button><input type="number" name="quantity" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center quantity-input" min="1"><button type="button" class="quantity-step" data-step="1">+</button></div><button type="submit" class="btn btn-sm btn-outline-primary ms-2" title="Cập nhật số lượng"><i class="bi bi-check2"></i></button>
                                                 </form>
                                             </td>
-                                            <td class="text-danger fw-bold">{{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }} đ</td>
+                                            <td class="text-danger fw-bold line-total">{{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }} đ</td>
                                             <td>
                                                 <!-- Đã cập nhật thành cart.destroy để sửa lỗi route -->
                                                 <form action="{{ route('cart.destroy', $id) }}" method="POST">
@@ -124,24 +137,9 @@
                         <h5 class="fw-bold mb-4 border-bottom pb-3 text-center">TỔNG ĐƠN HÀNG</h5>
                         
                         <!-- THUẬT TOÁN TÍNH TIỀN ĐƯỢC GIẢM -->
-                        @php
-                            $discount = 0;
-                            if(session()->has('voucher')) {
-                                if(session('voucher')['type'] == 'fixed') {
-                                    $discount = session('voucher')['value'];
-                                } else {
-                                    $discount = $total * (session('voucher')['value'] / 100);
-                                }
-                                $discount = min($discount, $total);
-                            }
-                            $finalTotal = $total - $discount;
-                            $serviceFee = config('shop.service_fee', 3000);
-                            $finalTotal += $serviceFee;
-                        @endphp
-
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Tạm tính:</span>
-                            <span class="fw-bold">{{ number_format($total, 0, ',', '.') }} đ</span>
+                            <span class="fw-bold" id="cart-subtotal">{{ number_format($total, 0, ',', '.') }} đ</span>
                         </div>
                         
                         <div class="d-flex justify-content-between mb-3">
@@ -151,31 +149,38 @@
 
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Phí dịch vụ:</span>
-                            <span class="fw-bold">{{ number_format($serviceFee, 0, ',', '.') }} đ</span>
+                            <span class="fw-bold" id="cart-service-fee">{{ number_format($serviceFee, 0, ',', '.') }} đ</span>
                         </div>
 
                         <!-- HIỂN THỊ DÒNG TIỀN ĐƯỢC GIẢM -->
-                        @if(session()->has('voucher'))
+                        @if($discountVoucher || $shippingVoucher)
                             <div class="d-flex justify-content-between mb-3 text-success">
                                 <span>
-                                    <i class="bi bi-tag-fill me-1"></i> Voucher ({{ session('voucher')['code'] }}):
+                                    <i class="bi bi-tag-fill me-1"></i> Voucher đã chọn:
                                 </span>
-                                <span class="fw-bold">- {{ number_format($discount, 0, ',', '.') }} đ</span>
+                                <span class="fw-bold text-end">
+                                    @if($discountVoucher) <span id="cart-discount-code">{{ $discountVoucher['code'] }}</span> (-<span id="cart-discount">{{ number_format($discount, 0, ',', '.') }}</span> đ) @endif
+                                    @if($shippingVoucher)<br>{{ $shippingVoucher['code'] }} (Free ship)@endif
+                                </span>
                             </div>
                         @endif
 
                         <!-- KHU VỰC NHẬP VOUCHER -->
-                        <div class="mb-3 border-top pt-3">
-                            <label class="form-label text-muted small"><i class="bi bi-ticket-perforated text-warning me-1"></i> Mã giảm giá Miu Voucher</label>
-                            <div class="d-flex gap-2">
-                                <input type="text" name="voucher_code" class="form-control rounded-3 border-secondary voucher-input" placeholder="Nhập mã..." value="{{ old('voucher_code', session('voucher')['code'] ?? '') }}">
-                                <button type="submit" formaction="{{ route('cart.apply_voucher') }}" formmethod="POST" formnovalidate class="btn btn-dark rounded-3 px-3 text-nowrap">Áp dụng</button>
+                        <div class="mb-3 border-top pt-3 voucher-box">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label text-dark fw-bold mb-0"><i class="bi bi-ticket-perforated text-warning me-1"></i> Voucher của bạn</label>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#voucherPickerModal">Chọn hoặc nhập mã</button>
+                            </div>
+                            <div class="small text-muted">
+                                @if($discountVoucher)<i class="bi bi-check-circle text-danger me-1"></i>Giảm tiền: {{ $discountVoucher['code'] }}<br>@endif
+                                @if($shippingVoucher)<i class="bi bi-check-circle text-success me-1"></i>Free ship: {{ $shippingVoucher['code'] }}@endif
+                                @if(!$discountVoucher && !$shippingVoucher) Chưa chọn voucher @endif
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between border-top pt-3 mb-4">
                             <span class="fw-bold fs-5">Thành tiền:</span>
-                            <span class="fw-bold fs-4 text-danger">{{ number_format($finalTotal, 0, ',', '.') }} đ</span>
+                            <span class="fw-bold fs-4 text-danger" id="cart-final-total">{{ number_format($finalTotal, 0, ',', '.') }} đ</span>
                         </div>
 
                         <div class="mb-4">
@@ -202,7 +207,64 @@
         </div>
     @endif
 </div>
+
+@if(isset($vouchers))
+<div class="modal fade voucher-picker-modal" id="voucherPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-ticket-perforated text-warning me-2"></i>Chọn voucher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-4">
+                    <input type="text" id="voucher-code-modal" class="form-control text-uppercase" placeholder="Nhập mã voucher">
+                    <button type="button" class="btn btn-dark" id="apply-voucher-modal">Áp dụng mã</button>
+                </div>
+                <p class="small text-muted mb-3">Có thể tích cùng lúc 1 mã giảm tiền và 1 mã free ship.</p>
+                <form action="{{ route('cart.apply_vouchers') }}" method="POST" id="selected-vouchers-form">
+                    @csrf
+                <div class="mt-3">
+                    <h6 class="fw-bold border-bottom pb-2"><i class="bi bi-globe2 text-primary me-2"></i>Mã giảm tiền toàn sàn</h6>
+                    @forelse($vouchers->where('scope', 'platform')->whereIn('type', ['fixed', 'percent']) as $voucher)
+                        <div class="border rounded-3 p-3 mb-2 d-flex justify-content-between align-items-center">
+                            <label class="d-flex align-items-center gap-3 w-100 mb-0">
+                                <input type="checkbox" class="form-check-input voucher-choice" data-voucher-type="discount" name="voucher_codes[]" value="{{ $voucher->code }}">
+                                <span><strong class="text-primary">{{ $voucher->code }}</strong><span class="d-block small text-muted">Giảm {{ $voucher->type === 'fixed' ? number_format($voucher->value, 0, ',', '.') . ' đ' : $voucher->value . '%' }} · Đơn từ {{ number_format($voucher->min_order_value, 0, ',', '.') }} đ</span></span>
+                            </label>
+                        </div>
+                    @empty
+                        <p class="small text-muted">Hiện chưa có mã giảm tiền toàn sàn.</p>
+                    @endforelse
+                </div>
+                <div class="mt-3">
+                    <h6 class="fw-bold border-bottom pb-2"><i class="bi bi-truck text-info me-2"></i>Free ship toàn sàn</h6>
+                    @forelse($vouchers->where('scope', 'platform')->where('type', 'free_shipping') as $voucher)
+                        <div class="border rounded-3 p-3 mb-2 d-flex justify-content-between align-items-center">
+                            <label class="d-flex align-items-center gap-3 w-100 mb-0">
+                                <input type="checkbox" class="form-check-input voucher-choice" data-voucher-type="shipping" name="voucher_codes[]" value="{{ $voucher->code }}">
+                                <span><strong class="text-info">{{ $voucher->code }}</strong><span class="d-block small text-muted">Miễn phí vận chuyển · Đơn từ {{ number_format($voucher->min_order_value, 0, ',', '.') }} đ</span></span>
+                            </label>
+                        </div>
+                    @empty
+                        <p class="small text-muted">Hiện chưa có mã free ship toàn sàn.</p>
+                    @endforelse
+                </div>
+                <button type="submit" class="btn btn-primary w-100 rounded-pill mt-3">Áp dụng voucher đã chọn</button>
+                </form>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal">Trở lại</button></div>
+        </div>
+    </div>
+</div>
+@endif
 @push('scripts')
+    <style>
+        #voucherPickerModal { z-index: 2000 !important; }
+        #voucherPickerModal .modal-dialog,
+        #voucherPickerModal .modal-content { position: relative; z-index: 2001; }
+        .modal-backdrop.show { z-index: 1990 !important; }
+    </style>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -211,6 +273,7 @@
                 const input = this.closest('.quantity-control').querySelector('input');
                 const nextValue = Math.max(1, Number(input.value || 1) + Number(this.dataset.step));
                 input.value = nextValue;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
             });
         });
         const mapElement = document.getElementById('delivery-map');
@@ -254,6 +317,71 @@
         document.getElementById('use-current-location').addEventListener('click', function () { if (!navigator.geolocation) return; status.textContent = 'Đang lấy vị trí...'; navigator.geolocation.getCurrentPosition(position => reverseGeocode(position.coords.latitude, position.coords.longitude), () => status.textContent = 'Trình duyệt chưa cho phép định vị.'); });
         if (addressInput.value.trim()) document.getElementById('map-search').value = addressInput.value;
     });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const voucherModal = document.getElementById('voucherPickerModal');
+        if (voucherModal && voucherModal.parentElement !== document.body) {
+            document.body.appendChild(voucherModal);
+        }
+    });
+
+    document.getElementById('apply-voucher-modal')?.addEventListener('click', function () {
+        const code = document.getElementById('voucher-code-modal').value.trim();
+        if (!code) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = @json(route('cart.apply_voucher'));
+        form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}"><input type="hidden" name="voucher_code" value="${code}">`;
+        document.body.appendChild(form);
+        form.submit();
+    });
+
+    document.querySelectorAll('.voucher-choice').forEach(function (choice) {
+        choice.addEventListener('change', function () {
+            if (!this.checked) return;
+            document.querySelectorAll('.voucher-choice[data-voucher-type="' + this.dataset.voucherType + '"]').forEach(function (other) {
+                if (other !== choice) other.checked = false;
+            });
+        });
+    });
+
+    const money = value => new Intl.NumberFormat('vi-VN').format(Math.round(value));
+    const discountType = @json($discountVoucher['type'] ?? null);
+    const discountValue = Number(@json($discountVoucher['value'] ?? 0));
+    const serviceFee = Number(@json($serviceFee ?? 0));
+    const hasShippingVoucher = @json((bool) $shippingVoucher);
+
+    function refreshCartTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('.cart-item-row').forEach(function (row) {
+            const input = row.querySelector('.quantity-input');
+            const quantity = Math.max(1, Number(input.value || 1));
+            input.value = quantity;
+            const lineTotal = Number(row.dataset.unitPrice) * quantity;
+            subtotal += lineTotal;
+            row.querySelector('.line-total').textContent = money(lineTotal) + ' đ';
+        });
+
+        let discount = 0;
+        if (discountType === 'fixed') discount = discountValue;
+        if (discountType === 'percent') discount = subtotal * discountValue / 100;
+        discount = Math.min(discount, subtotal);
+        const total = subtotal - discount + (hasShippingVoucher ? 0 : serviceFee);
+
+        document.getElementById('cart-subtotal').textContent = money(subtotal) + ' đ';
+        document.getElementById('cart-discount')?.replaceChildren(document.createTextNode(money(discount)));
+        document.getElementById('cart-final-total').textContent = money(total) + ' đ';
+    }
+
+    document.querySelectorAll('.quantity-input').forEach(function (input) {
+        input.addEventListener('input', function () {
+            refreshCartTotals();
+            clearTimeout(input.form.dataset.updateTimer);
+            input.form.dataset.updateTimer = setTimeout(() => input.form.submit(), 500);
+        });
+    });
+    refreshCartTotals();
     </script>
 @endpush
 @endsection

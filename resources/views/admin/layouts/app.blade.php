@@ -15,7 +15,7 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     
 </head>
-<body>
+<body class="admin-body">
 
     <!-- Thanh điều hướng Navbar -->
     <nav class="navbar navbar-expand-lg glass-navbar shadow-sm">
@@ -42,6 +42,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">Danh mục (Admin)</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.posts.*') || request()->routeIs('admin.post-categories.*') ? 'active' : '' }}" href="{{ route('admin.posts.index') }}">Blog (Admin)</a>
                         </li>
                     @endauth
                 </ul>
@@ -95,7 +98,7 @@
     </nav>
 
     <!-- Nội dung chính -->
-    <main class="container py-4">
+    <main class="container-fluid admin-main py-4">
         @yield('content')
     </main>
 

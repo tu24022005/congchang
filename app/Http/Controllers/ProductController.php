@@ -8,6 +8,7 @@ use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
+use App\Services\ActivityLogService;
 
 class ProductController extends Controller
 {
@@ -18,7 +19,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         // Hàm này dành cho trang "Kho (Admin)" - Route: admin.products.index
-        $products = Product::latest()->paginate(10);
+        $products = Product::with(['category', 'variations'])->latest()->paginate(10);
         return view('admin.products.index', compact('products'));
     }
 
@@ -34,20 +35,21 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'quantity' => 'required|integer|min:0',
-            'price' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'gallery.*' => 'nullable|image|max:2048', 
-            'variations' => 'nullable|array',
+            'variations' => 'required|array|min:1',
             'variations.*.id' => 'nullable|integer|exists:product_variations,id',
             'variations.*.sku' => 'nullable|string|max:100|distinct',
             'variations.*.color' => 'nullable|string|max:100',
             'variations.*.storage' => 'nullable|string|max:100',
             'variations.*.size_value' => 'nullable|numeric|min:0',
             'variations.*.size_unit' => 'nullable|string|max:20',
-            'variations.*.price' => 'required_with:variations.*|numeric|min:0',
-            'variations.*.stock' => 'required_with:variations.*|integer|min:0',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.stock' => 'required|integer|min:0',
+            'variations.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
+        $validatedData['price'] = (float) $request->input('variations.0.price');
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
@@ -55,7 +57,7 @@ class ProductController extends Controller
         }
 
         $product = Product::create($validatedData);
-        $this->syncVariations($product, $request->input('variations', []));
+        $this->syncVariations($product, $request->input('variations', []), $request->file('variations', []));
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $file) {
@@ -88,20 +90,21 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'quantity' => 'required|integer|min:0',
-            'price' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'gallery.*' => 'nullable|image|max:2048', 
-            'variations' => 'nullable|array',
+            'variations' => 'required|array|min:1',
             'variations.*.id' => 'nullable|integer|exists:product_variations,id',
             'variations.*.sku' => 'nullable|string|max:100|distinct',
             'variations.*.color' => 'nullable|string|max:100',
             'variations.*.storage' => 'nullable|string|max:100',
             'variations.*.size_value' => 'nullable|numeric|min:0',
             'variations.*.size_unit' => 'nullable|string|max:20',
-            'variations.*.price' => 'required_with:variations.*|numeric|min:0',
-            'variations.*.stock' => 'required_with:variations.*|integer|min:0',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.stock' => 'required|integer|min:0',
+            'variations.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
+        $validatedData['price'] = (float) $request->input('variations.0.price');
 
         if ($request->hasFile('image')) {
             if ($product->image && Storage::disk('public')->exists($product->image)) {
@@ -112,7 +115,7 @@ class ProductController extends Controller
         }
 
         $product->update($validatedData);
-        $this->syncVariations($product, $request->input('variations', []));
+        $this->syncVariations($product, $request->input('variations', []), $request->file('variations', []));
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $file) {
@@ -131,8 +134,54 @@ class ProductController extends Controller
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
         }
+        foreach ($product->variations as $variation) {
+            if ($variation->image && Storage::disk('public')->exists($variation->image)) {
+                Storage::disk('public')->delete($variation->image);
+            }
+        }
+
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Xóa sản phẩm thành công!');
+    }
+
+    public function updateStock(Request $request, Product $product)
+    {
+        $data = $request->validate([
+            'quantity' => 'required|integer|min:0',
+        ]);
+        $before = ['quantity' => $product->quantity];
+        $product->update(['quantity' => $data['quantity']]);
+        ActivityLogService::record('product.stock.updated', 'Đã cập nhật tồn kho sản phẩm ' . $product->name . '.', $product, $before, ['quantity' => $product->quantity]);
+
+        return back()->with('success', 'Đã cập nhật tồn kho sản phẩm.');
+    }
+
+    public function updateVariationStock(Request $request, Product $product)
+    {
+        $data = $request->validate([
+            'variations' => 'required|array|min:1',
+            'variations.*.id' => 'required|integer',
+            'variations.*.stock' => 'required|integer|min:0',
+            'variations.*.received' => 'nullable|integer|min:0',
+        ]);
+
+        $before = [];
+        $after = [];
+        foreach ($data['variations'] as $variationData) {
+            $variation = $product->variations()->whereKey($variationData['id'])->firstOrFail();
+            $before[$variation->id] = ['stock' => $variation->stock];
+            $variation->update([
+                'stock' => $variationData['stock'] + (int) ($variationData['received'] ?? 0),
+            ]);
+            $after[$variation->id] = ['stock' => $variation->stock];
+        }
+
+        $product->update([
+            'quantity' => $product->variations()->sum('stock'),
+        ]);
+        ActivityLogService::record('product.variation-stock.updated', 'Đã cập nhật tồn kho biến thể của ' . $product->name . '.', $product, $before, $after);
+
+        return back()->with('success', 'Đã cập nhật tồn kho từng mã loại thành công.');
     }
 
     // ==========================================
@@ -142,7 +191,7 @@ class ProductController extends Controller
     // Đã cấu hình lại: Xử lý hiển thị danh sách sản phẩm VÀ Tìm kiếm
     public function userIndex(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with(['category', 'variations']);
         $categories = Category::withCount('products')->orderBy('name')->get();
 
         if ($request->filled('category')) {
@@ -159,14 +208,16 @@ class ProductController extends Controller
         // Phân 8 sản phẩm 1 trang và đưa lên giao diện
         $products = $query->latest()->paginate(8);
         $products->appends(['search' => $request->search]);
+        $wishlistProductIds = $request->user()->wishlistProducts()->pluck('products.id');
 
-        return view('products.index', compact('products', 'categories'));
+        return view('products.index', compact('products', 'categories', 'wishlistProductIds'));
     }
 
     // ĐÃ TÍCH HỢP AI GỢI Ý VÀO HÀM NÀY CHO NGƯỜI DÙNG XEM
-    public function show_normal(Product $product)
+    public function show_normal(Request $request, Product $product)
     {
         $product->load(['category', 'images', 'variations']); 
+        $isWishlisted = $request->user()->wishlistProducts()->whereKey($product->id)->exists();
 
         // =========================================================
         // THUẬT TOÁN APRIORI - KHAI PHÁ DỮ LIỆU ĐƠN HÀNG (AI TỰ HỌC)
@@ -197,14 +248,14 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('products.show', compact('product', 'recommendations'));
+        return view('products.show', compact('product', 'recommendations', 'isWishlisted'));
     }
 
-    private function syncVariations(Product $product, array $variations): void
+    private function syncVariations(Product $product, array $variations, array $variationFiles = []): void
     {
         $keptIds = [];
 
-        foreach ($variations as $variation) {
+        foreach ($variations as $thisIndex => $variation) {
             if (blank($variation['sku'] ?? null) && blank($variation['color'] ?? null) && blank($variation['storage'] ?? null) && blank($variation['size_value'] ?? null)) {
                 continue;
             }
@@ -222,16 +273,33 @@ class ProductController extends Controller
             if (!empty($variation['id'])) {
                 $existing = $product->variations()->whereKey($variation['id'])->first();
                 if ($existing) {
+                    $file = $variationFiles[$thisIndex]['image'] ?? null;
+                    if ($file) {
+                        if ($existing->image && Storage::disk('public')->exists($existing->image)) {
+                            Storage::disk('public')->delete($existing->image);
+                        }
+                        $attributes['image'] = $file->store('products/variations', 'public');
+                    }
                     $existing->update($attributes);
                     $keptIds[] = $existing->id;
                     continue;
                 }
             }
 
+            $file = $variationFiles[$thisIndex]['image'] ?? null;
+            if ($file) {
+                $attributes['image'] = $file->store('products/variations', 'public');
+            }
             $keptIds[] = $product->variations()->create($attributes)->id;
         }
 
-        $product->variations()->whereNotIn('id', $keptIds ?: [0])->delete();
+        $removed = $product->variations()->whereNotIn('id', $keptIds ?: [0])->get();
+        foreach ($removed as $variation) {
+            if ($variation->image && Storage::disk('public')->exists($variation->image)) {
+                Storage::disk('public')->delete($variation->image);
+            }
+            $variation->delete();
+        }
     }
 
     // HÀM TÌM KIẾM TRỰC TIẾP (LIVE SEARCH API)

@@ -35,15 +35,23 @@
                             <input type="text" name="code" class="form-control text-uppercase" required>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label small fw-bold">Phạm vi áp dụng</label>
+                            <select name="scope" class="form-select">
+                                <option value="platform">Mã hiện công khai toàn sàn</option>
+                                <option value="shop">Mã riêng - ẩn, chỉ nhập code để áp dụng</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-bold">Loại giảm giá</label>
                             <select name="type" class="form-select">
                                 <option value="fixed">Giảm tiền mặt (VNĐ)</option>
                                 <option value="percent">Giảm theo phần trăm (%)</option>
+                                <option value="free_shipping">Miễn phí vận chuyển</option>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Mức giảm (Số tiền hoặc %)</label>
-                            <input type="number" name="value" class="form-control" required>
+                            <input type="number" name="value" class="form-control" min="1">
                         </div>
                         <div class="mb-4">
                             <label class="form-label small fw-bold">Đơn tối thiểu để áp dụng</label>
@@ -73,6 +81,7 @@
                         <thead class="table-dark">
                             <tr>
                                 <th class="py-3">Mã Code</th>
+                                <th class="py-3">Phạm vi</th>
                                 <th class="py-3">Mức giảm</th>
                                 <th class="py-3">Đơn tối thiểu</th>
                                 <th class="py-3">Số lượng</th>
@@ -84,8 +93,13 @@
                             @forelse($vouchers as $voucher)
                                 <tr>
                                     <td class="fw-bold text-success fs-5">{{ $voucher->code }}</td>
+                                    <td><span class="badge {{ $voucher->scope === 'platform' ? 'bg-primary' : 'bg-dark' }}">{{ $voucher->scope === 'platform' ? 'Hiện toàn sàn' : 'Ẩn - nhập code' }}</span></td>
                                     <td class="fw-bold text-danger">
-                                        {{ $voucher->type == 'fixed' ? number_format($voucher->value, 0, ',', '.') . ' đ' : $voucher->value . '%' }}
+                                        @if($voucher->type === 'free_shipping')
+                                            Miễn phí vận chuyển
+                                        @else
+                                            {{ $voucher->type == 'fixed' ? number_format($voucher->value, 0, ',', '.') . ' đ' : $voucher->value . '%' }}
+                                        @endif
                                     </td>
                                     <td>{{ number_format($voucher->min_order_value, 0, ',', '.') }} đ</td>
                                     <td>

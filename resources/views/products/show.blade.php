@@ -4,8 +4,11 @@
 @section('content')
 <style>
     .shop-detail { --shop-ink: #1f2d3d; --shop-muted: #718096; --shop-line: #e5eaf0; }
-    .detail-breadcrumb { color: #64748b; font-size: .82rem; }
-    .detail-breadcrumb a { color: #0082c8; text-decoration: none; font-weight: 700; }
+    .detail-breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; color: #64748b; font-size: .82rem; }
+    .detail-breadcrumb a { color: #1677c8; text-decoration: none; }
+    .detail-breadcrumb a:hover { color: #ee4d2d; text-decoration: underline; }
+    .detail-breadcrumb .breadcrumb-separator { color: #a0aec0; }
+    .detail-breadcrumb .breadcrumb-current { max-width: min(55vw, 620px); overflow: hidden; color: #526170; text-overflow: ellipsis; white-space: nowrap; }
     .detail-shell { background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.95); border-radius: 22px; box-shadow: 0 18px 50px rgba(38, 60, 80, .1); }
     .detail-gallery { position: sticky; top: 1rem; }
     .detail-main-image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 18px; background: #f6f8fb; }
@@ -73,7 +76,17 @@
 </style>
 
 <div class="shop-detail container py-4 py-lg-5">
-    <div class="detail-breadcrumb mb-3"><a href="{{ route('products.index') }}"><i class="bi bi-arrow-left me-1"></i>Sản phẩm</a><span class="mx-2">/</span>{{ $product->name }}</div>
+    <nav class="detail-breadcrumb mb-3" aria-label="Đường dẫn trang">
+        <a href="{{ route('welcome') }}"><i class="bi bi-house-door me-1"></i>Trang chủ</a>
+        <span class="breadcrumb-separator">&gt;</span>
+        <a href="{{ route('products.index') }}">Sản phẩm</a>
+        @if($product->category)
+            <span class="breadcrumb-separator">&gt;</span>
+            <a href="{{ route('products.index', ['category' => $product->category->id]) }}">{{ $product->category->name }}</a>
+        @endif
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-current" aria-current="page">{{ $product->name }}</span>
+    </nav>
 
     <div class="detail-shell p-3 p-lg-5">
         <div class="row g-4 g-lg-5">
@@ -84,10 +97,26 @@
                     @else
                         <div id="detail-main-image" class="detail-main-image d-grid place-items-center text-muted"><i class="bi bi-image fs-1"></i></div>
                     @endif
+                    @php
+                        $shownGalleryImages = $product->image ? [$product->image] : [];
+                    @endphp
                     <div class="d-flex flex-wrap gap-2 mt-3">
                         @if($product->image)<img class="detail-thumb active" src="{{ asset('storage/' . $product->image) }}" data-image="{{ asset('storage/' . $product->image) }}" alt="Ảnh chính">@endif
                         @foreach($product->images as $image)
-                            <img class="detail-thumb" src="{{ asset('storage/' . $image->image_path) }}" data-image="{{ asset('storage/' . $image->image_path) }}" alt="Ảnh sản phẩm">
+                            @if($image->image_path && !in_array($image->image_path, $shownGalleryImages, true))
+                                <img class="detail-thumb" src="{{ asset('storage/' . $image->image_path) }}" data-image="{{ asset('storage/' . $image->image_path) }}" alt="Ảnh sản phẩm">
+                                @php
+                                    $shownGalleryImages[] = $image->image_path;
+                                @endphp
+                            @endif
+                        @endforeach
+                        @foreach($product->variations as $variation)
+                            @if($variation->image && !in_array($variation->image, $shownGalleryImages, true))
+                                <img class="detail-thumb" src="{{ asset('storage/' . $variation->image) }}" data-image="{{ asset('storage/' . $variation->image) }}" data-variation="{{ $variation->id }}" alt="Ảnh {{ $variation->sku ?: 'biến thể' }}">
+                                @php
+                                    $shownGalleryImages[] = $variation->image;
+                                @endphp
+                            @endif
                         @endforeach
                     </div>
                     <button type="button" class="btn btn-sm btn-light border rounded-pill mt-3" id="copy-product-link"><i class="bi bi-link-45deg me-1"></i>Chia sẻ sản phẩm</button>
@@ -96,7 +125,13 @@
 
             <div class="col-lg-6">
                 <div class="detail-kicker mb-2">{{ $product->category?->name ?? 'Aloha Beauty' }}</div>
-                <h1 class="detail-title fw-bold mb-3">{{ $product->name }}</h1>
+                <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                    <h1 class="detail-title fw-bold mb-0">{{ $product->name }}</h1>
+                    <form action="{{ route('wishlist.toggle', $product) }}" method="POST" class="flex-shrink-0">
+                        @csrf
+                        <button type="submit" class="btn {{ $isWishlisted ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle" title="{{ $isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ $isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}"><i class="bi bi-heart{{ $isWishlisted ? '-fill' : '' }}"></i></button>
+                    </form>
+                </div>
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span><span class="text-muted small">Được lựa chọn bởi khách hàng Aloha</span></div>
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-price">{{ number_format($product->price, 0, ',', '.') }} đ</span><span class="{{ $product->quantity > 0 ? 'detail-stock' : 'detail-stock out' }}"><i class="bi bi-{{ $product->quantity > 0 ? 'check-circle' : 'x-circle' }} me-1"></i>{{ $product->quantity > 0 ? 'Còn ' . $product->quantity . ' sản phẩm' : 'Hết hàng' }}</span></div>
                 <p class="detail-copy mb-4">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
@@ -110,7 +145,7 @@
                                     @foreach($product->variations as $index => $variation)
                                         @php $variationLabel = collect([$variation->color, $variation->size_value ? rtrim(rtrim($variation->size_value, '0'), '.') . $variation->size_unit : null, $variation->storage])->filter()->implode(' · '); @endphp
                                         <label class="variation-option">
-                                            <input type="radio" name="variation_id" value="{{ $variation->id }}" data-price="{{ $variation->price }}" data-stock="{{ $variation->stock }}" data-label="{{ $variationLabel ?: 'Mặc định' }}" @checked($index === 0)>
+                                            <input type="radio" name="variation_id" value="{{ $variation->id }}" data-price="{{ $variation->price }}" data-stock="{{ $variation->stock }}" data-image="{{ $variation->image ? asset('storage/' . $variation->image) : '' }}" data-label="{{ $variationLabel ?: 'Mặc định' }}" @checked($index === 0)>
                                             <span class="variation-code">{{ $variation->sku ?: 'Mã chưa đặt' }}</span><span class="variation-name">{{ $variationLabel ?: 'Mặc định' }}</span>
                                         </label>
                                     @endforeach
@@ -248,6 +283,10 @@ document.addEventListener('DOMContentLoaded', function () {
             stockNote.textContent = 'Tối đa ' + stock + ' sản phẩm';
             stockElement.classList.toggle('out', stock < 1);
             stockElement.innerHTML = stock > 0 ? '<i class="bi bi-check-circle me-1"></i>Còn ' + stock + ' sản phẩm' : '<i class="bi bi-x-circle me-1"></i>Hết hàng';
+            if (this.dataset.image && mainImage?.tagName === 'IMG') {
+                mainImage.src = this.dataset.image;
+                document.querySelectorAll('.detail-thumb').forEach(item => item.classList.toggle('active', item.dataset.variation === this.value));
+            }
             document.querySelectorAll('.detail-buy').forEach(button => {
                 button.disabled = stock < 1;
             });

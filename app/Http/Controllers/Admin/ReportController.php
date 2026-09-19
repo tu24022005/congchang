@@ -15,7 +15,7 @@ class ReportController extends Controller
         $filters = $request->validate([
             'from' => 'nullable|date',
             'to' => 'nullable|date|after_or_equal:from',
-            'status' => 'nullable|in:processing,confirmed,packing,shipping,paid,completed,cancelled',
+            'status' => 'nullable|in:processing,confirmed,packing,shipping,paid,completed,cancelled,refund_pending,refunded',
         ]);
 
         $ordersQuery = Order::query();
@@ -109,7 +109,7 @@ class ReportController extends Controller
         $filters = $request->validate([
             'from' => 'nullable|date',
             'to' => 'nullable|date|after_or_equal:from',
-            'status' => 'nullable|in:processing,confirmed,packing,shipping,paid,completed,cancelled',
+            'status' => 'nullable|in:processing,confirmed,packing,shipping,paid,completed,cancelled,refund_pending,refunded',
         ]);
         $ordersQuery = Order::with('user')->latest();
         if (!empty($filters['from'])) $ordersQuery->whereDate('created_at', '>=', $filters['from']);

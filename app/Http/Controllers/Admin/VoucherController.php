@@ -21,8 +21,9 @@ class VoucherController extends Controller
     {
         $data = $request->validate([
             'code' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:vouchers,code'],
-            'type' => 'required|in:fixed,percent',
-            'value' => ['required', 'numeric', 'min:1', Rule::when($request->input('type') === 'percent', 'max:100')],
+            'scope' => 'required|in:shop,platform',
+            'type' => 'required|in:fixed,percent,free_shipping',
+            'value' => ['required_unless:type,free_shipping', 'nullable', 'numeric', 'min:1', Rule::when($request->input('type') === 'percent', 'max:100')],
             'min_order_value' => 'required|integer|min:0',
             'usage_limit' => 'nullable|integer|min:1',
             'expires_at' => 'nullable|date|after_or_equal:today',
@@ -30,8 +31,9 @@ class VoucherController extends Controller
 
         Voucher::create([
             'code' => strtoupper($data['code']),
+            'scope' => $data['scope'],
             'type' => $data['type'],
-            'value' => $data['value'],
+            'value' => $data['type'] === 'free_shipping' ? 0 : $data['value'],
             'min_order_value' => $data['min_order_value'],
             'usage_limit' => $data['usage_limit'] ?? null,
             'expires_at' => $data['expires_at'] ?? null,

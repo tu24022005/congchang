@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
+  <rect width="900" height="700" fill="#f4f0fb"/>
+  <path d="M90 470c150-190 250-190 360 0s210 190 360 0" fill="none" stroke="#b79bdd" stroke-width="90" stroke-linecap="round"/>
+  <circle cx="450" cy="310" r="110" fill="#fff" opacity=".86"/>
+  <text x="450" y="320" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" fill="#71549f">MỀM MỊN</text>
+</svg>

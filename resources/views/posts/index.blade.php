@@ -1,0 +1,11 @@
+@extends('layouts.app')
+@section('title', 'Blog làm đẹp - Aloha Beauty')
+@section('content')
+<div class="container py-4">
+    <div class="text-center mb-5"><span class="text-primary fw-bold">ALOHA BEAUTY / BLOG</span><h1 class="fw-bold mt-2">Bí quyết làm đẹp mỗi ngày</h1><p class="text-muted">Skincare routine, mẹo trang điểm và kiến thức chăm sóc cơ thể.</p></div>
+    <div class="row g-4">
+        <aside class="col-lg-3"><div class="card border-0 shadow-sm rounded-4"><div class="card-body"><h5 class="fw-bold">Chuyên mục</h5><a class="d-block py-2 {{ !request('category') ? 'fw-bold text-primary' : 'text-muted' }}" href="{{ route('posts.index') }}">Tất cả bài viết</a>@foreach($categories as $category)<a class="d-flex justify-content-between py-2 text-decoration-none {{ request('category') === $category->slug ? 'fw-bold text-primary' : 'text-muted' }}" href="{{ route('posts.index', ['category' => $category->slug]) }}"><span>{{ $category->name }}</span><small>{{ $category->posts_count }}</small></a>@endforeach</div></div></aside>
+        <div class="col-lg-9"><div class="row g-4">@forelse($posts as $post)<div class="col-md-6 col-xl-4"><article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden"><a href="{{ route('posts.show', $post->slug) }}">@if($post->featured_image)<img src="{{ asset('storage/'.$post->featured_image) }}" class="w-100" style="height:180px;object-fit:cover" alt="{{ $post->title }}">@else<div class="bg-light d-flex align-items-center justify-content-center" style="height:180px"><i class="bi bi-newspaper fs-1 text-primary"></i></div>@endif</a><div class="card-body"><small class="text-primary">{{ $post->category?->name ?? 'Làm đẹp' }}</small><h5 class="fw-bold mt-2"><a class="text-dark text-decoration-none" href="{{ route('posts.show', $post->slug) }}">{{ $post->title }}</a></h5><p class="text-muted small">{{ $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($post->content), 120) }}</p><small class="text-muted">{{ $post->published_at?->format('d/m/Y') }}</small></div></article></div>@empty<div class="col-12 text-center py-5 text-muted">Chưa có bài viết được xuất bản.</div>@endforelse</div><div class="mt-4">{{ $posts->links() }}</div></div>
+    </div>
+</div>
+@endsection

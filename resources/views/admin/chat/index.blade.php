@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('layouts.app')
 @section('title', 'Chat khách hàng')
 
 @section('content')
@@ -41,6 +41,7 @@
 <div class="inbox-page py-2">
     <div class="inbox-hero d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div><div class="small text-white-50 mb-1"><i class="bi bi-headset me-1"></i> TRUNG TÂM HỖ TRỢ</div><h1 class="h3 fw-bold mb-1">Chat khách hàng</h1><p class="mb-0 text-white-50">Theo dõi và trả lời hội thoại theo thời gian thực.</p></div>
+        <a href="{{ route('admin.chat.history') }}" class="btn btn-light rounded-pill"><i class="bi bi-clock-history me-1"></i> Lịch sử chat</a>
         <div class="text-end"><div class="small text-white-50">Kênh hỗ trợ</div><strong><span class="online-dot bg-white"></span>Đang hoạt động</strong></div>
     </div>
 

@@ -41,6 +41,11 @@
                             Sản phẩm
                         </a>
                     </li>
+                    <li class="nav-item me-3">
+                        <a class="nav-link text-nowrap fw-semibold {{ request()->routeIs('posts.*') ? 'active' : '' }}" href="{{ route('posts.index') }}">
+                            Blog làm đẹp
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- THANH TÌM KIẾM TRUNG TÂM CO GỢI Ý (LIVE SEARCH) -->
@@ -65,19 +70,21 @@
                         <li class="nav-item"><a class="nav-link text-nowrap fw-semibold" href="{{ route('register') }}"><i class="bi bi-person-plus me-1"></i> Đăng ký</a></li>
                     @else
                         <!-- MENU QUẢN TRỊ (CHỈ HIỂN THỊ VỚI ADMIN) -->
-                        @if(Auth::user()->role === 'admin')
+                        @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff', 'customer_service'], true))
                             <li class="nav-item dropdown me-4">
                                 <a class="nav-link dropdown-toggle text-danger fw-bold text-nowrap" href="#" data-bs-toggle="dropdown">
                                     <i class="bi bi-shield-lock fs-5 me-1"></i> Quản trị
                                 </a>
                                 <ul class="dropdown-menu border-0 shadow-sm">
-                                    <li><a class="dropdown-item py-2" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 text-primary me-2"></i>Tổng quan</a></li>
-                                    <li><a class="dropdown-item py-2" href="{{ route('admin.orders.index') }}"><i class="bi bi-truck text-danger me-2"></i>Quản lý Đơn hàng</a></li>
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 text-primary me-2"></i>Tổng quan</a></li>@endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.orders.index') }}"><i class="bi bi-truck text-danger me-2"></i>Quản lý Đơn hàng</a></li>@endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.refunds.index') }}"><i class="bi bi-cash-coin text-warning me-2"></i>Yêu cầu hoàn tiền</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.members.index') }}"><i class="bi bi-people text-primary me-2"></i>Thành viên</a></li>@endif
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item py-2" href="{{ route('admin.products.index') }}"><i class="bi bi-box-seam text-success me-2"></i>Kho sản phẩm</a></li>
-                                    <li><a class="dropdown-item py-2" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags text-warning me-2"></i>Danh mục</a></li>
-                                    <li><a class="dropdown-item py-2" href="{{ route('admin.vouchers.index') }}"><i class="bi bi-ticket-perforated text-success me-2"></i>Mã giảm giá</a></li>
-                                    <li><a class="dropdown-item py-2" href="{{ route('admin.reports.index') }}"><i class="bi bi-bar-chart-line text-info me-2"></i>Báo cáo</a></li>
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.products.index') }}"><i class="bi bi-box-seam text-success me-2"></i>Kho sản phẩm</a></li>@endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags text-warning me-2"></i>Danh mục</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.vouchers.index') }}"><i class="bi bi-ticket-perforated text-success me-2"></i>Mã giảm giá</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.posts.index') }}"><i class="bi bi-newspaper text-primary me-2"></i>Blog / Tin tức</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.reports.index') }}"><i class="bi bi-bar-chart-line text-info me-2"></i>Báo cáo</a></li>@endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'customer_service'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.chat.index') }}"><i class="bi bi-chat-dots text-info me-2"></i>Chat CSKH</a></li>@endif
+                                    @if(Auth::user()->role === 'admin')<li><a class="dropdown-item py-2" href="{{ route('admin.staff.index') }}"><i class="bi bi-shield-lock text-danger me-2"></i>Phân quyền nhân viên</a></li>@endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.activity-logs.index') }}"><i class="bi bi-clock-history text-secondary me-2"></i>Lịch sử hoạt động</a></li>@endif
                                 </ul>
                             </li>
                         @else
@@ -93,7 +100,7 @@
                         <li class="nav-item me-4">
                             <a class="nav-link text-nowrap position-relative fw-semibold" href="{{ route('cart.index') }}">
                                 <i class="bi bi-cart3 fs-5 me-1"></i> Giỏ hàng
-                                @php $cartCount = array_sum(array_column(session('cart', []), 'quantity')); @endphp
+                                @php $cartCount = Auth::user()->cartItems()->sum('quantity'); @endphp
                                 @if($cartCount > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count-badge">{{ $cartCount }}</span>
                                 @endif
@@ -107,6 +114,11 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('account') }}"><i class="bi bi-person-vcard text-primary me-2"></i> Tài khoản của tôi</a></li>
+                                <li><a class="dropdown-item fw-bold py-2" href="{{ route('wishlist.index') }}"><i class="bi bi-heart text-danger me-2"></i> Sản phẩm yêu thích</a></li>
+                                <li><a class="dropdown-item fw-bold py-2" href="{{ route('refunds.index') }}"><i class="bi bi-arrow-counterclockwise text-success me-2"></i> Tiền hoàn của tôi</a></li>
+                                @if(Auth::user()->role !== 'admin')
+                                    <li><a class="dropdown-item fw-bold py-2" href="{{ route('loyalty.index') }}"><i class="bi bi-stars text-warning me-2"></i> Điểm thành viên</a></li>
+                                @endif
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('password.change') }}"><i class="bi bi-key text-warning me-2"></i> Đổi mật khẩu</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>

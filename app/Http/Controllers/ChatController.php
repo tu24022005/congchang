@@ -16,15 +16,40 @@ class ChatController extends Controller
 
     public function adminIndex()
     {
-        abort_unless(Auth::user()->role === 'admin', 403);
+        abort_unless(in_array(Auth::user()->role, ['admin', 'customer_service'], true), 403);
 
         return view('admin.chat.index');
+    }
+
+    public function history(Request $request)
+    {
+        abort_unless(in_array(Auth::user()->role, ['admin', 'customer_service'], true), 403);
+
+        $query = Message::with('user')->latest();
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->integer('user_id'));
+        }
+
+        if ($request->filled('keyword')) {
+            $keyword = $request->string('keyword')->toString();
+            $query->where('message', 'like', '%' . $keyword . '%');
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date('date'));
+        }
+
+        $messages = $query->paginate(30)->withQueryString();
+        $users = User::whereHas('messages')->orderBy('name')->get(['id', 'name', 'email']);
+
+        return view('admin.chat.history', compact('messages', 'users'));
     }
 
     // Lấy danh sách khách hàng đã từng chat (Chỉ dành cho Admin)
     public function fetchUsers()
     {
-        if (Auth::user()->role !== 'admin') return response()->json([]);
+        if (!in_array(Auth::user()->role, ['admin', 'customer_service'], true)) return response()->json([]);
         
         $users = User::whereHas('messages', function($query) {
             $query->where('is_admin', false);
@@ -51,9 +76,10 @@ class ChatController extends Controller
     public function fetchMessages(Request $request)
     {
         // Admin chat với ai thì truyền ID người đó lên, Khách thì tự động lấy ID của mình
-        $targetUserId = Auth::user()->role === 'admin' ? $request->user_id : Auth::id();
+        $isStaff = in_array(Auth::user()->role, ['admin', 'customer_service'], true);
+        $targetUserId = $isStaff ? $request->user_id : Auth::id();
         
-        if (Auth::user()->role === 'admin') {
+        if ($isStaff) {
             Message::where('user_id', $targetUserId)
                 ->where('is_admin', false)
                 ->where('is_read', false)
@@ -72,7 +98,7 @@ class ChatController extends Controller
             'receiver_id' => 'nullable|exists:users,id',
         ]);
 
-        $isAdmin = Auth::user()->role === 'admin';
+        $isAdmin = in_array(Auth::user()->role, ['admin', 'customer_service'], true);
         // Quyết định phòng chat: Nếu Admin nhắn thì phòng là receiver_id, nếu Khách nhắn thì phòng là ID của khách
         $targetUserId = $isAdmin ? $request->receiver_id : Auth::id();
 
@@ -104,7 +130,7 @@ class ChatController extends Controller
 
     public function presence(Request $request)
     {
-        $targetUserId = Auth::user()->role === 'admin'
+        $targetUserId = in_array(Auth::user()->role, ['admin', 'customer_service'], true)
             ? $request->integer('user_id')
             : User::where('role', 'admin')->value('id');
 

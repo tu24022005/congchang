@@ -31,6 +31,11 @@
 <div class="row g-4">
     @forelse($products as $product)
     <div class="col-lg-3 col-md-4 col-sm-6">
+        @php
+            $variationPrices = $product->variations->pluck('price')->map(fn ($price) => (float) $price);
+            $displayMinPrice = $variationPrices->isNotEmpty() ? $variationPrices->min() : (float) $product->price;
+            $displayMaxPrice = $variationPrices->isNotEmpty() ? $variationPrices->max() : (float) $product->price;
+        @endphp
         <div class="card product-card text-center h-100 shadow-sm">
             <div class="card-body p-4 d-flex flex-column">
                 
@@ -48,12 +53,26 @@
                     {{ $product->category->name ?? 'Mỹ phẩm chăm sóc da' }}
                 </span>
 
-                <h5 class="fw-bold text-dark mb-2">{{ $product->name }}</h5>
+                <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                    <h5 class="fw-bold text-dark mb-0">{{ $product->name }}</h5>
+                    @auth
+                        <form action="{{ route('wishlist.toggle', $product) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-sm {{ $wishlistProductIds->contains($product->id) ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle" title="{{ $wishlistProductIds->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ $wishlistProductIds->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}"><i class="bi bi-heart{{ $wishlistProductIds->contains($product->id) ? '-fill' : '' }}"></i></button>
+                        </form>
+                    @endauth
+                </div>
                 <p class="text-muted small mb-3 flex-grow-1 product-description">
                     {{ $product->description ?? 'Sản phẩm chăm sóc cá nhân chất lượng cho vẻ đẹp rạng ngời mỗi ngày.' }}
                 </p>
 
-                <h5 class="fw-bold text-danger mb-1">{{ number_format($product->price, 0, ',', '.') }} ₫</h5>
+                <h5 class="fw-bold text-danger mb-1">
+                    @if($displayMinPrice < $displayMaxPrice)
+                        {{ number_format($displayMinPrice, 0, ',', '.') }} - {{ number_format($displayMaxPrice, 0, ',', '.') }} ₫
+                    @else
+                        {{ number_format($displayMinPrice, 0, ',', '.') }} ₫
+                    @endif
+                </h5>
                 <p class="text-muted small mb-3"><i class="bi bi-box-seam me-1"></i>Còn lại: {{ $product->quantity > 0 ? $product->quantity : 'Hết hàng' }}</p>
 
                 <a href="{{ route('products.show', $product->id) }}" class="btn btn-cyan w-100 rounded-pill py-2 mt-auto">KHÁM PHÁ NGAY</a>

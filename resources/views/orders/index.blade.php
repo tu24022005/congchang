@@ -2,8 +2,43 @@
 @section('title', 'Đơn hàng của bạn')
 
 @section('content')
+<style>
+    .customer-orders-page { max-width: 1120px; }
+    .customer-orders-page .customer-orders-heading { margin-bottom: 1.25rem !important; }
+    .customer-orders-page .customer-orders-heading .btn { white-space: nowrap; padding: .55rem .8rem; font-size: .82rem; }
+    .customer-orders-page .customer-orders-heading p { font-size: .86rem; }
+    .customer-orders-page .customer-order-stat { min-height: 82px; padding: .85rem 1rem; }
+    .customer-orders-page .customer-order-stat strong { font-size: 1.55rem; }
+    .customer-orders-page .customer-order-stat span { font-size: .72rem; }
+    .customer-orders-page .customer-order-toolbar { padding: 1rem 1.15rem !important; }
+    .customer-orders-page .customer-order-toolbar h5 { font-size: 1rem; }
+    .customer-orders-page .order-search-form { flex: 0 1 480px; max-width: 480px; }
+    .customer-orders-page .order-product-preview { min-width: 175px; gap: .55rem; }
+    .customer-orders-page .order-product-preview img { width: 40px; height: 40px; }
+    .customer-orders-page .order-product-preview strong { font-size: .76rem; }
+    .customer-orders-page .order-product-preview small { font-size: .68rem; }
+    .customer-orders-page .table th { padding: .65rem .5rem !important; font-size: .67rem; white-space: nowrap; }
+    .customer-orders-page .table td { padding: .65rem .5rem; font-size: .78rem; }
+    .customer-orders-page .order-actions { display: inline-flex; align-items: center; justify-content: center; gap: .25rem; white-space: nowrap; }
+    .customer-orders-page .order-actions .btn { display: inline-flex; align-items: center; justify-content: center; width: 31px; height: 31px; min-width: 31px; padding: 0; font-size: .78rem; }
+    .customer-orders-page .order-actions .btn span { display: none; }
+    .customer-orders-page .order-payment-badge { display: inline-block; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: .3rem .5rem !important; font-size: .65rem; }
+    .customer-orders-page .order-status-badge { display: inline-block; max-width: 108px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: .3rem .5rem !important; font-size: .65rem; }
+    @media (max-width: 991.98px) {
+        .customer-orders-page .order-payment-badge { max-width: 110px; }
+        .customer-orders-page .order-status-badge { max-width: 95px; }
+        .customer-orders-page .order-product-preview { min-width: 150px; }
+    }
+    @media (max-width: 575.98px) {
+        .customer-orders-page .customer-orders-heading .btn { width: auto; }
+        .customer-orders-page .customer-orders-heading .btn span { display: none; }
+        .customer-orders-page .order-payment-badge { max-width: 88px; }
+        .customer-orders-page .order-status-badge { max-width: 82px; }
+        .customer-orders-page .order-date-cell { white-space: nowrap; }
+    }
+</style>
 <div class="container py-4 customer-orders-page">
-    <div class="customer-orders-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / ĐƠN HÀNG CỦA TÔI</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-box-seam me-2"></i>Đơn hàng của bạn</h2><p class="text-muted mb-0">Theo dõi hành trình mua sắm và lịch sử giao dịch của bạn.</p></div><a href="{{ route('products.index') }}" class="btn btn-primary rounded-pill"><i class="bi bi-bag-plus me-1"></i>Mua sắm thêm</a></div>
+    <div class="customer-orders-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / ĐƠN HÀNG CỦA TÔI</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-box-seam me-2"></i>Đơn hàng của bạn</h2><p class="text-muted mb-0">Theo dõi hành trình mua sắm và lịch sử giao dịch của bạn.</p></div><a href="{{ route('products.index') }}" class="btn btn-primary rounded-pill" title="Mua sắm thêm"><i class="bi bi-bag-plus me-1"></i><span>Mua sắm thêm</span></a></div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3" role="alert">
@@ -77,37 +112,57 @@
                                     <td class="text-danger fw-bold">{{ number_format($order->total, 0, ',', '.') }} đ</td>
                                     <td>
                                         @if($order->payment_method == 'COD')
-                                            <span class="badge bg-secondary rounded-pill px-3">Thanh toán khi nhận hàng (COD)</span>
+                                            <span class="badge bg-secondary rounded-pill px-3 order-payment-badge" title="Thanh toán khi nhận hàng (COD)">COD - Nhận hàng trả tiền</span>
                                         @else
-                                            <span class="badge bg-primary rounded-pill px-3">Chuyển khoản Ngân hàng (PayOS)</span>
+                                            <span class="badge bg-primary rounded-pill px-3 order-payment-badge" title="Chuyển khoản ngân hàng qua PayOS">Chuyển khoản PayOS</span>
                                         @endif
                                     </td>
                                     <td>
                                         @if(strtolower($order->status) == 'processing' || $order->status == 'Đang xử lý')
-                                            <span class="badge bg-warning text-dark rounded-pill px-3">Chờ xác nhận</span>
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 order-status-badge">Chờ xác nhận</span>
                                         @elseif(strtolower($order->status) == 'confirmed')
-                                            <span class="badge bg-info text-dark rounded-pill px-3">Đã xác nhận</span>
+                                            <span class="badge bg-info text-dark rounded-pill px-3 order-status-badge">Đã xác nhận</span>
                                         @elseif(strtolower($order->status) == 'packing')
-                                            <span class="badge bg-secondary rounded-pill px-3">Đang gói hàng</span>
+                                            <span class="badge bg-secondary rounded-pill px-3 order-status-badge">Đang gói hàng</span>
                                         @elseif(strtolower($order->status) == 'shipping')
-                                            <span class="badge bg-primary rounded-pill px-3">Đang vận chuyển</span>
+                                            <span class="badge bg-primary rounded-pill px-3 order-status-badge">Đang vận chuyển</span>
                                         @elseif(strtolower($order->status) == 'paid' || $order->status == 'Đã thanh toán')
-                                            <span class="badge bg-success rounded-pill px-3">Đã thanh toán</span>
+                                            <span class="badge bg-success rounded-pill px-3 order-status-badge">Đã thanh toán</span>
                                         @elseif(strtolower($order->status) == 'completed')
-                                            <span class="badge bg-success rounded-pill px-3">Đã nhận hàng</span>
+                                            <span class="badge bg-success rounded-pill px-3 order-status-badge">Đã nhận hàng</span>
+                                        @elseif($order->status === 'refund_pending')
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 order-status-badge">Chờ hoàn tiền</span>
+                                        @elseif($order->status === 'refunded')
+                                            <span class="badge bg-success rounded-pill px-3 order-status-badge">Đã hoàn tiền</span>
                                         @elseif(strtolower($order->status) == 'cancelled' || $order->status == 'Đã huỷ')
-                                            <span class="badge bg-danger rounded-pill px-3">Đã huỷ</span>
+                                            <span class="badge bg-danger rounded-pill px-3 order-status-badge">Đã huỷ</span>
                                         @else
-                                            <span class="badge bg-dark rounded-pill px-3">{{ ucfirst($order->status) }}</span>
+                                            <span class="badge bg-dark rounded-pill px-3 order-status-badge">{{ ucfirst($order->status) }}</span>
                                         @endif
                                     </td>
                                     <td class="order-date-cell">
                                         <span class="d-block">{{ $order->created_at->format('d/m/Y') }}</span><small class="text-muted">{{ $order->created_at->format('H:i') }}</small>
                                     </td>
                                     <td>
-                                        <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-info text-white rounded-pill px-3 shadow-sm fw-bold">
-                                            <i class="bi bi-arrow-up-right me-1"></i>Chi tiết
+                                        <div class="order-actions">
+                                        <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-info text-white rounded-pill shadow-sm fw-bold" title="Xem chi tiết đơn hàng">
+                                            <i class="bi bi-eye"></i><span>Chi tiết</span>
                                         </a>
+                                        @if(in_array($order->status, ['processing', 'confirmed', 'paid'], true))
+                                            @if($order->payment_method !== 'COD' && $order->status === 'paid')
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Hủy và yêu cầu hoàn tiền" data-bs-toggle="modal" data-bs-target="#cancelOnlineOrderModal" data-order-url="{{ route('orders.cancel', $order) }}">
+                                                    <i class="bi bi-x-circle"></i><span>Hủy</span>
+                                                </button>
+                                            @else
+                                            <form action="{{ route('orders.cancel', $order) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Hủy đơn hàng">
+                                                    <i class="bi bi-x-circle"></i><span>Hủy</span>
+                                                </button>
+                                            </form>
+                                            @endif
+                                        @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -129,4 +184,36 @@
         </div>
     @endif
 </div>
+
+<div class="modal fade" id="cancelOnlineOrderModal" tabindex="-1" aria-labelledby="cancelOnlineOrderTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <form id="cancelOnlineOrderForm" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="cancelOnlineOrderTitle"><i class="bi bi-arrow-counterclockwise text-danger me-2"></i>Hủy đơn và yêu cầu hoàn tiền</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">Đơn online đã thanh toán sẽ chuyển sang chờ hoàn tiền. Vui lòng nhập thông tin tài khoản nhận tiền.</p>
+                    <div class="mb-3"><label class="form-label">Tên ngân hàng</label><input type="text" name="refund_bank_name" class="form-control" placeholder="Ví dụ: Vietcombank" required></div>
+                    <div class="mb-3"><label class="form-label">Số tài khoản</label><input type="text" name="refund_account_number" class="form-control" required></div>
+                    <div class="mb-0"><label class="form-label">Tên chủ tài khoản</label><input type="text" name="refund_account_holder" class="form-control" required></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-light border rounded-pill" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-danger rounded-pill"><i class="bi bi-send me-1"></i>Gửi yêu cầu hoàn tiền</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('cancelOnlineOrderModal');
+        const form = document.getElementById('cancelOnlineOrderForm');
+        if (!modal || !form) return;
+        modal.addEventListener('show.bs.modal', function (event) {
+            form.action = event.relatedTarget.dataset.orderUrl;
+        });
+        if (modal.parentElement !== document.body) document.body.appendChild(modal);
+    });
+</script>
 @endsection

@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Services\CartService;
 
 class GoogleController extends Controller
 {
@@ -46,6 +47,7 @@ class GoogleController extends Controller
                 return redirect()->route('verification.notice');
             }
 
+            app(CartService::class)->mergeSession(Auth::user());
             return redirect()->intended('/');
         } catch (\Exception $e) {
             return redirect('/login')->with('error', 'Lỗi đăng nhập Google: ' . $e->getMessage());

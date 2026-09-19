@@ -39,7 +39,7 @@
         <div class="order-hero-meta"><span class="order-live-dot"></span><span>{{ $order->status === 'completed' ? 'Đơn hàng đã hoàn tất' : 'Đơn hàng đang được xử lý' }}</span></div>
     </div>
 
-    @if($order->status !== 'cancelled')
+    @if($order->status !== 'cancelled' && $order->status !== 'refund_pending' && $order->status !== 'refunded')
         <div class="card border-0 shadow-sm rounded-4 mb-4 order-panel-card order-timeline-card">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4"><h5 class="fw-bold mb-0"><i class="bi bi-signpost-2 text-primary me-2"></i>Hành trình đơn hàng</h5><span class="small text-muted">Cập nhật theo trạng thái</span></div>
@@ -53,6 +53,10 @@
                 </div>
             </div>
         </div>
+    @elseif($order->status === 'refund_pending')
+        <div class="alert alert-warning border-0 shadow-sm rounded-4"><i class="bi bi-hourglass-split me-2"></i>Đơn hàng đã hủy. Shop đang xử lý hoàn tiền {{ number_format($order->total, 0, ',', '.') }} đ cho bạn.</div>
+    @elseif($order->status === 'refunded')
+        <div class="alert alert-success border-0 shadow-sm rounded-4"><i class="bi bi-check-circle me-2"></i>Shop đã xác nhận hoàn tiền {{ number_format($order->total, 0, ',', '.') }} đ.</div>
     @else
         <div class="alert alert-danger border-0 shadow-sm rounded-4"><i class="bi bi-x-circle me-2"></i>Đơn hàng này đã được hủy.</div>
     @endif
@@ -78,6 +82,10 @@
                             <span class="badge bg-success rounded-pill px-3">Đã thanh toán</span>
                         @elseif(strtolower($order->status) == 'completed')
                             <span class="badge bg-success rounded-pill px-3">Đã nhận hàng</span>
+                        @elseif($order->status === 'refund_pending')
+                            <span class="badge bg-warning text-dark rounded-pill px-3">Chờ hoàn tiền</span>
+                        @elseif($order->status === 'refunded')
+                            <span class="badge bg-success rounded-pill px-3">Đã hoàn tiền</span>
                         @elseif(strtolower($order->status) == 'cancelled' || $order->status == 'Đã huỷ')
                             <span class="badge bg-danger rounded-pill px-3">Đã huỷ</span>
                         @else
@@ -101,6 +109,37 @@
                         <div><span>Phí dịch vụ</span><strong>{{ number_format(max(0, $order->total - $subtotal), 0, ',', '.') }} đ</strong></div>
                         <div class="order-summary-total"><span>Tổng thanh toán</span><strong>{{ number_format($order->total, 0, ',', '.') }} đ</strong></div>
                     </div>
+
+                    @if(Auth::user()->role !== 'admin' && in_array($order->status, ['processing', 'confirmed', 'paid'], true))
+                        <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
+                        <form action="{{ route('orders.cancel', $order) }}" method="POST" class="d-grid">
+                            @csrf
+                            @if($order->payment_method !== 'COD' && $order->status === 'paid')
+                                <div class="text-start p-3 rounded-3 bg-light border mb-3">
+                                    <div class="fw-bold text-danger mb-2"><i class="bi bi-bank me-1"></i>Thông tin nhận tiền hoàn</div>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label small mb-1">Ngân hàng</label>
+                                            <input type="text" name="refund_bank_name" class="form-control form-control-sm" required placeholder="VD: Vietcombank">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small mb-1">Số tài khoản</label>
+                                            <input type="text" name="refund_account_number" class="form-control form-control-sm" required inputmode="numeric">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small mb-1">Chủ tài khoản</label>
+                                            <input type="text" name="refund_account_holder" class="form-control form-control-sm text-uppercase" required>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">Shop sẽ chuyển {{ number_format($order->total, 0, ',', '.') }} đ vào thông tin trên sau khi duyệt.</small>
+                                </div>
+                            @endif
+                            <button type="submit" class="btn btn-outline-danger fw-bold py-2" onclick="return confirm('Bạn chắc chắn muốn hủy đơn hàng này? Chỉ nên hủy trước khi shop bắt đầu đóng gói.')">
+                                <i class="bi bi-x-circle me-2"></i> HỦY ĐƠN HÀNG
+                            </button>
+                            <small class="text-muted text-center mt-2">{{ $order->status === 'paid' ? 'Sau khi hủy, shop sẽ chuyển khoản hoàn tiền cho bạn.' : 'Chỉ hủy được trước trạng thái “Đang đóng gói”.' }}</small>
+                        </form>
+                    @endif
 
                     @if($order->status === 'shipping')
                         <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
@@ -198,8 +237,9 @@
             <i class="bi bi-gear-fill me-2"></i>ĐIỀU PHỐI ĐƠN HÀNG (Chỉ dành cho Admin)
         </div>
         <div class="card-body p-4">
-            <form action="{{ route('orders.update_status', $order->id) }}" method="POST">
+            <form action="{{ Auth::user()->role === 'admin' ? route('admin.orders.updateStatus', $order->id) : route('orders.update_status', $order->id) }}" method="POST">
                 @csrf
+                @if(Auth::user()->role === 'admin') @method('PATCH') @endif
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-secondary small">TRẠNG THÁI HIỆN TẠI</label>
@@ -213,7 +253,7 @@
                                 'completed' => [],
                                 'cancelled' => [],
                             ][$order->status] ?? [];
-                            $statusLabels = ['processing' => 'Chờ xác nhận (Đang xử lý)', 'confirmed' => 'Đã xác nhận đơn', 'packing' => 'Đang gói hàng', 'shipping' => 'Đang vận chuyển', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã huỷ'];
+                            $statusLabels = ['processing' => 'Chờ xác nhận (Đang xử lý)', 'confirmed' => 'Đã xác nhận đơn', 'packing' => 'Đang gói hàng', 'shipping' => 'Đang vận chuyển', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã huỷ', 'refund_pending' => 'Chờ hoàn tiền', 'refunded' => 'Đã hoàn tiền'];
                         @endphp
                         <select name="status" class="form-select border-primary shadow-sm">
                             <option value="{{ $order->status }}" selected>{{ $statusLabels[$order->status] ?? ucfirst($order->status) }}</option>
@@ -237,12 +277,46 @@
                         <input type="date" name="shipping_date" class="form-control border-primary shadow-sm" value="{{ $order->shipping_date }}">
                     </div>
                 </div>
+                @if($order->status === 'refunded')
+                    <div class="bg-success-subtle rounded-3 p-3 mt-3 small">
+                        <strong>Mã giao dịch:</strong> {{ $order->refund_reference ?: 'Đã cập nhật' }}
+                        @if($order->refunded_at) · {{ $order->refunded_at->format('d/m/Y H:i') }} @endif
+                        @if($order->refund_note)<br><strong>Ghi chú:</strong> {{ $order->refund_note }}@endif
+                    </div>
+                @endif
                 <div class="mt-4 text-end">
                     <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">
                         <i class="bi bi-save2 me-2"></i>Lưu trạng thái
                     </button>
                 </div>
             </form>
+            @if($order->status === 'refund_pending')
+                <div class="border border-warning rounded-4 p-4 mt-4 bg-warning-subtle">
+                    <h5 class="fw-bold text-warning-emphasis"><i class="bi bi-cash-coin me-2"></i>Hoàn tiền cho khách</h5>
+                    <p class="small mb-3">Chuyển đúng <strong>{{ number_format($order->total, 0, ',', '.') }} đ</strong> đến tài khoản khách rồi nhập thông tin giao dịch để hoàn tất.</p>
+                    <div class="bg-white rounded-3 p-3 small mb-3">
+                        <div><strong>Ngân hàng:</strong> {{ $order->refund_bank_name }}</div>
+                        <div><strong>Số tài khoản:</strong> {{ $order->refund_account_number }}</div>
+                        <div><strong>Chủ tài khoản:</strong> {{ $order->refund_account_holder }}</div>
+                    </div>
+                    <form action="{{ route('admin.orders.refund', $order->id) }}" method="POST">
+                        @csrf
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold small">Mã giao dịch chuyển khoản</label>
+                                <input type="text" name="refund_reference" class="form-control" required placeholder="Bắt buộc">
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label fw-bold small">Ghi chú</label>
+                                <input type="text" name="refund_note" class="form-control" placeholder="Nội dung chuyển khoản">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-warning fw-bold rounded-pill mt-3" onclick="return confirm('Bạn đã chuyển đủ tiền cho khách và muốn xác nhận hoàn tiền?')">
+                            <i class="bi bi-check-circle me-1"></i> Xác nhận đã hoàn tiền
+                        </button>
+                    </form>
+                </div>
+            @endif
         </div>
     </div>
     @endif

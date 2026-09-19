@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Sample product 31">
+  <rect width="800" height="800" fill="#F3D9C6"/>
+  <circle cx="400" cy="330" r="190" fill="#ffffff" fill-opacity="0.72"/>
+  <rect x="285" y="180" width="230" height="310" rx="28" fill="#ffffff" stroke="#6b7280" stroke-width="5"/>
+  <rect x="335" y="135" width="130" height="65" rx="14" fill="#6b7280"/>
+  <rect x="315" y="285" width="170" height="80" rx="8" fill="#F3D9C6" stroke="#6b7280" stroke-width="3"/>
+  <text x="400" y="335" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#374151">ALOHA</text>
+  <text x="400" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#374151">SAMPLE 31</text>
+  <text x="400" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#4b5563">Product catalogue image</text>
+</svg>

@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $countCancelled = Order::where('status', 'cancelled')->count();
 
         // 2. Các thông số Khách hàng, Sản phẩm, Danh mục
-        $totalCustomers = User::where('role', 'user')->count(); 
+        $totalCustomers = User::whereIn('role', ['customer', 'user'])->count(); 
         $totalProducts = Product::count();
         $totalCategories = Category::count();
         $todayRevenue = Order::where('status', 'paid')->whereDate('created_at', today())->sum('total');

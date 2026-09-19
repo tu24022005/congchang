@@ -154,9 +154,14 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     <div id="hot-products-track" class="hot-products-track">
         @foreach($hotProducts as $hotProduct)
+            @php
+                $hotPrices = $hotProduct->variations->pluck('price')->map(fn ($price) => (float) $price);
+                $hotMinPrice = $hotPrices->isNotEmpty() ? $hotPrices->min() : (float) $hotProduct->price;
+                $hotMaxPrice = $hotPrices->isNotEmpty() ? $hotPrices->max() : (float) $hotProduct->price;
+            @endphp
             <a href="{{ route('products.show', $hotProduct->id) }}" class="hot-product-card">
                 <div class="hot-product-image">@if($hotProduct->image)<img src="{{ asset('storage/' . $hotProduct->image) }}" alt="{{ $hotProduct->name }}">@else<i class="bi bi-bag-heart"></i>@endif</div>
-                <div class="p-3"><span class="badge bg-info-subtle text-info-emphasis rounded-pill mb-2">{{ $hotProduct->category->name ?? 'Beauty' }}</span><h5>{{ $hotProduct->name }}</h5><strong>{{ number_format($hotProduct->price, 0, ',', '.') }} ₫</strong></div>
+                <div class="p-3"><span class="badge bg-info-subtle text-info-emphasis rounded-pill mb-2">{{ $hotProduct->category->name ?? 'Beauty' }}</span><h5>{{ $hotProduct->name }}</h5><strong>@if($hotMinPrice < $hotMaxPrice){{ number_format($hotMinPrice, 0, ',', '.') }} - {{ number_format($hotMaxPrice, 0, ',', '.') }}@else{{ number_format($hotMinPrice, 0, ',', '.') }}@endif ₫</strong></div>
             </a>
         @endforeach
     </div>
@@ -165,6 +170,11 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- DANH SÁCH SẢN PHẨM -->
 <div class="row g-4 justify-content-center">
     @foreach($products as $product)
+    @php
+        $productPrices = $product->variations->pluck('price')->map(fn ($price) => (float) $price);
+        $productMinPrice = $productPrices->isNotEmpty() ? $productPrices->min() : (float) $product->price;
+        $productMaxPrice = $productPrices->isNotEmpty() ? $productPrices->max() : (float) $product->price;
+    @endphp
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div class="card product-card text-center h-100 shadow-sm">
             <div class="card-body p-4 d-flex flex-column">
@@ -188,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     {{ $product->description ?? 'Sản phẩm chăm sóc cá nhân chất lượng cho vẻ đẹp rạng ngời mỗi ngày.' }}
                 </p>
 
-                <h5 class="fw-bold text-danger mb-1">{{ number_format($product->price, 0, ',', '.') }} ₫</h5>
+                <h5 class="fw-bold text-danger mb-1">@if($productMinPrice < $productMaxPrice){{ number_format($productMinPrice, 0, ',', '.') }} - {{ number_format($productMaxPrice, 0, ',', '.') }}@else{{ number_format($productMinPrice, 0, ',', '.') }}@endif ₫</h5>
                 <p class="text-muted small mb-3"><i class="bi bi-box-seam me-1"></i>Còn lại: {{ $product->quantity > 0 ? $product->quantity : 'Hết hàng' }}</p>
 
                 <a href="{{ route('products.show', $product->id) }}" class="btn btn-cyan w-100 rounded-pill py-2 mt-auto">KHÁM PHÁ NGAY</a>

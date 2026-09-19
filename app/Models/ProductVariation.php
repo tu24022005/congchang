@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductVariation extends Model
 {
-    protected $fillable = ['product_id', 'sku', 'color', 'storage', 'size_value', 'size_unit', 'price', 'stock'];
+    protected $fillable = ['product_id', 'image', 'sku', 'color', 'storage', 'size_value', 'size_unit', 'price', 'stock'];
 
     protected $casts = [
         'size_value' => 'decimal:2',

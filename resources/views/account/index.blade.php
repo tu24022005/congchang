@@ -31,7 +31,11 @@
                 <div class="account-meta-list mt-4">
                     <div><i class="bi bi-calendar3"></i><span>Thành viên từ<strong>{{ $user->created_at?->format('d/m/Y') }}</strong></span></div>
                     <div><i class="bi bi-shield-check"></i><span>Bảo mật<strong>Mật khẩu riêng tư</strong></span></div>
+                    <div><i class="bi bi-stars"></i><span>Điểm thành viên<strong>{{ number_format($user->loyalty_points) }} điểm</strong></span></div>
+                    <div><i class="bi bi-award"></i><span>Hạng thành viên<strong class="{{ $membershipTier['class'] }}">{{ $membershipTier['name'] }}</strong></span></div>
                 </div>
+                <div class="small text-muted mt-3">Doanh số đơn hoàn thành: <strong>{{ number_format($completedSpend, 0, ',', '.') }} đ</strong></div>
+                <a href="{{ route('loyalty.index') }}" class="btn btn-outline-primary w-100 rounded-pill mt-3">Đổi điểm lấy voucher</a>
                 @if (!$user->hasVerifiedEmail())
                     <a href="{{ route('verification.notice') }}" class="btn btn-outline-primary w-100 rounded-pill mt-4">Xác thực email</a>
                 @endif

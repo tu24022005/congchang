@@ -20,7 +20,23 @@ class Order extends Model
         'customer_phone',
         'customer_address',
         'latitude',
-        'longitude'
+        'longitude',
+        'refund_bank_name',
+        'refund_account_number',
+        'refund_account_holder',
+        'refund_reference',
+        'refund_note',
+        'refund_status',
+        'refund_rejection_note',
+        'refund_reviewed_at',
+        'refund_reviewed_by',
+        'refunded_at',
+        'refunded_by',
+    ];
+
+    protected $casts = [
+        'refunded_at' => 'datetime',
+        'refund_reviewed_at' => 'datetime',
     ];
 
     // Quan hệ: Một Đơn hàng (Order) có nhiều Chi tiết đơn hàng (OrderItem)[cite: 1]

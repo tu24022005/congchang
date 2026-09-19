@@ -30,7 +30,7 @@
         <div class="card-body p-3">
             <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-2 align-items-center">
                 <div class="col-lg-6"><div class="input-group"><span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span><input type="search" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Mã đơn, tên khách hàng hoặc sản phẩm..."></div></div>
-                <div class="col-sm-5 col-lg-3"><select name="status" class="form-select"><option value="">Tất cả trạng thái</option><option value="processing" @selected(request('status') === 'processing')>Chờ xử lý</option><option value="paid" @selected(request('status') === 'paid')>Đã thanh toán</option><option value="cancelled" @selected(request('status') === 'cancelled')>Đã hủy</option></select></div>
+                <div class="col-sm-5 col-lg-3"><select name="status" class="form-select"><option value="">Tất cả trạng thái</option><option value="processing" @selected(request('status') === 'processing')>Chờ xử lý</option><option value="paid" @selected(request('status') === 'paid')>Đã thanh toán</option><option value="refund_pending" @selected(request('status') === 'refund_pending')>Chờ hoàn tiền</option><option value="refunded" @selected(request('status') === 'refunded')>Đã hoàn tiền</option><option value="cancelled" @selected(request('status') === 'cancelled')>Đã hủy</option></select></div>
                 <div class="col-sm-3 col-lg-1"><button class="btn btn-primary w-100" title="Lọc"><i class="bi bi-funnel"></i></button></div>
                 <div class="col-sm-4 col-lg-2"><a href="{{ route('admin.orders.index') }}" class="btn btn-light border w-100">Xóa bộ lọc</a></div>
             </form>
@@ -83,6 +83,10 @@
                                         <span class="badge bg-success rounded-pill px-3">Đã thanh toán</span>
                                     @elseif(strtolower($order->status) == 'completed')
                                         <span class="badge bg-success rounded-pill px-3">Đã nhận hàng</span>
+                                    @elseif($order->status === 'refund_pending')
+                                        <span class="badge bg-warning text-dark rounded-pill px-3">{{ in_array($order->refund_status, ['approved', null], true) ? 'Đã duyệt hoàn tiền' : 'Chờ duyệt hoàn tiền' }}</span>
+                                    @elseif($order->status === 'refunded')
+                                        <span class="badge bg-success rounded-pill px-3">Đã hoàn tiền</span>
                                     @elseif(strtolower($order->status) == 'cancelled' || $order->status == 'Đã huỷ')
                                         <span class="badge bg-danger rounded-pill px-3">Đã huỷ</span>
                                     @else
@@ -101,17 +105,25 @@
                                                 'shipping' => ['completed'],
                                                 'completed' => [],
                                                 'cancelled' => [],
+                                                'refund_pending' => [],
                                             ][$order->status] ?? [];
                                         @endphp
                                         <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" class="order-status-form">
                                             @csrf @method('PATCH')
                                             <select name="status" class="form-select form-select-sm order-status-select" onchange="this.form.submit()" title="Đổi trạng thái">
-                                                <option value="{{ $order->status }}" selected>{{ ['processing' => 'Chờ xử lý', 'confirmed' => 'Đã xác nhận', 'packing' => 'Đang đóng gói', 'shipping' => 'Đang giao hàng', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã hủy'][$order->status] ?? ucfirst($order->status) }}</option>
+                                                <option value="{{ $order->status }}" selected>{{ ['processing' => 'Chờ xử lý', 'confirmed' => 'Đã xác nhận', 'packing' => 'Đang đóng gói', 'shipping' => 'Đang giao hàng', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã hủy', 'refund_pending' => 'Chờ hoàn tiền', 'refunded' => 'Đã hoàn tiền'][$order->status] ?? ucfirst($order->status) }}</option>
                                                 @foreach($nextStatuses as $nextStatus)
-                                                    <option value="{{ $nextStatus }}">{{ ['confirmed' => 'Đã xác nhận', 'packing' => 'Đang đóng gói', 'shipping' => 'Đang giao hàng', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã hủy'][$nextStatus] }}</option>
+                                                    <option value="{{ $nextStatus }}">{{ ['confirmed' => 'Đã xác nhận', 'packing' => 'Đang đóng gói', 'shipping' => 'Đang giao hàng', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'cancelled' => 'Đã hủy', 'refunded' => 'Đã hoàn tiền'][$nextStatus] }}</option>
                                                 @endforeach
                                             </select>
                                         </form>
+                                        @if($order->status === 'refund_pending' && $order->refund_status === 'requested')
+                                            <form action="{{ route('admin.orders.refund.approve', $order->id) }}" method="POST" class="d-inline">@csrf<button class="btn btn-sm btn-success rounded-pill px-3 fw-bold" type="submit" onclick="return confirm('Duyệt yêu cầu hoàn tiền cho đơn #{{ $order->id }}?')"><i class="bi bi-check-circle me-1"></i>Duyệt</button></form>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#rejectRefund{{ $order->id }}">Từ chối</button>
+                                            <div class="modal fade" id="rejectRefund{{ $order->id }}" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><form action="{{ route('admin.orders.refund.reject', $order->id) }}" method="POST">@csrf<div class="modal-header"><h5 class="modal-title">Từ chối hoàn tiền #{{ $order->id }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><label class="form-label">Lý do từ chối</label><textarea name="refund_rejection_note" class="form-control" rows="3" required></textarea></div><div class="modal-footer"><button type="submit" class="btn btn-danger rounded-pill">Xác nhận từ chối</button></div></form></div></div></div>
+                                        @elseif($order->status === 'refund_pending' && in_array($order->refund_status, ['approved', null], true))
+                                            <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-warning rounded-pill px-3 fw-bold" title="Hoàn tiền cho khách"><i class="bi bi-cash-coin me-1"></i>Hoàn tiền</a>
+                                        @endif
                                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
                                     </div>
                                 </td>

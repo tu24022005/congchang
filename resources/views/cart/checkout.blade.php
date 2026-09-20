@@ -45,6 +45,18 @@
                             <label class="form-label fw-bold">Địa chỉ giao hàng chi tiết</label>
                             <textarea name="customer_address" class="form-control" rows="3" minlength="10" maxlength="500" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>{{ old('customer_address') }}</textarea>
                         </div>
+                        <div class="mb-3">
+                            <label for="shipping-zone" class="form-label fw-bold">Khu vực giao hàng</label>
+                            <select name="shipping_zone" id="shipping-zone" class="form-select" required>
+                                <option value="">-- Chọn khu vực --</option>
+                                @foreach(config('shop.shipping_zones', []) as $key => $zone)
+                                    <option value="{{ $key }}" data-fee="{{ $zone['fee'] }}" @selected(old('shipping_zone') === $key)>
+                                        {{ $zone['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Phí được tính theo khu vực, voucher miễn phí vận chuyển sẽ được áp dụng nếu đủ điều kiện.</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,8 +83,8 @@
                             <span class="fw-bold">{{ number_format($total, 0, ',', '.') }} đ</span>
                         </div>
                         <div class="d-flex justify-content-between fw-bold fs-5 mb-4">
-                            <span>Phí dịch vụ:</span>
-                            <span class="text-danger">{{ number_format(config('shop.service_fee', 3000), 0, ',', '.') }} đ</span>
+                            <span>Phí vận chuyển:</span>
+                            <span id="shipping-fee" class="text-danger">Chọn khu vực</span>
                         </div>
 
                         <h5 class="fw-bold mb-3">Phương thức thanh toán</h5>
@@ -100,18 +112,29 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const selector = document.getElementById('saved-address');
-        if (!selector) return;
-        const name = document.querySelector('[name="customer_name"]');
-        const phone = document.querySelector('[name="customer_phone"]');
-        const address = document.querySelector('[name="customer_address"]');
-        const fill = () => {
-            const option = selector.options[selector.selectedIndex];
-            name.value = option.dataset.name || '';
-            phone.value = option.dataset.phone || '';
-            address.value = option.dataset.address || '';
+        if (selector) {
+            const name = document.querySelector('[name="customer_name"]');
+            const phone = document.querySelector('[name="customer_phone"]');
+            const address = document.querySelector('[name="customer_address"]');
+            const fill = () => {
+                const option = selector.options[selector.selectedIndex];
+                name.value = option.dataset.name || '';
+                phone.value = option.dataset.phone || '';
+                address.value = option.dataset.address || '';
+            };
+            selector.addEventListener('change', fill);
+            if (selector.value) fill();
+        }
+
+        const zone = document.getElementById('shipping-zone');
+        const fee = document.getElementById('shipping-fee');
+        const formatMoney = value => new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+        const refreshShippingFee = () => {
+            const option = zone.options[zone.selectedIndex];
+            fee.textContent = option?.dataset.fee ? formatMoney(Number(option.dataset.fee)) : 'Chọn khu vực';
         };
-        selector.addEventListener('change', fill);
-        if (selector.value) fill();
+        zone.addEventListener('change', refreshShippingFee);
+        refreshShippingFee();
     });
 </script>
 @endpush

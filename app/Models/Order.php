@@ -19,6 +19,8 @@ class Order extends Model
         'customer_name',
         'customer_phone',
         'customer_address',
+        'shipping_zone',
+        'shipping_fee',
         'latitude',
         'longitude',
         'refund_bank_name',
@@ -37,6 +39,7 @@ class Order extends Model
     protected $casts = [
         'refunded_at' => 'datetime',
         'refund_reviewed_at' => 'datetime',
+        'shipping_fee' => 'integer',
     ];
 
     // Quan hệ: Một Đơn hàng (Order) có nhiều Chi tiết đơn hàng (OrderItem)[cite: 1]

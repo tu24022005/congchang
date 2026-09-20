@@ -106,7 +106,7 @@
 
                     <div class="order-summary-box mt-3">
                         <div><span>Tạm tính sản phẩm</span><strong>{{ number_format($subtotal, 0, ',', '.') }} đ</strong></div>
-                        <div><span>Phí dịch vụ</span><strong>{{ number_format(max(0, $order->total - $subtotal), 0, ',', '.') }} đ</strong></div>
+                        <div><span>Phí vận chuyển</span><strong>{{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }} đ</strong></div>
                         <div class="order-summary-total"><span>Tổng thanh toán</span><strong>{{ number_format($order->total, 0, ',', '.') }} đ</strong></div>
                     </div>
 

@@ -16,10 +16,10 @@
                 : $total * ($discountVoucher['value'] / 100);
             $discount = min($discount, $total);
         }
-        $serviceFee = $shippingVoucher ? 0 : config('shop.service_fee', 3000);
+        $serviceFee = 0;
         $finalTotal = $total - $discount + $serviceFee;
     @endphp
-    <div class="cart-page-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / GIỎ HÀNG</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn</h2><p class="text-muted mb-0">Kiểm tra sản phẩm và hoàn tất địa chỉ nhận hàng.</p></div><a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a></div>
+    <div class="cart-page-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / GIỎ HÀNG</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn</h2>    <p class="text-muted mb-0">Phí vận chuyển sẽ được tính theo khu vực ở bước thanh toán.</p></div><a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a></div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
@@ -148,8 +148,8 @@
                         </div>
 
                         <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">Phí dịch vụ:</span>
-                            <span class="fw-bold" id="cart-service-fee">{{ number_format($serviceFee, 0, ',', '.') }} đ</span>
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <span class="fw-bold" id="cart-service-fee">Tính ở bước thanh toán</span>
                         </div>
 
                         <!-- HIỂN THỊ DÒNG TIỀN ĐƯỢC GIẢM -->

@@ -39,7 +39,7 @@ class HomeBannerController extends Controller
 
     public function update(Request $request, HomeBanner $homeBanner): RedirectResponse
     {
-        $homeBanner->fill($this->validated($request));
+        $homeBanner->fill($this->validated($request, $homeBanner));
         $this->storeImage($request, $homeBanner);
         $homeBanner->save();
 
@@ -57,13 +57,13 @@ class HomeBannerController extends Controller
         return back()->with('success', 'Đã xóa banner trang chủ.');
     }
 
-    private function validated(Request $request): array
+    private function validated(Request $request, ?HomeBanner $banner = null): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'badge' => ['nullable', 'string', 'max:100'],
             'title' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'url', 'max:2048', 'required_without:image'],
+            'image_url' => ['nullable', 'url', 'max:2048'],
             'alt_text' => ['nullable', 'string', 'max:180'],
             'button_text' => ['nullable', 'string', 'max:80'],
             'button_url' => ['nullable', 'string', 'max:2048'],
@@ -71,6 +71,14 @@ class HomeBannerController extends Controller
             'is_active' => ['nullable', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
+
+        if (!$request->hasFile('image') && !$request->filled('image_url') && !$banner?->image_path) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'image' => 'Vui lòng upload ảnh hoặc nhập URL ảnh.',
+            ]);
+        }
+
+        return $data;
     }
 
     private function storeImage(Request $request, HomeBanner $banner): void

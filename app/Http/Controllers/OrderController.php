@@ -83,6 +83,7 @@ class OrderController extends Controller
             'customer_name' => ['required_without:address_id', 'string', 'min:2', 'max:120'],
             'customer_phone' => ['required_without:address_id', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
             'customer_address' => ['required_without:address_id', 'string', 'min:10', 'max:500'],
+            'shipping_zone' => ['required', 'string', 'in:' . implode(',', array_keys(config('shop.shipping_zones', [])))],
             'payment_method' => 'required|in:COD,PAYOS',
             'address_id' => ['nullable', 'integer', 'exists:addresses,id'],
         ], [
@@ -96,6 +97,8 @@ class OrderController extends Controller
             'customer_address.max' => 'Địa chỉ giao hàng không được vượt quá 500 ký tự.',
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
             'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
+            'shipping_zone.required' => 'Vui lòng chọn khu vực giao hàng.',
+            'shipping_zone.in' => 'Khu vực giao hàng không hợp lệ.',
         ]);
 
         if (!empty($validated['address_id'])) {
@@ -152,8 +155,9 @@ class OrderController extends Controller
                 $voucher->increment('used_count');
                 $voucherIds[] = $voucher->id;
             }
-            $serviceFee = config('shop.service_fee', 3000);
-            $shippingFee = session()->has('voucher_shipping') ? 0 : $serviceFee;
+            $shippingFee = session()->has('voucher_shipping')
+                ? 0
+                : (int) config('shop.shipping_zones.' . $validated['shipping_zone'] . '.fee', config('shop.service_fee', 3000));
             $finalTotal = $total - $discount + $shippingFee;
 
             // 3. Tạo đơn hàng và lưu tổng tiền đã giảm
@@ -166,6 +170,8 @@ class OrderController extends Controller
             $order->customer_name = $validated['customer_name'];
             $order->customer_phone = $validated['customer_phone'];
             $order->customer_address = $validated['customer_address'];
+            $order->shipping_zone = $validated['shipping_zone'];
+            $order->shipping_fee = $shippingFee;
             $order->latitude = $request->input('latitude');
             $order->longitude = $request->input('longitude');
             

@@ -138,6 +138,7 @@ class AuthController extends Controller
         }
 
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+            $request->session()->forget('authenticated_with_google');
             $user = Auth::user();
             $user->forceFill(['login_attempts' => 0, 'login_locked_at' => null])->save();
             $request->session()->regenerate(); 
@@ -170,14 +171,20 @@ class AuthController extends Controller
             }
         }
 
-        return back()->withErrors([ 
-            'email' => 'Email hoặc mật khẩu không chính xác. Còn ' . (5 - ($user?->login_attempts ?? 0)) . ' lần thử.',
-        ])->onlyInput('email'); 
+        $message = $user?->google_id
+            ? 'Mật khẩu Google không dùng để đăng nhập trực tiếp trên website. Hãy chọn “Google”, hoặc đăng nhập Google rồi đặt mật khẩu website trong mục tài khoản.'
+            : 'Email hoặc mật khẩu không chính xác. Còn ' . (5 - ($user?->login_attempts ?? 0)) . ' lần thử.';
+
+        return back()->withErrors([
+            'email' => $message,
+        ])->onlyInput('email');
     } 
 // Hiển thị form đổi mật khẩu
     public function showChangePasswordForm()
     {
-        return view('auth.change-password');
+        return view('auth.change-password', [
+            'authenticatedWithGoogle' => session('authenticated_with_google', false),
+        ]);
     }
 
     public function account(Request $request)
@@ -225,8 +232,11 @@ class AuthController extends Controller
     // Xử lý logic đổi mật khẩu
     public function updatePassword(Request $request)
     {
+        $user = $request->user();
+        $authenticatedWithGoogle = $request->session()->get('authenticated_with_google', false);
+
         $request->validate([
-            'current_password' => 'required',
+            'current_password' => $authenticatedWithGoogle ? 'nullable' : 'required',
             'new_password' => 'required|min:8|confirmed',
         ], [
             'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
@@ -236,16 +246,16 @@ class AuthController extends Controller
         ]);
 
         // Kiểm tra mật khẩu cũ có đúng không
-        if (!Hash::check($request->current_password, Auth::user()->password)) {
+        if (!$authenticatedWithGoogle && !Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không đúng.']);
         }
 
         // Cập nhật mật khẩu mới
-        $user = Auth::user();
         $user->password = Hash::make($request->new_password);
         $user->login_attempts = 0;
         $user->login_locked_at = null;
         $user->save();
+        $request->session()->forget('authenticated_with_google');
 
         return back()->with('success', 'Đổi mật khẩu thành công!');
     }

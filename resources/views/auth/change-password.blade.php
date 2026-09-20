@@ -17,7 +17,7 @@
             <div class="account-panel password-panel">
                 <div class="password-panel-intro">
                     <span class="account-panel-icon account-panel-icon-gold"><i class="bi bi-key-fill"></i></span>
-                    <div><h2>Thông tin mật khẩu</h2><p class="mb-0">Bạn sẽ cần nhập mật khẩu hiện tại để xác nhận thay đổi.</p></div>
+                    <div><h2>Thông tin mật khẩu</h2>                    <p class="mb-0">{{ $authenticatedWithGoogle ? 'Bạn vừa đăng nhập bằng Google. Hãy tạo mật khẩu để có thể đăng nhập trực tiếp bằng email.' : 'Bạn sẽ cần nhập mật khẩu hiện tại để xác nhận thay đổi.' }}</p></div>
                 </div>
 
                 @if (session('success'))
@@ -31,9 +31,13 @@
                     @csrf
                     @method('PUT')
                     <div class="mb-3">
-                        <label for="current_password" class="form-label">Mật khẩu hiện tại</label>
-                        <input id="current_password" type="password" name="current_password" class="form-control" required autocomplete="current-password">
-                        @error('current_password')<div class="field-error">{{ $message }}</div>@enderror
+                        @if (!$authenticatedWithGoogle)
+                            <label for="current_password" class="form-label">Mật khẩu hiện tại</label>
+                            <input id="current_password" type="password" name="current_password" class="form-control" required autocomplete="current-password">
+                            @error('current_password')<div class="field-error">{{ $message }}</div>@enderror
+                        @else
+                            <div class="alert alert-info border-0 rounded-4 mb-0"><i class="bi bi-google me-2"></i>Đăng nhập Google đã xác thực tài khoản này. Bạn không cần nhập mật khẩu cũ.</div>
+                        @endif
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">

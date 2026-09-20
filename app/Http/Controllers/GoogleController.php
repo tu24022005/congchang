@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Services\CartService;
+use Illuminate\Support\Carbon;
 
 class GoogleController extends Controller
 {
@@ -25,12 +26,23 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
             
-            // Tìm user xem email này đã từng đăng ký chưa
-            $user = User::where('email', $googleUser->email)->first();
+            // Ưu tiên liên kết Google hiện có, sau đó mới ghép theo email.
+            $user = User::where('google_id', $googleUser->id)->first()
+                ?? User::where('email', $googleUser->email)->first();
 
             if ($user) {
-                // Nếu có rồi thì cập nhật ID và cho đăng nhập luôn
-                $user->update(['google_id' => $googleUser->id]);
+                // Một Google ID không được phép liên kết với hai tài khoản website.
+                $linkedUser = User::where('google_id', $googleUser->id)
+                    ->where('id', '!=', $user->getKey())
+                    ->exists();
+                if ($linkedUser) {
+                    throw new \RuntimeException('Google account is already linked to another user.');
+                }
+
+                $user->forceFill([
+                    'google_id' => $googleUser->id,
+                    'email_verified_at' => $user->email_verified_at ?? Carbon::now(),
+                ])->save();
                 Auth::login($user);
             } else {
                 // Nếu chưa có, tự động tạo tài khoản mới bằng thông tin Google
@@ -39,15 +51,13 @@ class GoogleController extends Controller
                     'email' => $googleUser->email,
                     'google_id' => $googleUser->id,
                     'password' => Hash::make(Str::random(16)), // Mật khẩu ngẫu nhiên
-                    'role' => 'user' // Mặc định là Khách hàng
+                    'role' => 'customer',
+                    'email_verified_at' => Carbon::now(),
                 ]);
                 Auth::login($newUser);
             }
 
-            if (!Auth::user()->hasVerifiedEmail()) {
-                return redirect()->route('verification.notice');
-            }
-
+            session()->put('authenticated_with_google', true);
             app(CartService::class)->mergeSession(Auth::user());
             return redirect()->intended('/');
         } catch (\Exception $e) {

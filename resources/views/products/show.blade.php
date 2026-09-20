@@ -137,33 +137,33 @@
                 <p class="detail-copy mb-4">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
 
                 @auth
-                    <form action="{{ route('cart.add', $product->id) }}" method="POST" id="detail-cart-form">
-                        @csrf
-                        @if($product->variations->isNotEmpty())
-                            <div class="variation-picker mb-3">
-                                <div class="variation-picker-row"><span class="variation-picker-label">Phân loại hàng</span><div class="variation-options">
-                                    @foreach($product->variations as $index => $variation)
-                                        @php $variationLabel = collect([$variation->color, $variation->size_value ? rtrim(rtrim($variation->size_value, '0'), '.') . $variation->size_unit : null, $variation->storage])->filter()->implode(' · '); @endphp
-                                        <label class="variation-option">
-                                            <input type="radio" name="variation_id" value="{{ $variation->id }}" data-price="{{ $variation->price }}" data-stock="{{ $variation->stock }}" data-image="{{ $variation->image ? asset('storage/' . $variation->image) : '' }}" data-label="{{ $variationLabel ?: 'Mặc định' }}" @checked($index === 0)>
-                                            <span class="variation-code">{{ $variation->sku ?: 'Mã chưa đặt' }}</span><span class="variation-name">{{ $variationLabel ?: 'Mặc định' }}</span>
-                                        </label>
-                                    @endforeach
-                                </div></div>
+                    @if($product->quantity > 0)
+                        <form action="{{ route('cart.add', $product->id) }}" method="POST" id="detail-cart-form">
+                            @csrf
+                            @if($product->variations->isNotEmpty())
+                                <div class="variation-picker mb-3">
+                                    <div class="variation-picker-row"><span class="variation-picker-label">Phân loại hàng</span><div class="variation-options">
+                                        @foreach($product->variations as $index => $variation)
+                                            @php $variationLabel = collect([$variation->color, $variation->size_value ? rtrim(rtrim($variation->size_value, '0'), '.') . $variation->size_unit : null, $variation->storage])->filter()->implode(' · '); @endphp
+                                            <label class="variation-option">
+                                                <input type="radio" name="variation_id" value="{{ $variation->id }}" data-price="{{ $variation->price }}" data-stock="{{ $variation->stock }}" data-image="{{ $variation->image ? asset('storage/' . $variation->image) : '' }}" data-label="{{ $variationLabel ?: 'Mặc định' }}" @checked($index === 0)>
+                                                <span class="variation-code">{{ $variation->sku ?: 'Mã chưa đặt' }}</span><span class="variation-name">{{ $variationLabel ?: 'Mặc định' }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div></div>
+                                </div>
+                            @endif
+                            <label class="form-label fw-bold text-dark mb-2">Số lượng</label>
+                            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+                                <div class="quantity-picker"><button type="button" data-quantity-step="-1" aria-label="Giảm số lượng">−</button><input type="number" name="quantity" id="detail-quantity" value="1" min="1" max="{{ max(1, $product->quantity) }}" aria-label="Số lượng"><button type="button" data-quantity-step="1" aria-label="Tăng số lượng">+</button></div>
+                                <small class="text-muted" id="detail-stock-note">Tối đa {{ $product->quantity }} sản phẩm</small>
                             </div>
-                        @endif
-                        <label class="form-label fw-bold text-dark mb-2">Số lượng</label>
-                        <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
-                            <div class="quantity-picker"><button type="button" data-quantity-step="-1" aria-label="Giảm số lượng">−</button><input type="number" name="quantity" id="detail-quantity" value="1" min="1" max="{{ max(1, $product->quantity) }}" aria-label="Số lượng"><button type="button" data-quantity-step="1" aria-label="Tăng số lượng">+</button></div>
-                            <small class="text-muted" id="detail-stock-note">Tối đa {{ $product->quantity }} sản phẩm</small>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success detail-buy flex-grow-1" {{ $product->quantity <= 0 ? 'disabled' : '' }}><i class="bi bi-bag-plus me-2"></i>Thêm vào giỏ hàng</button>
-                            <button type="submit" name="buy_now" value="1" class="btn btn-dark detail-buy flex-grow-1" {{ $product->quantity <= 0 ? 'disabled' : '' }}><i class="bi bi-lightning-charge me-2"></i>Mua ngay</button>
-                        </div>
-                    </form>
-                @else
-                    @auth
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success detail-buy flex-grow-1"><i class="bi bi-bag-plus me-2"></i>Thêm vào giỏ hàng</button>
+                                <button type="submit" name="buy_now" value="1" class="btn btn-dark detail-buy flex-grow-1"><i class="bi bi-lightning-charge me-2"></i>Mua ngay</button>
+                            </div>
+                        </form>
+                    @else
                         @if($isStockAlertSubscribed)
                             <form action="{{ route('products.stock-alert.destroy', $product) }}" method="POST">
                                 @csrf
@@ -176,9 +176,13 @@
                                 <button type="submit" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Báo khi có hàng</button>
                             </form>
                         @endif
+                    @endif
+                @else
+                    @if($product->quantity > 0)
+                        <a href="{{ route('login') }}" class="btn btn-warning detail-buy w-100"><i class="bi bi-person me-2"></i>Đăng nhập để mua hàng</a>
                     @else
                         <a href="{{ route('login') }}" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Đăng nhập để được báo khi có hàng</a>
-                    @endauth
+                    @endif
                 @endauth
 
                 <div class="detail-benefit row g-3">

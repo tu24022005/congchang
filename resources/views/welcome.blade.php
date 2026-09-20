@@ -105,19 +105,28 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- SAN PHAM HOT -->
 <section class="hot-products-section mb-5" aria-labelledby="hot-products-title">
     <div class="d-flex justify-content-between align-items-end mb-3">
-        <div><span class="hot-products-kicker"><i class="bi bi-fire me-1"></i> ĐANG ĐƯỢC QUAN TÂM</span><h3 id="hot-products-title" class="fw-bold mb-0 storefront-title">Sản phẩm hot hôm nay</h3></div>
+        <div><span class="hot-products-kicker"><i class="bi bi-lightning-charge-fill me-1"></i> FLASH SALE & ĐANG ĐƯỢC QUAN TÂM</span><h3 id="hot-products-title" class="fw-bold mb-0 storefront-title">Ưu đãi nổi bật hôm nay</h3></div>
         <div class="d-flex gap-2"><button type="button" class="btn btn-light border rounded-circle hot-scroll-button" data-direction="-1" aria-label="Xem sản phẩm trước"><i class="bi bi-arrow-left"></i></button><button type="button" class="btn btn-light border rounded-circle hot-scroll-button" data-direction="1" aria-label="Xem sản phẩm tiếp theo"><i class="bi bi-arrow-right"></i></button></div>
     </div>
     <div id="hot-products-track" class="hot-products-track">
         @foreach($hotProducts as $hotProduct)
             @php
-                $hotPrices = $hotProduct->variations->pluck('price')->map(fn ($price) => (float) $price);
-                $hotMinPrice = $hotPrices->isNotEmpty() ? $hotPrices->min() : (float) $hotProduct->price;
-                $hotMaxPrice = $hotPrices->isNotEmpty() ? $hotPrices->max() : (float) $hotProduct->price;
+                $hotPrices = $hotProduct->variations->map(fn ($variation) => $hotProduct->effectivePrice($variation));
+                $hotMinPrice = $hotPrices->isNotEmpty() ? $hotPrices->min() : $hotProduct->effectivePrice();
+                $hotMaxPrice = $hotPrices->isNotEmpty() ? $hotPrices->max() : $hotProduct->effectivePrice();
             @endphp
             <a href="{{ route('products.show', ['product' => $hotProduct->slug]) }}" class="hot-product-card">
                 <div class="hot-product-image">@if($hotProduct->image)<img src="{{ asset('storage/' . $hotProduct->image) }}" alt="{{ $hotProduct->name }}">@else<i class="bi bi-bag-heart"></i>@endif</div>
-                <div class="p-3"><span class="badge bg-info-subtle text-info-emphasis rounded-pill mb-2">{{ $hotProduct->category->name ?? 'Beauty' }}</span><h5>{{ $hotProduct->name }}</h5><strong>@if($hotMinPrice < $hotMaxPrice){{ number_format($hotMinPrice, 0, ',', '.') }} - {{ number_format($hotMaxPrice, 0, ',', '.') }}@else{{ number_format($hotMinPrice, 0, ',', '.') }}@endif ₫</strong></div>
+                <div class="p-3">
+                    @if($hotProduct->isFlashSaleActive())
+                        <span class="badge bg-danger rounded-pill mb-2"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span>
+                    @else
+                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill mb-2">{{ $hotProduct->category->name ?? 'Beauty' }}</span>
+                    @endif
+                    <h5>{{ $hotProduct->name }}</h5>
+                    @if($hotProduct->isFlashSaleActive())<small class="text-muted text-decoration-line-through">{{ number_format($hotProduct->price, 0, ',', '.') }} ₫</small><br>@endif
+                    <strong>@if($hotMinPrice < $hotMaxPrice){{ number_format($hotMinPrice, 0, ',', '.') }} - {{ number_format($hotMaxPrice, 0, ',', '.') }}@else{{ number_format($hotMinPrice, 0, ',', '.') }}@endif ₫</strong>
+                </div>
             </a>
         @endforeach
     </div>

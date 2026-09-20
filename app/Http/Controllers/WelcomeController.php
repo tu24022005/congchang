@@ -24,9 +24,36 @@ $hotProductIds = DB::table('order_items')
 ->orderByDesc('sold_quantity')
 ->limit(8)
 ->pluck('product_id');
-$hotProducts = $hotProductIds->isNotEmpty()
-	? Product::with(['category', 'variations'])->whereIn('id', $hotProductIds)->orderByRaw('FIELD(id, ' . $hotProductIds->implode(',') . ')')->get()
-	: Product::with(['category', 'variations'])->latest()->limit(8)->get();
+$flashSaleProducts = Product::with(['category', 'variations'])
+    ->whereNotNull('flash_sale_price')
+    ->whereNotNull('flash_sale_starts_at')
+    ->whereNotNull('flash_sale_ends_at')
+    ->where('flash_sale_starts_at', '<=', now())
+    ->where('flash_sale_ends_at', '>', now())
+    ->whereColumn('flash_sale_price', '<', 'price')
+    ->orderBy('flash_sale_ends_at')
+    ->limit(8)
+    ->get();
+$remainingSlots = max(0, 8 - $flashSaleProducts->count());
+$hotProducts = $remainingSlots > 0 && $hotProductIds->isNotEmpty()
+    ? Product::with(['category', 'variations'])
+        ->whereIn('id', $hotProductIds)
+        ->whereNotIn('id', $flashSaleProducts->pluck('id'))
+        ->orderByRaw('FIELD(id, ' . $hotProductIds->implode(',') . ')')
+        ->limit($remainingSlots)
+        ->get()
+    : collect();
+
+if ($hotProducts->count() < $remainingSlots) {
+    $fallbackProducts = Product::with(['category', 'variations'])
+        ->whereNotIn('id', $flashSaleProducts->pluck('id')->merge($hotProducts->pluck('id')))
+        ->latest()
+        ->limit($remainingSlots - $hotProducts->count())
+        ->get();
+    $hotProducts = $hotProducts->concat($fallbackProducts);
+}
+
+$hotProducts = $flashSaleProducts->concat($hotProducts);
 $banners = HomeBanner::where('is_active', true)->orderBy('sort_order')->orderByDesc('id')->get();
 // Trả về view 'welcome' và truyền biến $products sang cho view
 return view('welcome', compact('products', 'categories', 'hotProducts', 'banners'));

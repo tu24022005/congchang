@@ -21,38 +21,13 @@ class OrderController extends Controller
     }
 
     // ==================================================
-    // HIỂN THỊ DANH SÁCH ĐƠN HÀNG VÀ XỬ LÝ KẾT QUẢ PAYOS
+    // HIỂN THỊ DANH SÁCH ĐƠN HÀNG
     // ==================================================
     public function index(Request $request)
     {
         $search = trim((string) $request->input('search', ''));
 
-        // 1. Kiểm tra xem có dữ liệu trả về từ cổng thanh toán PayOS hay không
-        if ($request->has('orderCode') && $request->has('status')) {
-            $orderId = $request->orderCode;
-            $status = $request->status;
-            $isCancelled = $request->cancel;
-
-            // Tìm đơn hàng tương ứng trong Database
-            $order = Order::find($orderId);
-
-            // Kiểm tra đơn hàng tồn tại và thuộc về user đang đăng nhập
-            if ($order && $order->user_id === Auth::id()) {
-                // Nếu khách thanh toán thành công
-                if ($status === 'PAID' && $isCancelled == 'false') {
-                    $order->status = 'paid';
-                    $order->save();
-                    return redirect()->route('orders.index')->with('success', 'Thanh toán đơn hàng #' . $orderId . ' thành công qua PayOS!');
-                } 
-                // Nếu khách bấm nút Hủy giao dịch
-                elseif ($status === 'CANCELLED' || $isCancelled == 'true') {
-                    $this->cancelOrder($order);
-                    return redirect()->route('orders.index')->with('error', 'Bạn đã hủy thanh toán cho đơn hàng #' . $orderId);
-                }
-            }
-        }
-
-        // 2. Truy vấn danh sách đơn hàng của User đang đăng nhập
+        // Payment status is changed only by the server-side payment webhook.
         $ordersQuery = Order::where('user_id', Auth::id())
             ->with('items.product', 'items.variation')
             ->latest();
@@ -211,9 +186,9 @@ class OrderController extends Controller
                     "orderCode" => intval($order->id), 
                     "amount" => intval($order->total), 
                     "description" => "Thanh toan don " . $order->id,
-                    // Cấu hình URL để PayOS trả kết quả về đúng hàm index ở trên
-                    "returnUrl" => route('orders.index') . '?orderCode=' . $order->id . '&status=PAID&cancel=false', 
-                    "cancelUrl" => route('orders.index') . '?orderCode=' . $order->id . '&status=CANCELLED&cancel=true'
+                    // Các URL này chỉ hiển thị kết quả; trạng thái thanh toán do webhook xác thực cập nhật.
+                    "returnUrl" => route('orders.index'),
+                    "cancelUrl" => route('orders.index')
                 ];
 
                 $response = $payOS->createPaymentLink($data);

@@ -106,6 +106,36 @@
                             </li>
                         @endif
 
+                        @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
+                            @php($unreadStaffNotifications = Auth::user()->unreadNotifications()->latest()->limit(5)->get())
+                            <li class="nav-item dropdown me-3">
+                                <a class="nav-link position-relative fw-semibold" href="{{ route('admin.notifications.index') }}"
+                                   data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo từ khách hàng">
+                                    <i class="bi bi-bell-fill fs-5 text-warning"></i>
+                                    @if(Auth::user()->unreadNotifications()->exists())
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ Auth::user()->unreadNotifications()->count() > 99 ? '99+' : Auth::user()->unreadNotifications()->count() }}
+                                        </span>
+                                    @endif
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" style="min-width: 300px;">
+                                    <li><h6 class="dropdown-header">Thông báo từ khách hàng</h6></li>
+                                    @forelse($unreadStaffNotifications as $notification)
+                                        <li>
+                                            <a class="dropdown-item py-2" href="{{ route('admin.notifications.read', $notification->id) }}">
+                                                <strong class="d-block small">{{ $notification->data['title'] ?? 'Thông báo mới' }}</strong>
+                                                <span class="text-muted small">{{ \Illuminate\Support\Str::limit($notification->data['message'] ?? '', 70) }}</span>
+                                            </a>
+                                        </li>
+                                    @empty
+                                        <li><span class="dropdown-item-text small text-muted">Chưa có thông báo mới.</span></li>
+                                    @endforelse
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-center small" href="{{ route('admin.notifications.index') }}">Xem tất cả thông báo</a></li>
+                                </ul>
+                            </li>
+                        @endif
+
                         <!-- GIỎ HÀNG CHUNG -->
                         <li class="nav-item me-4">
                             <a class="nav-link text-nowrap position-relative fw-semibold" href="{{ route('cart.index') }}">

@@ -85,6 +85,17 @@ class AddressController extends Controller
             'phone' => ['required', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
             'address' => ['required', 'string', 'min:10', 'max:500'],
             'is_default' => ['sometimes', 'boolean'],
+        ], [
+            'label.required' => 'Vui lòng nhập tên nhãn địa chỉ.',
+            'label.max' => 'Tên nhãn địa chỉ không được dài quá 50 ký tự.',
+            'recipient_name.required' => 'Vui lòng nhập tên người nhận.',
+            'recipient_name.min' => 'Tên người nhận phải có ít nhất 2 ký tự.',
+            'recipient_name.max' => 'Tên người nhận không được dài quá 120 ký tự.',
+            'phone.required' => 'Vui lòng nhập số điện thoại nhận hàng.',
+            'phone.regex' => 'Số điện thoại Việt Nam không hợp lệ.',
+            'address.required' => 'Vui lòng nhập địa chỉ giao hàng.',
+            'address.min' => 'Địa chỉ giao hàng phải có ít nhất 10 ký tự.',
+            'address.max' => 'Địa chỉ giao hàng không được dài quá 500 ký tự.',
         ]);
     }
 

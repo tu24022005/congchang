@@ -12,7 +12,9 @@ class StaffController extends Controller
 {
     public function index()
     {
-        $staff = User::latest()->get();
+        $staff = User::whereIn('role', ['admin', 'manager', 'warehouse_staff', 'customer_service'])
+            ->latest()
+            ->get();
         return view('admin.staff.index', compact('staff'));
     }
 
@@ -22,7 +24,7 @@ class StaffController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8'],
-            'role' => ['required', Rule::in(['admin', 'manager', 'warehouse_staff', 'customer_service', 'customer'])],
+            'role' => ['required', Rule::in(['admin', 'manager', 'warehouse_staff', 'customer_service'])],
         ]);
 
         $staff = User::create($data);
@@ -38,7 +40,7 @@ class StaffController extends Controller
         }
 
         $data = $request->validate([
-            'role' => ['required', Rule::in(['admin', 'manager', 'warehouse_staff', 'customer_service', 'customer'])],
+            'role' => ['required', Rule::in(['admin', 'manager', 'warehouse_staff', 'customer_service'])],
         ]);
         $before = ['role' => $user->role];
         $user->update(['role' => $data['role']]);

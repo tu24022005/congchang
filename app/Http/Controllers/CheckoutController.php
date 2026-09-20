@@ -5,6 +5,7 @@ use App\Models\Order;
 use App\Models\OrderItem; 
 use App\Models\Product; // Đã thêm Model Product để gọi bảng sản phẩm
 use App\Models\ProductVariation;
+use App\Models\InventoryLog;
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\DB; 
 use PayOS\PayOS; 
@@ -48,7 +49,10 @@ class CheckoutController extends Controller
                 $variation = $variationId ? ProductVariation::where('id', $variationId)->where('product_id', $productId)->lockForUpdate()->first() : null;
                 if ($variation) {
                     if ($variation->stock < $details['quantity']) throw new \RuntimeException('Biến thể trong giỏ vừa hết hàng.');
+                    $beforeStock = (int) $variation->stock;
                     $variation->decrement('stock', $details['quantity']);
+                    $variation->refresh();
+                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Xuất kho theo đơn hàng', $order);
                 } else {
                     $product = Product::whereKey($productId)->lockForUpdate()->first();
                     if (!$product || $product->quantity < $details['quantity']) throw new \RuntimeException('Sản phẩm trong giỏ vừa hết hàng.');

@@ -2,7 +2,14 @@
 @section('title', 'Chi tiết thành viên')
 @section('content')
 <div class="container-fluid py-4">
-    <a href="{{ route('admin.members.index') }}" class="btn btn-light border rounded-pill mb-3">← Danh sách thành viên</a>
+    @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ route('admin.customers.index') }}" class="btn btn-light border rounded-pill">← Tài khoản khách hàng</a>
+        <div>
+            <a href="{{ route('admin.customers.edit', $user) }}" class="btn btn-warning rounded-pill">Sửa tài khoản</a>
+            <form action="{{ route('admin.customers.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa tài khoản khách hàng này?');">@csrf @method('DELETE')<button class="btn btn-outline-danger rounded-pill">Xóa tài khoản</button></form>
+        </div>
+    </div>
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">

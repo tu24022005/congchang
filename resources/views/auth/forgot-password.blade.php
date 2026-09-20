@@ -20,7 +20,7 @@
             @csrf
             <div class="mb-4">
                 <label for="email" class="chill-label">Địa chỉ Email</label>
-                <input type="email" name="email" id="email" class="form-control chill-input" value="{{ old('email') }}" required autofocus placeholder="email@example.com">
+                <input type="email" name="email" id="email" class="form-control chill-input" value="{{ old('email', request('email')) }}" pattern="^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$" required autofocus placeholder="email@example.com">
             </div>
             <button type="submit" class="btn chill-btn w-100">Gửi liên kết đặt lại</button>
             <div class="text-center mt-4"><a href="{{ route('login') }}" class="chill-link"><i class="bi bi-arrow-left me-1"></i>Quay lại đăng nhập</a></div>

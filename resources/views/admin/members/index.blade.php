@@ -1,9 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Thành viên')
+@section('title', 'Tài khoản khách hàng')
 @section('content')
 <div class="container-fluid py-4">
+    @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+    @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div><span class="text-uppercase small text-primary fw-bold">QUẢN LÝ KHÁCH HÀNG</span><h2 class="fw-bold mb-1">Thành viên</h2><p class="text-muted mb-0">Theo dõi tài khoản, đơn hàng và điểm thưởng của khách hàng.</p></div>
+        <div><span class="text-uppercase small text-primary fw-bold">QUẢN LÝ KHÁCH HÀNG</span><h2 class="fw-bold mb-1">Tài khoản khách hàng</h2><p class="text-muted mb-0">Xem, sửa và xóa các tài khoản khách hàng trên hệ thống.</p></div>
     </div>
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body">
@@ -22,7 +24,14 @@
                             <td><span class="badge bg-warning-subtle text-warning-emphasis rounded-pill">{{ number_format($member->loyalty_points) }} điểm</span></td>
                             <td>{{ $member->orders_count }}</td>
                             <td>{{ $member->created_at?->format('d/m/Y') }}</td>
-                            <td><a href="{{ route('admin.members.show', $member) }}" class="btn btn-sm btn-outline-primary rounded-pill">Xem chi tiết</a></td>
+                            <td class="text-nowrap">
+                                <a href="{{ route('admin.customers.show', $member) }}" class="btn btn-sm btn-outline-primary rounded-pill">Xem</a>
+                                <a href="{{ route('admin.customers.edit', $member) }}" class="btn btn-sm btn-outline-warning rounded-pill">Sửa</a>
+                                <form action="{{ route('admin.customers.destroy', $member) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa tài khoản khách hàng này? Dữ liệu đơn hàng liên quan có thể bị xóa.');">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill">Xóa</button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr><td colspan="8" class="text-center text-muted py-4">Chưa có thành viên.</td></tr>

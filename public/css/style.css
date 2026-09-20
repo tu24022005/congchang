@@ -1156,9 +1156,44 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* Product variations use a stable grid so labels and controls never overlap. */
+.password-field {
+    position: relative;
+}
+
+.password-field > input {
+    padding-right: 3rem;
+}
+
+/* Use the application toggle instead of the browser's native password reveal. */
+.password-field > input::-ms-reveal,
+.password-field > input::-ms-clear,
+.password-field > input::-webkit-credentials-auto-fill-button,
+.password-field > input::-webkit-textfield-decoration-container {
+    display: none !important;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: .75rem;
+    z-index: 2;
+    border: 0;
+    padding: .25rem;
+    color: #607080;
+    background: transparent;
+    transform: translateY(-50%);
+}
+
+.password-toggle:hover,
+.password-toggle:focus {
+    color: #138d95;
+}
+
 .variation-row {
     display: grid !important;
-    grid-template-columns: repeat(7, minmax(0, 1fr)) 96px;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(150px, 1.8fr) 96px;
     gap: .7rem;
     align-items: end;
     width: 100%;

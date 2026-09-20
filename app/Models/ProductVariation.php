@@ -18,4 +18,9 @@ class ProductVariation extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function inventoryLogs()
+    {
+        return $this->hasMany(InventoryLog::class, 'product_variation_id');
+    }
 }

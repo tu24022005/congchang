@@ -28,7 +28,7 @@
             
             <div class="mb-4"> 
                 <label for="email" class="chill-label">Địa chỉ Email</label> 
-                <input type="email" name="email" id="email" class="form-control chill-input" value="{{ old('email') }}" required placeholder="Nhập email của bạn..." autocomplete="off">   
+                <input type="email" name="email" id="email" class="form-control chill-input" value="{{ old('email') }}" required placeholder="Nhập email của bạn..." autocomplete="username">
                 @error('email') 
                 <span class="text-danger small mt-2 d-block">{{ $message }}</span> 
                 @enderror 
@@ -36,7 +36,7 @@
             
             <div class="mb-4"> 
                 <label for="password" class="chill-label">Mật khẩu</label> 
-                <input type="password" name="password" id="password" class="form-control chill-input" required placeholder="Nhập mật khẩu..." autocomplete="new-password">  
+                <input type="password" name="password" id="password" class="form-control chill-input" required minlength="8" placeholder="Nhập mật khẩu..." autocomplete="current-password">
                 @error('password') 
                 <span class="text-danger small mt-2 d-block">{{ $message }}</span> 
                 @enderror 

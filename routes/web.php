@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController; 
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\InventoryLogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WelcomeController;
@@ -94,11 +95,20 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::resource('categories', CategoryController::class)->middleware('role:admin,manager');
     Route::get('/members', [\App\Http\Controllers\Admin\MemberController::class, 'index'])->middleware('role:admin,manager')->name('members.index');
     Route::get('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'show'])->middleware('role:admin,manager')->name('members.show');
+    Route::get('/members/{user}/edit', [\App\Http\Controllers\Admin\MemberController::class, 'edit'])->middleware('role:admin,manager')->name('members.edit');
+    Route::put('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('members.update');
+    Route::delete('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('members.destroy');
+    Route::get('/customers', [\App\Http\Controllers\Admin\MemberController::class, 'index'])->middleware('role:admin,manager')->name('customers.index');
+    Route::get('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'show'])->middleware('role:admin,manager')->name('customers.show');
+    Route::get('/customers/{user}/edit', [\App\Http\Controllers\Admin\MemberController::class, 'edit'])->middleware('role:admin,manager')->name('customers.edit');
+    Route::put('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('customers.update');
+    Route::delete('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('customers.destroy');
     Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->middleware('role:admin')->name('staff.index');
     Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->middleware('role:admin')->name('staff.store');
     Route::patch('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->middleware('role:admin')->name('staff.update');
     Route::delete('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'destroy'])->middleware('role:admin')->name('staff.destroy');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->middleware('role:admin,manager')->name('activity-logs.index');
+    Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->middleware('role:admin,manager,warehouse_staff')->name('inventory-logs.index');
     
     // Đơn hàng (CHÍNH LÀ DÒNG ĐANG BỊ THIẾU GÂY LỖI)
     Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('role:admin,manager,customer_service')->name('orders.index'); 

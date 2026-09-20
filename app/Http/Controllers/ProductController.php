@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Models\InventoryLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
@@ -58,6 +59,7 @@ class ProductController extends Controller
 
         $product = Product::create($validatedData);
         $this->syncVariations($product, $request->input('variations', []), $request->file('variations', []));
+        $product->update(['quantity' => $product->variations()->sum('stock')]);
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $file) {
@@ -116,6 +118,7 @@ class ProductController extends Controller
 
         $product->update($validatedData);
         $this->syncVariations($product, $request->input('variations', []), $request->file('variations', []));
+        $product->update(['quantity' => $product->variations()->sum('stock')]);
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $file) {
@@ -167,18 +170,19 @@ class ProductController extends Controller
 
         $before = [];
         $after = [];
-        foreach ($data['variations'] as $variationData) {
-            $variation = $product->variations()->whereKey($variationData['id'])->firstOrFail();
-            $before[$variation->id] = ['stock' => $variation->stock];
-            $variation->update([
-                'stock' => $variationData['stock'] + (int) ($variationData['received'] ?? 0),
-            ]);
-            $after[$variation->id] = ['stock' => $variation->stock];
-        }
+        DB::transaction(function () use ($data, $product, &$before, &$after) {
+            foreach ($data['variations'] as $variationData) {
+                $variation = $product->variations()->whereKey($variationData['id'])->lockForUpdate()->firstOrFail();
+                $oldStock = (int) $variation->stock;
+                $newStock = (int) $variationData['stock'] + (int) ($variationData['received'] ?? 0);
+                $before[$variation->id] = ['stock' => $oldStock];
+                $variation->update(['stock' => $newStock]);
+                $after[$variation->id] = ['stock' => $variation->stock];
+                InventoryLog::record($variation, $oldStock, $newStock, 'Cập nhật tồn kho thủ công');
+            }
 
-        $product->update([
-            'quantity' => $product->variations()->sum('stock'),
-        ]);
+            $product->update(['quantity' => $product->variations()->sum('stock')]);
+        });
         ActivityLogService::record('product.variation-stock.updated', 'Đã cập nhật tồn kho biến thể của ' . $product->name . '.', $product, $before, $after);
 
         return back()->with('success', 'Đã cập nhật tồn kho từng mã loại thành công.');
@@ -273,6 +277,7 @@ class ProductController extends Controller
             if (!empty($variation['id'])) {
                 $existing = $product->variations()->whereKey($variation['id'])->first();
                 if ($existing) {
+                    $oldStock = (int) $existing->stock;
                     $file = $variationFiles[$thisIndex]['image'] ?? null;
                     if ($file) {
                         if ($existing->image && Storage::disk('public')->exists($existing->image)) {
@@ -281,6 +286,7 @@ class ProductController extends Controller
                         $attributes['image'] = $file->store('products/variations', 'public');
                     }
                     $existing->update($attributes);
+                    InventoryLog::record($existing, $oldStock, (int) $existing->stock, 'Cập nhật sản phẩm');
                     $keptIds[] = $existing->id;
                     continue;
                 }
@@ -290,11 +296,14 @@ class ProductController extends Controller
             if ($file) {
                 $attributes['image'] = $file->store('products/variations', 'public');
             }
-            $keptIds[] = $product->variations()->create($attributes)->id;
+            $created = $product->variations()->create($attributes);
+            InventoryLog::record($created, 0, (int) $created->stock, 'Tạo biến thể và nhập tồn ban đầu');
+            $keptIds[] = $created->id;
         }
 
         $removed = $product->variations()->whereNotIn('id', $keptIds ?: [0])->get();
         foreach ($removed as $variation) {
+            InventoryLog::record($variation, (int) $variation->stock, 0, 'Xóa biến thể');
             if ($variation->image && Storage::disk('public')->exists($variation->image)) {
                 Storage::disk('public')->delete($variation->image);
             }
@@ -324,12 +333,24 @@ class ProductController extends Controller
     // HÀM LƯU ĐÁNH GIÁ SẢN PHẨM (REVIEW)
     public function storeReview(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'order_id' => 'required|exists:orders,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:500',
         ]);
+
+        $isCompletedPurchase = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.id', $validated['order_id'])
+            ->where('orders.user_id', auth()->id())
+            ->where('orders.status', 'completed')
+            ->where('order_items.product_id', $validated['product_id'])
+            ->exists();
+
+        if (!$isCompletedPurchase) {
+            return back()->with('error', 'Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng đã hoàn thành.');
+        }
 
         /* 
         * Yêu cầu bạn phải có bảng 'reviews' trong Database. 
@@ -337,10 +358,10 @@ class ProductController extends Controller
         */
         \DB::table('reviews')->insert([
             'user_id' => auth()->id(),
-            'product_id' => $request->product_id,
-            'order_id' => $request->order_id,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
+            'product_id' => $validated['product_id'],
+            'order_id' => $validated['order_id'],
+            'rating' => $validated['rating'],
+            'comment' => $validated['comment'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

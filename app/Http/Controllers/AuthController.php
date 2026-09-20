@@ -13,6 +13,8 @@ use App\Services\CartService;
 
 class AuthController extends Controller 
 { 
+    private const VALID_EMAIL_RULES = ['required', 'string', 'email:rfc', 'regex:/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/D'];
+
     // Hiển thị form đăng ký 
     public function showRegistrationForm() 
     { 
@@ -24,7 +26,7 @@ class AuthController extends Controller
     { 
         $request->validate([ 
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users', 
+            'email' => [...self::VALID_EMAIL_RULES, 'max:255', 'unique:users'],
             'password' => 'required|string|min:8|confirmed', 
         ]); 
 
@@ -71,7 +73,7 @@ class AuthController extends Controller
 
     public function sendResetLinkEmail(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate(['email' => self::VALID_EMAIL_RULES]);
 
         $status = Password::sendResetLink($request->only('email'));
 
@@ -92,7 +94,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'token' => 'required',
-            'email' => 'required|email',
+            'email' => self::VALID_EMAIL_RULES,
             'password' => 'required|min:8|confirmed',
         ], [
             'password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
@@ -100,7 +102,12 @@ class AuthController extends Controller
         ]);
 
         $status = Password::reset($request->only('email', 'password', 'password_confirmation', 'token'), function ($user, $password) {
-            $user->forceFill(['password' => Hash::make($password), 'remember_token' => null])->save();
+            $user->forceFill([
+                'password' => Hash::make($password),
+                'remember_token' => null,
+                'login_attempts' => 0,
+                'login_locked_at' => null,
+            ])->save();
         });
 
         return $status === Password::PASSWORD_RESET
@@ -112,15 +119,23 @@ class AuthController extends Controller
     public function login(Request $request) 
     {
         $request->validate([ 
-            'email' => 'required|string|email', 
-            'password' => 'required|string', 
+            'email' => self::VALID_EMAIL_RULES,
+            'password' => 'required|string|min:8',
         ]); 
 
-        if (Auth::attempt($request->only('email', 'password'))) { 
-            $request->session()->regenerate(); 
-            app(CartService::class)->mergeSession(Auth::user());
+        $user = User::where('email', $request->input('email'))->first();
+        if ($user?->login_locked_at) {
+            return redirect()->route('password.request', ['email' => $user->email])
+                ->withErrors(['email' => 'Tài khoản đã bị khóa sau 5 lần đăng nhập sai. Vui lòng đặt lại mật khẩu để mở khóa.']);
+        }
 
-            if (!Auth::user()->hasVerifiedEmail()) {
+        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+            $user = Auth::user();
+            $user->forceFill(['login_attempts' => 0, 'login_locked_at' => null])->save();
+            $request->session()->regenerate(); 
+            app(CartService::class)->mergeSession($user);
+
+            if (!$user->hasVerifiedEmail()) {
                 return redirect()->route('verification.notice');
             }
 
@@ -129,16 +144,26 @@ class AuthController extends Controller
                 'manager' => 'admin.dashboard',
                 'warehouse_staff' => 'admin.products.index',
                 'customer_service' => 'admin.orders.index',
-            ][Auth::user()->role] ?? null;
+            ][$user->role] ?? null;
             if ($roleHome) {
                 return redirect()->intended(route($roleHome)); 
             }
             return redirect()->intended(route('welcome')); 
         } 
 
-        // Đã Việt hóa thông báo lỗi sai tài khoản/mật khẩu
+        if ($user) {
+            $user->increment('login_attempts');
+            $user->refresh();
+            if ($user->login_attempts >= 5) {
+                $user->forceFill(['login_locked_at' => now()])->save();
+
+                return redirect()->route('password.request', ['email' => $user->email])
+                    ->withErrors(['email' => 'Bạn đã nhập sai mật khẩu 5 lần. Vui lòng đặt lại mật khẩu để mở khóa tài khoản.']);
+            }
+        }
+
         return back()->withErrors([ 
-            'email' => 'Email hoặc mật khẩu không chính xác.', 
+            'email' => 'Email hoặc mật khẩu không chính xác. Còn ' . (5 - ($user?->login_attempts ?? 0)) . ' lần thử.',
         ])->onlyInput('email'); 
     } 
 // Hiển thị form đổi mật khẩu
@@ -161,7 +186,7 @@ class AuthController extends Controller
         $user = $request->user();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'email' => [...self::VALID_EMAIL_RULES, 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
         ], [
             'name.required' => 'Vui lòng nhập họ và tên.',
             'email.required' => 'Vui lòng nhập email.',
@@ -209,6 +234,8 @@ class AuthController extends Controller
         // Cập nhật mật khẩu mới
         $user = Auth::user();
         $user->password = Hash::make($request->new_password);
+        $user->login_attempts = 0;
+        $user->login_locked_at = null;
         $user->save();
 
         return back()->with('success', 'Đổi mật khẩu thành công!');

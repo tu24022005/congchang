@@ -54,6 +54,37 @@ class ReportController extends Controller
             ->take(10)
             ->get(['id', 'name', 'email', 'created_at']);
 
+        $monthlyRevenue = (clone $ordersQuery)
+            ->whereIn('status', ['paid', 'completed'])
+            ->get(['created_at', 'total'])
+            ->groupBy(fn ($order) => $order->created_at->format('Y-m'))
+            ->map(fn ($orders) => (float) $orders->sum('total'))
+            ->sortKeys();
+
+        $topCustomers = User::whereIn('role', ['customer', 'user'])
+            ->withSum(['orders as successful_spend' => function ($orders) use ($filters) {
+                $orders->whereIn('status', ['paid', 'completed'])
+                    ->when($filters['from'] ?? null, fn ($query, $from) => $query->whereDate('created_at', '>=', $from))
+                    ->when($filters['to'] ?? null, fn ($query, $to) => $query->whereDate('created_at', '<=', $to))
+                    ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status));
+            }], 'total')
+            ->withCount(['orders as successful_orders' => function ($orders) use ($filters) {
+                $orders->whereIn('status', ['paid', 'completed'])
+                    ->when($filters['from'] ?? null, fn ($query, $from) => $query->whereDate('created_at', '>=', $from))
+                    ->when($filters['to'] ?? null, fn ($query, $to) => $query->whereDate('created_at', '<=', $to))
+                    ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status));
+            }])
+            ->orderByDesc('successful_spend')
+            ->take(10)
+            ->get();
+
+        $cancelledCount = (clone $ordersQuery)->where('status', 'cancelled')->count();
+        $refundCount = (clone $ordersQuery)->whereIn('status', ['refund_pending', 'refunded'])->count();
+        $cancelledOrRefundedCount = $cancelledCount + $refundCount;
+        $cancelledRate = $totalOrders > 0 ? round($cancelledCount / $totalOrders * 100, 1) : 0;
+        $refundRate = $totalOrders > 0 ? round($refundCount / $totalOrders * 100, 1) : 0;
+        $cancelledOrRefundedRate = $totalOrders > 0 ? round($cancelledOrRefundedCount / $totalOrders * 100, 1) : 0;
+
         // 2. Thống kê doanh thu theo danh mục sản phẩm
         $revenueByCategory = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -100,7 +131,15 @@ class ReportController extends Controller
             'topProducts',
             'statusCounts',
             'customerAccounts',
-            'filters'
+            'filters',
+            'monthlyRevenue',
+            'topCustomers',
+            'cancelledCount',
+            'refundCount',
+            'cancelledOrRefundedCount',
+            'cancelledRate',
+            'refundRate',
+            'cancelledOrRefundedRate'
         ));
     }
 

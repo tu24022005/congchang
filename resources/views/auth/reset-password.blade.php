@@ -18,7 +18,7 @@
             <input type="hidden" name="token" value="{{ $token }}">
             <div class="mb-3">
                 <label for="email" class="chill-label">Địa chỉ Email</label>
-                <input type="email" name="email" id="email" class="form-control chill-input" value="{{ old('email', $email) }}" required autofocus>
+                <input type="email" name="email" id="email" class="form-control chill-input" value="{{ old('email', $email) }}" pattern="^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$" required autofocus>
             </div>
             <div class="mb-3">
                 <label for="password" class="chill-label">Mật khẩu mới</label>

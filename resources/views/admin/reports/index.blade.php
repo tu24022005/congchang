@@ -142,6 +142,48 @@
         <div id="reportRevenueChart" class="report-revenue-chart" aria-label="Biểu đồ giá trị đơn hàng"></div>
     </section>
 
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h5 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Doanh thu theo từng tháng</h5>
+                    <small class="text-muted">Chỉ tính các đơn đã thanh toán hoặc hoàn tất trong phạm vi bộ lọc.</small>
+                </div>
+                <div class="card-body"><div id="monthlyRevenueChart" style="min-height: 300px"></div></div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h5 class="fw-bold mb-1"><i class="bi bi-arrow-repeat me-2 text-danger"></i>Tỷ lệ hủy / chuyển hoàn</h5>
+                    <small class="text-muted">Tính trên tổng số đơn trong phạm vi bộ lọc.</small>
+                </div>
+                <div class="card-body"><div id="orderOutcomeChart" style="min-height: 260px"></div>
+                    <div class="small text-muted mt-2">Hủy: <strong>{{ $cancelledCount }}</strong> đơn ({{ $cancelledRate }}%) · Chuyển/hoàn: <strong>{{ $refundCount }}</strong> đơn ({{ $refundRate }}%) · Tổng: <strong>{{ $cancelledOrRefundedCount }}</strong> đơn ({{ $cancelledOrRefundedRate }}%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+            <div><h5 class="fw-bold mb-1"><i class="bi bi-trophy me-2 text-warning"></i>Khách hàng mua nhiều nhất</h5><small class="text-muted">Xếp theo tổng giá trị đơn đã thanh toán hoặc hoàn tất.</small></div>
+            <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill">{{ $topCustomers->count() }} khách hàng</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light"><tr><th class="ps-4">#</th><th>Khách hàng</th><th>Email</th><th>Số đơn thành công</th><th class="text-end pe-4">Tổng mua</th></tr></thead>
+                <tbody>
+                    @forelse($topCustomers as $index => $customer)
+                        <tr><td class="ps-4 fw-bold text-muted">{{ $index + 1 }}</td><td class="fw-semibold">{{ $customer->name }}</td><td class="text-muted">{{ $customer->email }}</td><td>{{ $customer->successful_orders }} đơn</td><td class="text-end pe-4 text-success fw-bold">{{ number_format($customer->successful_spend ?? 0, 0, ',', '.') }} đ</td></tr>
+                    @empty
+                        <tr><td colspan="5" class="text-center text-muted py-4">Chưa có dữ liệu khách hàng mua hàng.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Hàng 2: Chi tiết báo cáo -->
     <div class="row g-4">
         <div class="col-md-5">
@@ -273,6 +315,34 @@ document.addEventListener('DOMContentLoaded', function () {
         legend: { show: false }
     });
     chart.render();
+
+    const monthlyElement = document.getElementById('monthlyRevenueChart');
+    if (monthlyElement) {
+        new ApexCharts(monthlyElement, {
+            chart: { type: 'area', height: 300, toolbar: { show: false }, fontFamily: 'DM Sans, sans-serif' },
+            series: [{ name: 'Doanh thu', data: @json($monthlyRevenue->values()->all()) }],
+            xaxis: { categories: @json($monthlyRevenue->keys()->map(fn ($month) => \Carbon\Carbon::createFromFormat('Y-m', $month)->format('m/Y'))->values()->all()) },
+            colors: ['#238b5c'],
+            stroke: { curve: 'smooth', width: 3 },
+            fill: { type: 'gradient', gradient: { opacityFrom: .35, opacityTo: .04 } },
+            dataLabels: { enabled: false },
+            yaxis: { labels: { formatter: value => formatCurrency(value) } },
+            tooltip: { y: { formatter: value => formatCurrency(value) } }
+        }).render();
+    }
+
+    const outcomeElement = document.getElementById('orderOutcomeChart');
+    if (outcomeElement) {
+        new ApexCharts(outcomeElement, {
+            chart: { type: 'donut', height: 260, fontFamily: 'DM Sans, sans-serif' },
+            series: [@json($cancelledCount), @json($refundCount), @json(max(0, $totalOrders - $cancelledOrRefundedCount))],
+            labels: ['Đã hủy', 'Chuyển/hoàn', 'Còn lại'],
+            colors: ['#d64d59', '#f0a202', '#238b5c'],
+            legend: { position: 'bottom' },
+            dataLabels: { enabled: true },
+            tooltip: { y: { formatter: value => value + ' đơn' } }
+        }).render();
+    }
 });
 </script>
 @endpush

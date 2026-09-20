@@ -2,6 +2,8 @@
 namespace App\Http\Controllers\Admin; 
 use App\Http\Controllers\Controller; 
 use App\Models\Order; 
+use App\Models\ProductVariation;
+use App\Models\InventoryLog;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -86,8 +88,28 @@ class OrderController extends Controller
         }
 
         $beforeStatus = $order->status;
-        $order->status = $request->status; 
-        $order->save(); 
+        DB::transaction(function () use ($order, $request) {
+            $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if ($request->status === 'cancelled' && $lockedOrder->status !== 'cancelled') {
+                foreach ($lockedOrder->items()->lockForUpdate()->get() as $item) {
+                    if (!$item->variation_id) {
+                        continue;
+                    }
+
+                    $variation = ProductVariation::whereKey($item->variation_id)->lockForUpdate()->first();
+                    if (!$variation) {
+                        continue;
+                    }
+
+                    $beforeStock = (int) $variation->stock;
+                    $variation->increment('stock', $item->quantity);
+                    $variation->refresh();
+                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Hoàn tồn do quản trị hủy đơn', $lockedOrder);
+                }
+            }
+            $lockedOrder->update(['status' => $request->status]);
+        });
+        $order->refresh();
         ActivityLogService::record('order.status.updated', 'Đã cập nhật trạng thái đơn #' . $order->id . '.', $order, ['status' => $beforeStatus], ['status' => $order->status]);
         if ($order->status === 'completed') {
             app(LoyaltyPointService::class)->awardForCompletedOrder($order);

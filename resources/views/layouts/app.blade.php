@@ -78,9 +78,10 @@
                                 <ul class="dropdown-menu border-0 shadow-sm">
                                     @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 text-primary me-2"></i>Tổng quan</a></li>@endif
                                     @if(in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.orders.index') }}"><i class="bi bi-truck text-danger me-2"></i>Quản lý Đơn hàng</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.refunds.index') }}"><i class="bi bi-cash-coin text-warning me-2"></i>Yêu cầu hoàn tiền</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.members.index') }}"><i class="bi bi-people text-primary me-2"></i>Thành viên</a></li>@endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.refunds.index') }}"><i class="bi bi-cash-coin text-warning me-2"></i>Yêu cầu hoàn tiền</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.customers.index') }}"><i class="bi bi-person-lines-fill text-primary me-2"></i>Tài khoản khách hàng</a></li>@endif
                                     <li><hr class="dropdown-divider"></li>
                                     @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.products.index') }}"><i class="bi bi-box-seam text-success me-2"></i>Kho sản phẩm</a></li>@endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.inventory-logs.index') }}"><i class="bi bi-clock-history text-primary me-2"></i>Lịch sử nhập xuất kho</a></li>@endif
                                     @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags text-warning me-2"></i>Danh mục</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.vouchers.index') }}"><i class="bi bi-ticket-perforated text-success me-2"></i>Mã giảm giá</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.posts.index') }}"><i class="bi bi-newspaper text-primary me-2"></i>Blog / Tin tức</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.reports.index') }}"><i class="bi bi-bar-chart-line text-info me-2"></i>Báo cáo</a></li>@endif
                                     @if(in_array(Auth::user()->role, ['admin', 'customer_service'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.chat.index') }}"><i class="bi bi-chat-dots text-info me-2"></i>Chat CSKH</a></li>@endif
                                     @if(Auth::user()->role === 'admin')<li><a class="dropdown-item py-2" href="{{ route('admin.staff.index') }}"><i class="bi bi-shield-lock text-danger me-2"></i>Phân quyền nhân viên</a></li>@endif
@@ -488,5 +489,28 @@
         </script>
     @endauth
     @stack('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('input[type="password"]').forEach(function (input) {
+                if (input.parentElement.querySelector('.password-toggle')) return;
+
+                const container = input.parentElement;
+                container.classList.add('password-field');
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'password-toggle';
+                button.setAttribute('aria-label', 'Hiện mật khẩu');
+                button.innerHTML = '<i class="bi bi-eye"></i>';
+                button.addEventListener('click', function () {
+                    const visible = input.type === 'text';
+                    input.type = visible ? 'password' : 'text';
+                    button.setAttribute('aria-label', visible ? 'Hiện mật khẩu' : 'Ẩn mật khẩu');
+                    button.innerHTML = visible ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+                });
+                container.appendChild(button);
+            });
+        });
+    </script>
 </body>
 </html>

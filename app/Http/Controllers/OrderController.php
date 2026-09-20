@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Voucher;
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Models\InventoryLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\LoyaltyPointService;
@@ -171,7 +172,10 @@ class OrderController extends Controller
                     if ($variation->stock < $details['quantity']) {
                         throw new \RuntimeException('Biến thể ' . ($details['variation'] ?? '') . ' vừa hết hàng.');
                     }
+                    $beforeStock = (int) $variation->stock;
                     $variation->decrement('stock', $details['quantity']);
+                    $variation->refresh();
+                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Xuất kho theo đơn hàng', $order);
                 } else {
                     $product = Product::whereKey($productId)->lockForUpdate()->first();
                     if (!$product || $product->quantity < $details['quantity']) {
@@ -361,7 +365,13 @@ class OrderController extends Controller
     {
         foreach ($order->items()->lockForUpdate()->get() as $item) {
             if ($item->variation_id) {
-                ProductVariation::whereKey($item->variation_id)->lockForUpdate()->increment('stock', $item->quantity);
+                $variation = ProductVariation::whereKey($item->variation_id)->lockForUpdate()->first();
+                if ($variation) {
+                    $beforeStock = (int) $variation->stock;
+                    $variation->increment('stock', $item->quantity);
+                    $variation->refresh();
+                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Hoàn tồn do hủy đơn', $order);
+                }
             } else {
                 Product::whereKey($item->product_id)->lockForUpdate()->increment('quantity', $item->quantity);
             }

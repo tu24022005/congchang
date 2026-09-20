@@ -26,19 +26,19 @@
 
                     <!-- Ô nhập Email -->
                     <div class="form-floating mb-3 text-dark">
-                        <input type="email" class="form-control fw-bold auth-register-input" id="email" name="email" placeholder="name@example.com" required>
+                        <input type="email" class="form-control fw-bold auth-register-input" id="email" name="email" placeholder="name@example.com" pattern="^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$" required>
                         <label for="email"><i class="bi bi-envelope-fill text-warning"></i> Địa chỉ Email</label>
                     </div>
 
                     <!-- Ô nhập Mật khẩu -->
                     <div class="form-floating mb-3 text-dark">
-                        <input type="password" class="form-control fw-bold auth-register-input" id="password" name="password" placeholder="Mật khẩu" required>
+                        <input type="password" class="form-control fw-bold auth-register-input" id="password" name="password" placeholder="Mật khẩu (tối thiểu 8 ký tự)" minlength="8" required>
                         <label for="password"><i class="bi bi-lock-fill text-warning"></i> Mật khẩu</label>
                     </div>
 
                     <!-- Ô Xác nhận Mật khẩu -->
                     <div class="form-floating mb-4 text-dark">
-                        <input type="password" class="form-control fw-bold auth-register-input" id="password_confirmation" name="password_confirmation" placeholder="Xác nhận mật khẩu" required>
+                        <input type="password" class="form-control fw-bold auth-register-input" id="password_confirmation" name="password_confirmation" placeholder="Xác nhận mật khẩu" minlength="8" required>
                         <label for="password_confirmation"><i class="bi bi-shield-lock-fill text-warning"></i> Xác nhận mật khẩu</label>
                     </div>
 

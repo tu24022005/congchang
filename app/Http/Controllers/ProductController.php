@@ -195,23 +195,50 @@ class ProductController extends Controller
     // Đã cấu hình lại: Xử lý hiển thị danh sách sản phẩm VÀ Tìm kiếm
     public function userIndex(Request $request)
     {
-        $query = Product::with(['category', 'variations']);
+        $validated = $request->validate([
+            'category' => ['nullable', 'integer', 'exists:categories,id'],
+            'min_price' => ['nullable', 'numeric', 'min:0'],
+            'max_price' => ['nullable', 'numeric', 'gte:min_price'],
+            'rating' => ['nullable', 'numeric', 'min:1', 'max:5'],
+            'sort' => ['nullable', 'in:newest,price_asc,price_desc,rating_desc'],
+        ]);
+
+        $query = Product::with(['category', 'variations'])
+            ->withAvg('reviews', 'rating')
+            ->withMin('variations', 'price');
         $categories = Category::withCount('products')->orderBy('name')->get();
 
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->integer('category'));
+        if (!empty($validated['category'])) {
+            $query->where('category_id', $validated['category']);
         }
 
-        // Logic Tìm kiếm khi nhập vào thanh Search trên Header
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where('name', 'LIKE', '%' . $searchTerm . '%')
-                  ->orWhere('description', 'LIKE', '%' . $searchTerm . '%');
+        if ($request->filled('search')) {
+            $searchTerm = trim((string) $request->input('search'));
+            $query->where(function ($searchQuery) use ($searchTerm): void {
+                $searchQuery->where('name', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('description', 'LIKE', '%' . $searchTerm . '%');
+            });
         }
 
-        // Phân 8 sản phẩm 1 trang và đưa lên giao diện
-        $products = $query->latest()->paginate(8);
-        $products->appends(['search' => $request->search]);
+        $priceExpression = 'COALESCE((SELECT MIN(pv.price) FROM product_variations pv WHERE pv.product_id = products.id), products.price)';
+        if (array_key_exists('min_price', $validated)) {
+            $query->whereRaw($priceExpression . ' >= ?', [$validated['min_price']]);
+        }
+        if (array_key_exists('max_price', $validated)) {
+            $query->whereRaw($priceExpression . ' <= ?', [$validated['max_price']]);
+        }
+        if (!empty($validated['rating'])) {
+            $query->whereRaw('(SELECT COALESCE(AVG(pr.rating), 0) FROM product_reviews pr WHERE pr.product_id = products.id) >= ?', [$validated['rating']]);
+        }
+
+        match ($validated['sort'] ?? 'newest') {
+            'price_asc' => $query->orderByRaw($priceExpression . ' ASC'),
+            'price_desc' => $query->orderByRaw($priceExpression . ' DESC'),
+            'rating_desc' => $query->orderByDesc('reviews_avg_rating')->orderByDesc('products.created_at'),
+            default => $query->latest('products.created_at'),
+        };
+
+        $products = $query->paginate(8)->withQueryString();
         $wishlistProductIds = $request->user()->wishlistProducts()->pluck('products.id');
 
         return view('products.index', compact('products', 'categories', 'wishlistProductIds'));

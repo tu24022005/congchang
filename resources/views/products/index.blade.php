@@ -27,6 +27,51 @@
     </div>
 </section>
 
+<form method="GET" action="{{ route('products.index') }}" class="card border-0 shadow-sm p-3 mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Danh mục</label>
+            <select name="category" class="form-select">
+                <option value="">Tất cả danh mục</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold">Giá từ</label>
+            <input type="number" name="min_price" class="form-control" min="0" value="{{ request('min_price') }}" placeholder="0">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold">Giá đến</label>
+            <input type="number" name="max_price" class="form-control" min="0" value="{{ request('max_price') }}" placeholder="Không giới hạn">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold">Đánh giá tối thiểu</label>
+            <select name="rating" class="form-select">
+                <option value="">Tất cả</option>
+                @for($rating = 5; $rating >= 1; $rating--)
+                    <option value="{{ $rating }}" @selected((string) request('rating') === (string) $rating)>{{ $rating }} sao trở lên</option>
+                @endfor
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Sắp xếp</label>
+            <select name="sort" class="form-select">
+                <option value="newest" @selected(request('sort', 'newest') === 'newest')>Mới nhất</option>
+                <option value="price_asc" @selected(request('sort') === 'price_asc')>Giá tăng dần</option>
+                <option value="price_desc" @selected(request('sort') === 'price_desc')>Giá giảm dần</option>
+                <option value="rating_desc" @selected(request('sort') === 'rating_desc')>Đánh giá cao nhất</option>
+            </select>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <input type="hidden" name="search" value="{{ request('search') }}">
+            <button class="btn btn-primary rounded-pill px-4"><i class="bi bi-funnel me-1"></i>Áp dụng</button>
+            <a href="{{ route('products.index') }}" class="btn btn-outline-secondary rounded-pill px-4">Xóa lọc</a>
+        </div>
+    </div>
+</form>
+
 <!-- DANH SÁCH SẢN PHẨM -->
 <div class="row g-4">
     @forelse($products as $product)
@@ -73,6 +118,11 @@
                         {{ number_format($displayMinPrice, 0, ',', '.') }} ₫
                     @endif
                 </h5>
+                <div class="small text-warning mb-2">
+                    <i class="bi bi-star-fill"></i>
+                    {{ $product->reviews_avg_rating ? number_format($product->reviews_avg_rating, 1) : 'Chưa có' }}
+                    @if($product->reviews_avg_rating)<span class="text-muted">/ 5</span>@endif
+                </div>
                 <p class="text-muted small mb-3"><i class="bi bi-box-seam me-1"></i>Còn lại: {{ $product->quantity > 0 ? $product->quantity : 'Hết hàng' }}</p>
 
                 <a href="{{ route('products.show', $product->id) }}" class="btn btn-cyan w-100 rounded-pill py-2 mt-auto">KHÁM PHÁ NGAY</a>

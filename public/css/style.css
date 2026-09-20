@@ -157,6 +157,11 @@ main {
 .chat-header-admin { background: linear-gradient(135deg, #FF416C, #FF4B2B); }
 .chat-header-user { background: linear-gradient(135deg, #00c6ff, #0072ff); }
 .chat-back-button, .chat-close-button, .chat-user-item { cursor: pointer; }
+
+@media (max-width: 576px) {
+    .chat-widget-button { right: 1rem; bottom: 1rem; }
+    .chat-widget-window { right: 1rem; bottom: 5.75rem; width: min(350px, calc(100vw - 2rem)); }
+}
 .chat-back-button { font-size: 1.2rem; }
 .chat-user-list, .chat-messages { overflow-y: auto; }
 .chat-user-list { background: rgba(255,255,255,0.9); }

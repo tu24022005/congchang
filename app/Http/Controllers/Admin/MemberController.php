@@ -88,16 +88,20 @@ class MemberController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email:rfc', 'regex:/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/D', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/', Rule::unique('users', 'phone')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ], [
             'email.regex' => 'Email phải có tên miền hợp lệ, ví dụ: ten@gmail.com.',
+            'phone.regex' => 'Số điện thoại Việt Nam không hợp lệ.',
+            'phone.unique' => 'Số điện thoại này đã được sử dụng.',
             'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
         ]);
 
-        $before = ['name' => $user->name, 'email' => $user->email];
+        $before = ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone];
         $user->name = $data['name'];
         $user->email = $data['email'];
+        $user->phone = $data['phone'] ?? null;
         if (filled($data['password'] ?? null)) {
             $user->password = Hash::make($data['password']);
             $user->login_attempts = 0;
@@ -110,7 +114,7 @@ class MemberController extends Controller
             'Đã cập nhật tài khoản khách hàng ' . $user->name . '.',
             $user,
             $before,
-            ['name' => $user->name, 'email' => $user->email]
+            ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone]
         );
 
         return redirect()->route('admin.members.show', $user)->with('success', 'Đã cập nhật tài khoản khách hàng.');

@@ -13,7 +13,8 @@
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
-                <h4 class="fw-bold">{{ $user->name }}</h4><p class="text-muted">{{ $user->email }}</p>
+                <h4 class="fw-bold">{{ $user->name }}</h4><p class="text-muted mb-1">{{ $user->email }}</p>
+                <p class="text-muted"><i class="bi bi-telephone me-1"></i>{{ $user->phone ?: 'Chưa cập nhật số điện thoại' }}</p>
                 <hr>
                 <div class="d-flex justify-content-between mb-3"><span>Điểm hiện có</span><strong class="text-primary">{{ number_format($user->loyalty_points) }}</strong></div>
                 <div class="d-flex justify-content-between mb-3"><span>Hạng thành viên</span><strong class="{{ $membershipTier['class'] }}">{{ $membershipTier['name'] }}</strong></div>

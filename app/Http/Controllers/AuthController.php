@@ -203,16 +203,20 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => [...self::VALID_EMAIL_RULES, 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/', Rule::unique('users', 'phone')->ignore($user->id)],
         ], [
             'name.required' => 'Vui lòng nhập họ và tên.',
             'email.required' => 'Vui lòng nhập email.',
             'email.email' => 'Email không đúng định dạng.',
             'email.unique' => 'Email này đã được sử dụng.',
+            'phone.regex' => 'Số điện thoại Việt Nam không hợp lệ.',
+            'phone.unique' => 'Số điện thoại này đã được sử dụng.',
         ]);
 
         $emailChanged = $validated['email'] !== $user->email;
         $user->name = $validated['name'];
         $user->email = $validated['email'];
+        $user->phone = $validated['phone'] ?? null;
 
         if ($emailChanged) {
             $user->email_verified_at = null;

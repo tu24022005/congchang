@@ -21,6 +21,11 @@
                     <input id="email" type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" pattern="^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$" required>
                     @error('email')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="phone">Số điện thoại <span class="text-muted fw-normal">(không bắt buộc)</span></label>
+                    <input id="phone" type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" pattern="^(0|\+84)(3|5|7|8|9)[0-9]{8}$" autocomplete="tel">
+                    @error('phone')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                </div>
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="password">Mật khẩu mới <span class="text-muted fw-normal">(để trống nếu không đổi)</span></label>
                     <input id="password" type="password" name="password" class="form-control" minlength="8" autocomplete="new-password">

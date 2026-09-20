@@ -29,6 +29,7 @@
                 <div class="account-avatar"><i class="bi bi-person"></i></div>
                 <h2>{{ $user->name }}</h2>
                 <p class="text-muted mb-4">{{ $user->email }}</p>
+                <p class="text-muted mb-4"><i class="bi bi-telephone me-1"></i>{{ $user->phone ?: 'Chưa cập nhật số điện thoại' }}</p>
                 <div class="account-status {{ $user->hasVerifiedEmail() ? 'is-verified' : 'is-pending' }}">
                     <i class="bi {{ $user->hasVerifiedEmail() ? 'bi-patch-check-fill' : 'bi-exclamation-circle-fill' }}"></i>
                     <span>{{ $user->hasVerifiedEmail() ? 'Email đã xác thực' : 'Email chưa xác thực' }}</span>
@@ -61,10 +62,15 @@
                             <input id="name" type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required autocomplete="name">
                             @error('name')<div class="field-error">{{ $message }}</div>@enderror
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="email" class="form-label">Địa chỉ email</label>
                             <input id="email" type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required autocomplete="email">
                             @error('email')<div class="field-error">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="phone" class="form-label">Số điện thoại</label>
+                            <input id="phone" type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" pattern="^(0|\+84)(3|5|7|8|9)[0-9]{8}$" autocomplete="tel">
+                            @error('phone')<div class="field-error">{{ $message }}</div>@enderror
                         </div>
                     </div>
                     <div class="d-flex justify-content-end mt-4">
@@ -123,6 +129,11 @@
                     </div>
                 @endforeach
 
+                @if ($errors->any())
+                    <div class="alert alert-danger border-0 rounded-4 mt-3">
+                        <ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                    </div>
+                @endif
                 <form method="POST" action="{{ route('addresses.store') }}" class="row g-2">
                     @csrf
                     <div class="col-md-3"><input name="label" class="form-control" placeholder="Nhãn: Nhà riêng" required></div>
@@ -130,7 +141,7 @@
                     <div class="col-md-3"><input name="phone" class="form-control" placeholder="Số điện thoại" required></div>
                     <div class="col-md-9"><input name="address" class="form-control" placeholder="Địa chỉ chi tiết" required></div>
                     <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input"> <label class="form-check-label">Đặt mặc định</label></div>
-                    <div class="col-12"><button class="btn btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>Thêm địa chỉ</button></div>
+                    <div class="col-12"><button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Lưu địa chỉ</button></div>
                 </form>
             </div>
         </div>

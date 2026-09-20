@@ -66,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
         return $this->hasMany(Order::class);
     }
 
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
     public function wishlistProducts()
     {
         return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();

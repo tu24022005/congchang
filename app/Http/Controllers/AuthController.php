@@ -177,8 +177,9 @@ class AuthController extends Controller
         $user = $request->user();
         $completedSpend = $user->orders()->where('status', 'completed')->sum('total');
         $membershipTier = User::membershipTierFor($completedSpend);
+        $addresses = $user->addresses()->orderByDesc('is_default')->latest('id')->get();
 
-        return view('account.index', compact('user', 'completedSpend', 'membershipTier'));
+        return view('account.index', compact('user', 'completedSpend', 'membershipTier', 'addresses'));
     }
 
     public function updateAccount(Request $request)

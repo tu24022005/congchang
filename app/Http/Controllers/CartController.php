@@ -219,6 +219,7 @@ class CartController extends Controller
         }
 
         $total = collect($cart)->sum(fn (array $item) => $item['price'] * $item['quantity']);
-        return view('cart.checkout', compact('cart', 'total'));
+        $addresses = Auth::user()->addresses()->orderByDesc('is_default')->latest('id')->get();
+        return view('cart.checkout', compact('cart', 'total', 'addresses'));
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\InventoryLog;
 use App\Models\OrderVoucherUsage;
+use App\Models\Address;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -79,10 +80,11 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_name' => ['required', 'string', 'min:2', 'max:120'],
-            'customer_phone' => ['required', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
-            'customer_address' => ['required', 'string', 'min:10', 'max:500'],
+            'customer_name' => ['required_without:address_id', 'string', 'min:2', 'max:120'],
+            'customer_phone' => ['required_without:address_id', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
+            'customer_address' => ['required_without:address_id', 'string', 'min:10', 'max:500'],
             'payment_method' => 'required|in:COD,PAYOS',
+            'address_id' => ['nullable', 'integer', 'exists:addresses,id'],
         ], [
             'customer_name.required' => 'Vui lòng nhập tên người nhận.',
             'customer_name.min' => 'Tên người nhận phải có ít nhất 2 ký tự.',
@@ -95,6 +97,15 @@ class OrderController extends Controller
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
             'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
         ]);
+
+        if (!empty($validated['address_id'])) {
+            $savedAddress = Address::whereKey($validated['address_id'])
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+            $validated['customer_name'] = $savedAddress->recipient_name;
+            $validated['customer_phone'] = $savedAddress->phone;
+            $validated['customer_address'] = $savedAddress->address;
+        }
 
         $cart = $this->cartService->syncSession(Auth::user());
         

@@ -4,6 +4,11 @@
 @section('content')
 <div class="container py-4">
     <h2 class="fw-bold mb-4 text-center">Thông tin đặt hàng</h2>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        </div>
+    @endif
 
     <form action="{{ route('orders.store') }}" method="POST">
         @csrf
@@ -13,6 +18,17 @@
                 <div class="card shadow-sm border-0 bg-light">
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa chỉ nhận hàng</h5>
+                        @if ($addresses->isNotEmpty())
+                            <div class="mb-3">
+                                <label for="saved-address" class="form-label fw-bold">Chọn địa chỉ đã lưu</label>
+                                <select id="saved-address" name="address_id" class="form-select">
+                                    <option value="">Nhập địa chỉ mới</option>
+                                    @foreach ($addresses as $address)
+                                        <option value="{{ $address->id }}" data-name="{{ $address->recipient_name }}" data-phone="{{ $address->phone }}" data-address="{{ $address->address }}" @selected(old('address_id', $address->is_default ? $address->id : '') == $address->id)>{{ $address->label }} - {{ $address->recipient_name }} - {{ $address->phone }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                         
                         <!-- Lấy sẵn tên và email của user đang đăng nhập -->
                         <div class="mb-3">
@@ -80,4 +96,23 @@
         </div>
     </form>
 </div>
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selector = document.getElementById('saved-address');
+        if (!selector) return;
+        const name = document.querySelector('[name="customer_name"]');
+        const phone = document.querySelector('[name="customer_phone"]');
+        const address = document.querySelector('[name="customer_address"]');
+        const fill = () => {
+            const option = selector.options[selector.selectedIndex];
+            name.value = option.dataset.name || '';
+            phone.value = option.dataset.phone || '';
+            address.value = option.dataset.address || '';
+        };
+        selector.addEventListener('change', fill);
+        if (selector.value) fill();
+    });
+</script>
+@endpush
 @endsection

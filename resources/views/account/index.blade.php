@@ -17,6 +17,11 @@
     @if (session('success'))
         <div class="alert alert-success border-0 rounded-4 shadow-sm mb-4"><i class="bi bi-check-circle me-2"></i>{{ session('success') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger border-0 rounded-4 shadow-sm mb-4">
+            <ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        </div>
+    @endif
 
     <div class="row g-4">
         <div class="col-lg-4">
@@ -74,6 +79,59 @@
                     <a href="{{ route('password.change') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Đổi mật khẩu</a>
                 </div>
                 <div class="account-security-note"><i class="bi bi-lock-fill"></i><span>Mật khẩu của bạn được mã hóa và không hiển thị cho bất kỳ ai.</span></div>
+            </div>
+
+            <div class="account-panel mt-4">
+                <div class="account-panel-heading">
+                    <div><span class="account-panel-icon"><i class="bi bi-geo-alt-fill"></i></span><div><h3>Sổ địa chỉ giao hàng</h3><p class="mb-0">Lưu nhiều địa chỉ để chọn nhanh khi đặt hàng.</p></div></div>
+                </div>
+
+                @foreach ($addresses as $address)
+                    <div class="border rounded-3 p-3 mb-3">
+                        <div class="d-flex justify-content-between gap-3">
+                            <div>
+                                <strong>{{ $address->label }}</strong>
+                                @if ($address->is_default)<span class="badge text-bg-primary ms-2">Mặc định</span>@endif
+                                <div>{{ $address->recipient_name }} - {{ $address->phone }}</div>
+                                <div class="text-muted">{{ $address->address }}</div>
+                            </div>
+                            <div class="d-flex gap-2 align-items-start">
+                                @unless ($address->is_default)
+                                    <form method="POST" action="{{ route('addresses.default', $address) }}">
+                                        @csrf @method('PATCH')
+                                        <button class="btn btn-sm btn-outline-primary">Đặt mặc định</button>
+                                    </form>
+                                @endunless
+                                <form method="POST" action="{{ route('addresses.destroy', $address) }}" onsubmit="return confirm('Xóa địa chỉ này?')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger">Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                        <details class="mt-2">
+                            <summary class="small text-primary">Chỉnh sửa</summary>
+                            <form method="POST" action="{{ route('addresses.update', $address) }}" class="row g-2 mt-2">
+                                @csrf @method('PUT')
+                                <div class="col-md-3"><input name="label" class="form-control" value="{{ $address->label }}" required></div>
+                                <div class="col-md-3"><input name="recipient_name" class="form-control" value="{{ $address->recipient_name }}" required></div>
+                                <div class="col-md-3"><input name="phone" class="form-control" value="{{ $address->phone }}" required></div>
+                                <div class="col-md-9"><input name="address" class="form-control" value="{{ $address->address }}" required></div>
+                                <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input" @checked($address->is_default)> <label class="form-check-label">Đặt mặc định</label></div>
+                                <div class="col-12"><button class="btn btn-primary btn-sm">Lưu địa chỉ</button></div>
+                            </form>
+                        </details>
+                    </div>
+                @endforeach
+
+                <form method="POST" action="{{ route('addresses.store') }}" class="row g-2">
+                    @csrf
+                    <div class="col-md-3"><input name="label" class="form-control" placeholder="Nhãn: Nhà riêng" required></div>
+                    <div class="col-md-3"><input name="recipient_name" class="form-control" placeholder="Tên người nhận" required></div>
+                    <div class="col-md-3"><input name="phone" class="form-control" placeholder="Số điện thoại" required></div>
+                    <div class="col-md-9"><input name="address" class="form-control" placeholder="Địa chỉ chi tiết" required></div>
+                    <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input"> <label class="form-check-label">Đặt mặc định</label></div>
+                    <div class="col-12"><button class="btn btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>Thêm địa chỉ</button></div>
+                </form>
             </div>
         </div>
     </div>

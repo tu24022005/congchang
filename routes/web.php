@@ -14,6 +14,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\OrderController; 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
@@ -143,6 +144,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/loyalty-points', [\App\Http\Controllers\LoyaltyController::class, 'index'])->name('loyalty.index');
     Route::post('/loyalty-points/redeem', [\App\Http\Controllers\LoyaltyController::class, 'redeem'])->name('loyalty.redeem');
     Route::put('/account', [AuthController::class, 'updateAccount'])->name('account.update');
+    Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::patch('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
     Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
     Route::put('/change-password', [AuthController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
     

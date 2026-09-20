@@ -36,7 +36,12 @@ class WebhookController extends Controller
         $amount = (int) $data['amount'];
         
         $order = Order::find($orderId);
-        if ($order && $order->payment_method === 'PAYOS' && $amount >= (int) $order->total) {
+        if (
+            $order
+            && $order->status === 'processing'
+            && $order->payment_method === 'PAYOS'
+            && $amount >= (int) $order->total
+        ) {
             $order->status = 'paid';
             $order->save();
             Log::info("PayOS Đã tự động cập nhật đơn #{$orderId}");

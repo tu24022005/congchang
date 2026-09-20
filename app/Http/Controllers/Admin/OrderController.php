@@ -91,21 +91,9 @@ class OrderController extends Controller
         DB::transaction(function () use ($order, $request) {
             $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
             if ($request->status === 'cancelled' && $lockedOrder->status !== 'cancelled') {
-                foreach ($lockedOrder->items()->lockForUpdate()->get() as $item) {
-                    if (!$item->variation_id) {
-                        continue;
-                    }
-
-                    $variation = ProductVariation::whereKey($item->variation_id)->lockForUpdate()->first();
-                    if (!$variation) {
-                        continue;
-                    }
-
-                    $beforeStock = (int) $variation->stock;
-                    $variation->increment('stock', $item->quantity);
-                    $variation->refresh();
-                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Hoàn tồn do quản trị hủy đơn', $lockedOrder);
-                }
+                $cancellationService = app(\App\Services\OrderCancellationService::class);
+                $cancellationService->restoreStock($lockedOrder);
+                $cancellationService->releaseVouchers($lockedOrder);
             }
             $lockedOrder->update(['status' => $request->status]);
         });

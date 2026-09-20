@@ -9,6 +9,7 @@ use App\Models\Voucher;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\InventoryLog;
+use App\Models\OrderVoucherUsage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\LoyaltyPointService;
@@ -93,6 +94,7 @@ class OrderController extends Controller
             // 2. Tính toán trừ tiền Voucher (nếu có) để lưu vào DB cho chuẩn
             $discount = 0;
             $voucher = null;
+            $voucherIds = [];
             $voucherCodes = collect([session('voucher_discount.code'), session('voucher_shipping.code')])
                 ->filter()
                 ->unique()
@@ -118,6 +120,7 @@ class OrderController extends Controller
                     $discount += min($voucherDiscount, $total - $discount);
                 }
                 $voucher->increment('used_count');
+                $voucherIds[] = $voucher->id;
             }
             $serviceFee = config('shop.service_fee', 3000);
             $shippingFee = session()->has('voucher_shipping') ? 0 : $serviceFee;
@@ -137,6 +140,12 @@ class OrderController extends Controller
             $order->longitude = $request->input('longitude');
             
             $order->save(); 
+            foreach ($voucherIds as $voucherId) {
+                OrderVoucherUsage::create([
+                    'order_id' => $order->id,
+                    'voucher_id' => $voucherId,
+                ]);
+            }
 
             // 4. Lưu chi tiết từng sản phẩm
             foreach ($cart as $id => $details) {
@@ -300,6 +309,7 @@ class OrderController extends Controller
                 }
 
                 $this->restoreOrderStock($lockedOrder);
+                app(\App\Services\OrderCancellationService::class)->releaseVouchers($lockedOrder);
                 $isRefundRequest = $lockedOrder->payment_method !== 'COD' && $lockedOrder->status === 'paid';
                 $nextStatus = $isRefundRequest
                     ? 'refund_pending'
@@ -338,19 +348,7 @@ class OrderController extends Controller
 
     private function restoreOrderStock(Order $order): void
     {
-        foreach ($order->items()->lockForUpdate()->get() as $item) {
-            if ($item->variation_id) {
-                $variation = ProductVariation::whereKey($item->variation_id)->lockForUpdate()->first();
-                if ($variation) {
-                    $beforeStock = (int) $variation->stock;
-                    $variation->increment('stock', $item->quantity);
-                    $variation->refresh();
-                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Hoàn tồn do hủy đơn', $order);
-                }
-            } else {
-                Product::whereKey($item->product_id)->lockForUpdate()->increment('quantity', $item->quantity);
-            }
-        }
+        app(\App\Services\OrderCancellationService::class)->restoreStock($order);
     }
 
     // ==================================================

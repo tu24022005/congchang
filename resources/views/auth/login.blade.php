@@ -2,12 +2,12 @@
 @section('title', 'Aloha - Đăng nhập') 
 
 @section('content')
-<div class="chill-container">
+<div class="auth-login-shell chill-container">
     <div class="chill-card">
         
         <div class="chill-header">
             <h3>Aloha!</h3>
-            <p>Chào mừng bạn trở lại 🌴</p>
+            <p>Chào mừng bạn trở lại bên bờ biển Aloha 🌴</p>
         </div>
 
         {{-- Thông báo --}}

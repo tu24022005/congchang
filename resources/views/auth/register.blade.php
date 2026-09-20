@@ -2,7 +2,7 @@
 @section('title', 'Đăng ký tài khoản')
 
 @section('content')
-<div class="row justify-content-center mt-5 mb-5">
+<div class="auth-register-shell row justify-content-center mt-5 mb-5">
     <div class="col-md-5">
         <!-- Thẻ Card phong cách Thần Mặt Trời -->
         <div class="card border-0 shadow-lg auth-register-card">
@@ -10,9 +10,9 @@
                 
                 <!-- Tiêu đề & Icon phát sáng -->
                 <div class="text-center mb-4">
-                    <i class="bi bi-brightness-high-fill auth-register-icon"></i>
+                    <i class="bi bi-sun-fill auth-register-icon"></i>
                     <h2 class="fw-bold mt-2 auth-register-heading">ĐĂNG KÝ TÀI KHOẢN</h2>
-                    <p class="mb-0 text-light fw-medium">Gia nhập thế giới chăm sóc sắc đẹp của Aloha Beauty</p>
+                    <p class="mb-0 text-light fw-medium">Cùng Aloha đón nắng, đón gió và chăm sóc làn da mỗi ngày</p>
                 </div>
 
                 <form method="POST" action="{{ route('register') }}">

@@ -16,7 +16,7 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 
 </head>
-<body>
+<body class="{{ request()->routeIs('login', 'register', 'password.request', 'password.reset', 'verification.notice') ? 'auth-page' : '' }}">
 
     <!-- THANH ĐIỀU HƯỚNG GỌN GÀNG -->
     <nav class="navbar navbar-expand-lg glass-navbar shadow-sm">

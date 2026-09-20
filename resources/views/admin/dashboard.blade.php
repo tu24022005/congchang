@@ -90,6 +90,25 @@
         </div>
     </div>
 
+    @if($lowStockProducts->isNotEmpty())
+        <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4">
+            <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                <div>
+                    <strong>Cảnh báo tồn kho thấp</strong>
+                    <div class="small mt-1">Có {{ $lowStockProducts->count() }} sản phẩm đang ở mức tồn kho từ 10 trở xuống.</div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        @foreach($lowStockProducts as $lowStockProduct)
+                            <a href="{{ route('admin.products.edit', $lowStockProduct) }}" class="badge text-bg-light text-decoration-none">
+                                {{ $lowStockProduct->name }}: {{ $lowStockProduct->quantity }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Hàng 2: Trạng thái đơn hàng -->
     <div class="card border-0 shadow-sm rounded-3 mb-4">
         <div class="card-body p-4">

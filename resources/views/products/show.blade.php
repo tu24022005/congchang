@@ -163,7 +163,22 @@
                         </div>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-warning detail-buy w-100"><i class="bi bi-person me-2"></i>Đăng nhập để mua hàng</a>
+                    @auth
+                        @if($isStockAlertSubscribed)
+                            <form action="{{ route('products.stock-alert.destroy', $product) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-secondary detail-buy w-100"><i class="bi bi-bell-slash me-2"></i>Hủy báo khi có hàng</button>
+                            </form>
+                        @else
+                            <form action="{{ route('products.stock-alert.store', $product) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Báo khi có hàng</button>
+                            </form>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Đăng nhập để được báo khi có hàng</a>
+                    @endauth
                 @endauth
 
                 <div class="detail-benefit row g-3">

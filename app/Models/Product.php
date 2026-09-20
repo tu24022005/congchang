@@ -42,4 +42,9 @@ class Product extends Model
     {
         return $this->belongsToMany(User::class, 'wishlists')->withTimestamps();
     }
+
+    public function stockAlertSubscriptions()
+    {
+        return $this->hasMany(StockAlertSubscription::class);
+    }
 }

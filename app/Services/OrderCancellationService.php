@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
+use App\Services\StockAlertService;
 
 class OrderCancellationService
 {
@@ -52,7 +53,11 @@ class OrderCancellationService
 
     public function restoreStock(Order $order): void
     {
+        $previousQuantities = [];
+        $productIds = [];
         foreach ($order->items()->lockForUpdate()->get() as $item) {
+            $productIds[] = $item->product_id;
+            $previousQuantities[$item->product_id] ??= (int) Product::whereKey($item->product_id)->value('quantity');
             if ($item->variation_id) {
                 $variation = ProductVariation::whereKey($item->variation_id)->lockForUpdate()->first();
                 if (!$variation) {
@@ -67,6 +72,23 @@ class OrderCancellationService
             }
 
             Product::whereKey($item->product_id)->lockForUpdate()->increment('quantity', $item->quantity);
+        }
+
+        foreach (array_unique($productIds) as $productId) {
+            $product = Product::whereKey($productId)->lockForUpdate()->first();
+            if (!$product) {
+                continue;
+            }
+
+            if ($product->variations()->exists()) {
+                $product->update(['quantity' => $product->variations()->sum('stock')]);
+                $product->refresh();
+            }
+            app(StockAlertService::class)->notifyIfRestocked(
+                $product,
+                $previousQuantities[$productId] ?? 0,
+                (int) $product->quantity
+            );
         }
     }
 

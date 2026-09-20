@@ -16,6 +16,7 @@ use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\OrderController; 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\StockAlertController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
@@ -159,6 +160,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     Route::patch('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
+    Route::post('/products/{product}/stock-alert', [StockAlertController::class, 'store'])->name('products.stock-alert.store');
+    Route::delete('/products/{product}/stock-alert', [StockAlertController::class, 'destroy'])->name('products.stock-alert.destroy');
     Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
     Route::put('/change-password', [AuthController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
     

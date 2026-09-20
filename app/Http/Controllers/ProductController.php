@@ -153,7 +153,9 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:0',
         ]);
         $before = ['quantity' => $product->quantity];
+        $previousQuantity = (int) $product->quantity;
         $product->update(['quantity' => $data['quantity']]);
+        app(\App\Services\StockAlertService::class)->notifyIfRestocked($product, $previousQuantity, (int) $product->quantity);
         ActivityLogService::record('product.stock.updated', 'Đã cập nhật tồn kho sản phẩm ' . $product->name . '.', $product, $before, ['quantity' => $product->quantity]);
 
         return back()->with('success', 'Đã cập nhật tồn kho sản phẩm.');
@@ -170,6 +172,7 @@ class ProductController extends Controller
 
         $before = [];
         $after = [];
+        $previousQuantity = (int) $product->quantity;
         DB::transaction(function () use ($data, $product, &$before, &$after) {
             foreach ($data['variations'] as $variationData) {
                 $variation = $product->variations()->whereKey($variationData['id'])->lockForUpdate()->firstOrFail();
@@ -183,6 +186,8 @@ class ProductController extends Controller
 
             $product->update(['quantity' => $product->variations()->sum('stock')]);
         });
+        $product->refresh();
+        app(\App\Services\StockAlertService::class)->notifyIfRestocked($product, $previousQuantity, (int) $product->quantity);
         ActivityLogService::record('product.variation-stock.updated', 'Đã cập nhật tồn kho biến thể của ' . $product->name . '.', $product, $before, $after);
 
         return back()->with('success', 'Đã cập nhật tồn kho từng mã loại thành công.');
@@ -253,6 +258,9 @@ class ProductController extends Controller
         $isWishlisted = $request->user()
             ? $request->user()->wishlistProducts()->whereKey($product->id)->exists()
             : false;
+        $isStockAlertSubscribed = $request->user()
+            ? $request->user()->stockAlertSubscriptions()->where('product_id', $product->id)->exists()
+            : false;
 
         // =========================================================
         // THUẬT TOÁN APRIORI - KHAI PHÁ DỮ LIỆU ĐƠN HÀNG (AI TỰ HỌC)
@@ -283,7 +291,7 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('products.show', compact('product', 'recommendations', 'isWishlisted'));
+        return view('products.show', compact('product', 'recommendations', 'isWishlisted', 'isStockAlertSubscribed'));
     }
 
     private function syncVariations(Product $product, array $variations, array $variationFiles = []): void

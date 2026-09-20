@@ -15,6 +15,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\OrderController; 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
@@ -26,6 +27,10 @@ use App\Http\Controllers\Admin\PostCategoryController as AdminPostCategoryContro
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/blog', [PostController::class, 'index'])->name('posts.index');
 Route::get('/blog/{slug}', [PostController::class, 'show'])->name('posts.show');
+Route::get('/about', [PageController::class, 'about'])->name('pages.about');
+Route::get('/contact', [PageController::class, 'contact'])->name('pages.contact');
+Route::get('/policies', [PageController::class, 'policies'])->name('pages.policies');
+Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
 
 // ==================================================
 // ĐĂNG NHẬP GOOGLE (ĐỂ NGOÀI CÙNG ĐỂ AI CŨNG BẤM ĐƯỢC)

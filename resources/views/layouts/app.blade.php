@@ -46,6 +46,15 @@
                             Blog làm đẹp
                         </a>
                     </li>
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle text-nowrap fw-semibold {{ request()->routeIs('pages.*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Về Aloha</a>
+                        <ul class="dropdown-menu border-0 shadow-sm">
+                            <li><a class="dropdown-item" href="{{ route('pages.about') }}">Giới thiệu</a></li>
+                            <li><a class="dropdown-item" href="{{ route('pages.contact') }}">Liên hệ</a></li>
+                            <li><a class="dropdown-item" href="{{ route('pages.policies') }}">Đổi trả & vận chuyển</a></li>
+                            <li><a class="dropdown-item" href="{{ route('pages.faq') }}">Câu hỏi thường gặp</a></li>
+                        </ul>
+                    </li>
                 </ul>
 
                 <!-- THANH TÌM KIẾM TRUNG TÂM CO GỢI Ý (LIVE SEARCH) -->
@@ -177,9 +186,10 @@
                     <ul class="list-unstyled footer-menu">
                         <li><a href="{{ route('cart.index') }}">Giỏ hàng của bạn</a></li>
                         <li><a href="{{ route('orders.index') }}">Theo dõi đơn hàng</a></li>
-                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#supportPolicyModal" data-policy="returns">Đổi trả & hoàn tiền</a></li>
-                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#supportPolicyModal" data-policy="shipping">Giao hàng & thanh toán</a></li>
-                        <li><a href="mailto:contact@phungthanhtuc.com">Liên hệ Aloha</a></li>
+                        <li><a href="{{ route('pages.policies') }}">Đổi trả & hoàn tiền</a></li>
+                        <li><a href="{{ route('pages.policies') }}">Giao hàng & thanh toán</a></li>
+                        <li><a href="{{ route('pages.contact') }}">Liên hệ Aloha</a></li>
+                        <li><a href="{{ route('pages.faq') }}">Câu hỏi thường gặp</a></li>
                     </ul>
                 </div>
 

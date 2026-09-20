@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
 use App\Services\ActivityLogService;
 
 class MemberController extends Controller
@@ -29,6 +30,48 @@ class MemberController extends Controller
         $members = $query->paginate(15)->withQueryString();
 
         return view('admin.members.index', compact('members'));
+    }
+
+    public function create()
+    {
+        return view('admin.members.create');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email:rfc', 'regex:/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/D', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/', 'unique:users,phone'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.regex' => 'Email phải có tên miền hợp lệ, ví dụ: ten@gmail.com.',
+            'email.unique' => 'Email này đã được sử dụng.',
+            'phone.regex' => 'Số điện thoại Việt Nam không hợp lệ.',
+            'phone.unique' => 'Số điện thoại này đã được sử dụng.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'password' => Hash::make($data['password']),
+            'role' => 'customer',
+            'email_verified_at' => Carbon::now(),
+        ]);
+
+        ActivityLogService::record(
+            'customer.created',
+            'Đã tạo tài khoản khách hàng ' . $user->name . '.',
+            $user,
+            null,
+            ['name' => $user->name, 'email' => $user->email]
+        );
+
+        return redirect()->route('admin.customers.index')
+            ->with('success', 'Đã tạo tài khoản khách hàng thành công.');
     }
 
     public function edit(User $user)

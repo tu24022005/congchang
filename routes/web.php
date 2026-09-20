@@ -106,6 +106,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('members.update');
     Route::delete('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('members.destroy');
     Route::get('/customers', [\App\Http\Controllers\Admin\MemberController::class, 'index'])->middleware('role:admin,manager')->name('customers.index');
+    Route::get('/customers/create', [\App\Http\Controllers\Admin\MemberController::class, 'create'])->middleware('role:admin,manager')->name('customers.create');
+    Route::post('/customers', [\App\Http\Controllers\Admin\MemberController::class, 'store'])->middleware('role:admin,manager')->name('customers.store');
     Route::get('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'show'])->middleware('role:admin,manager')->name('customers.show');
     Route::get('/customers/{user}/edit', [\App\Http\Controllers\Admin\MemberController::class, 'edit'])->middleware('role:admin,manager')->name('customers.edit');
     Route::put('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('customers.update');

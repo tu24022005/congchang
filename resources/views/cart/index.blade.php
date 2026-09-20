@@ -105,7 +105,7 @@
                 </a>
 
                 <!-- BẮT ĐẦU FORM ĐẶT HÀNG CHÍNH -->
-                <form action="{{ route('orders.store') }}" method="POST">
+                <form action="{{ route('orders.store') }}" method="POST" id="checkout-order-form">
                     @csrf
                     <div class="card border-0 shadow-sm rounded-4 storefront-panel-card">
                         <div class="card-body p-4">
@@ -353,8 +353,29 @@
         form.method = 'POST';
         form.action = @json(route('cart.apply_voucher'));
         form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}"><input type="hidden" name="voucher_code" value="${code}">`;
+        preserveCheckoutDetails(form);
         document.body.appendChild(form);
         form.submit();
+    });
+
+    function preserveCheckoutDetails(targetForm) {
+        const checkoutForm = document.getElementById('checkout-order-form');
+        if (!checkoutForm) return;
+
+        checkoutForm.querySelectorAll('[name]').forEach(function (field) {
+            if (field.name === 'payment_method' && !field.checked) return;
+            if (field.type === 'submit' || field.type === 'button' || field.name === 'voucher_codes[]') return;
+
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = field.name;
+            hidden.value = field.value;
+            targetForm.appendChild(hidden);
+        });
+    }
+
+    document.getElementById('selected-vouchers-form')?.addEventListener('submit', function () {
+        preserveCheckoutDetails(this);
     });
 
     document.querySelectorAll('.voucher-choice').forEach(function (choice) {

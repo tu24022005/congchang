@@ -266,10 +266,9 @@
                         <label class="form-label fw-bold text-secondary small">ĐƠN VỊ VẬN CHUYỂN</label>
                         <select name="shipping_provider" class="form-select border-primary shadow-sm">
                             <option value="">-- Chưa chỉ định --</option>
-                            <option value="Giao Hàng Tiết Kiệm" {{ $order->shipping_provider == 'Giao Hàng Tiết Kiệm' ? 'selected' : '' }}>Giao Hàng Tiết Kiệm</option>
-                            <option value="Viettel Post" {{ $order->shipping_provider == 'Viettel Post' ? 'selected' : '' }}>Viettel Post</option>
-                            <option value="Shopee Express" {{ $order->shipping_provider == 'Shopee Express' ? 'selected' : '' }}>Shopee Express</option>
-                            <option value="J&T Express" {{ $order->shipping_provider == 'J&T Express' ? 'selected' : '' }}>J&T Express</option>
+                            @foreach(config('shop.shipping_providers', []) as $key => $label)
+                                <option value="{{ $key }}" @selected($order->shipping_provider === $key)>{{ $label }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-4">

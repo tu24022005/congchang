@@ -57,6 +57,15 @@
                             </select>
                             <small class="text-muted">Phí được tính theo khu vực, voucher miễn phí vận chuyển sẽ được áp dụng nếu đủ điều kiện.</small>
                         </div>
+                        <div class="mb-3">
+                            <label for="shipping-provider" class="form-label fw-bold">Đơn vị vận chuyển</label>
+                            <select name="shipping_provider" id="shipping-provider" class="form-select" required>
+                                <option value="">-- Chọn đơn vị vận chuyển --</option>
+                                @foreach(config('shop.shipping_providers', []) as $key => $label)
+                                    <option value="{{ $key }}" @selected(old('shipping_provider') === $key)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>

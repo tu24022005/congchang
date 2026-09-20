@@ -124,6 +124,26 @@
                                 <input type="hidden" name="latitude" id="delivery-latitude" value="{{ old('latitude') }}">
                                 <input type="hidden" name="longitude" id="delivery-longitude" value="{{ old('longitude') }}">
                             </div>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">
+                                    <label for="shipping-zone" class="form-label text-muted small">Khu vực giao hàng:</label>
+                                    <select name="shipping_zone" id="shipping-zone" class="form-select rounded-3" required>
+                                        <option value="">-- Chọn khu vực --</option>
+                                        @foreach(config('shop.shipping_zones', []) as $key => $zone)
+                                            <option value="{{ $key }}" data-fee="{{ $zone['fee'] }}" @selected(old('shipping_zone') === $key)>{{ $zone['label'] }} - {{ number_format($zone['fee'], 0, ',', '.') }}đ</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="shipping-provider" class="form-label text-muted small">Đơn vị vận chuyển:</label>
+                                    <select name="shipping_provider" id="shipping-provider" class="form-select rounded-3" required>
+                                        <option value="">-- Chọn đơn vị --</option>
+                                        @foreach(config('shop.shipping_providers', []) as $key => $label)
+                                            <option value="{{ $key }}" @selected(old('shipping_provider') === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="delivery-map-tools mt-3"><div class="input-group"><input type="search" name="map_search" id="map-search" class="form-control" placeholder="Tìm địa chỉ trên bản đồ..." value="{{ old('map_search') }}"><button type="button" id="map-search-button" class="btn btn-primary"><i class="bi bi-search"></i></button></div><button type="button" id="use-current-location" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-crosshair me-1"></i>Dùng vị trí hiện tại</button><span id="map-status" class="small text-muted ms-2"></span></div>
                             <div id="delivery-map" class="delivery-map mt-3"></div>
                         </div>
@@ -149,7 +169,7 @@
 
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Phí vận chuyển:</span>
-                            <span class="fw-bold" id="cart-service-fee">Tính ở bước thanh toán</span>
+                            <span class="fw-bold" id="cart-service-fee">Chọn khu vực</span>
                         </div>
 
                         <!-- HIỂN THỊ DÒNG TIỀN ĐƯỢC GIẢM -->
@@ -349,8 +369,8 @@
     const money = value => new Intl.NumberFormat('vi-VN').format(Math.round(value));
     const discountType = @json($discountVoucher['type'] ?? null);
     const discountValue = Number(@json($discountVoucher['value'] ?? 0));
-    const serviceFee = Number(@json($serviceFee ?? 0));
     const hasShippingVoucher = @json((bool) $shippingVoucher);
+    const shippingZone = document.getElementById('shipping-zone');
 
     function refreshCartTotals() {
         let subtotal = 0;
@@ -367,10 +387,15 @@
         if (discountType === 'fixed') discount = discountValue;
         if (discountType === 'percent') discount = subtotal * discountValue / 100;
         discount = Math.min(discount, subtotal);
-        const total = subtotal - discount + (hasShippingVoucher ? 0 : serviceFee);
+        const selectedZone = shippingZone?.options[shippingZone.selectedIndex];
+        const shippingFee = hasShippingVoucher ? 0 : Number(selectedZone?.dataset.fee || 0);
+        const total = subtotal - discount + shippingFee;
 
         document.getElementById('cart-subtotal').textContent = money(subtotal) + ' đ';
         document.getElementById('cart-discount')?.replaceChildren(document.createTextNode(money(discount)));
+        document.getElementById('cart-service-fee').textContent = hasShippingVoucher
+            ? 'Miễn phí'
+            : shippingFee > 0 ? money(shippingFee) + ' đ' : 'Chọn khu vực';
         document.getElementById('cart-final-total').textContent = money(total) + ' đ';
     }
 
@@ -381,6 +406,7 @@
             input.form.dataset.updateTimer = setTimeout(() => input.form.submit(), 500);
         });
     });
+    shippingZone?.addEventListener('change', refreshCartTotals);
     refreshCartTotals();
     </script>
 @endpush

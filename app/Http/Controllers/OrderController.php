@@ -84,6 +84,7 @@ class OrderController extends Controller
             'customer_phone' => ['required_without:address_id', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
             'customer_address' => ['required_without:address_id', 'string', 'min:10', 'max:500'],
             'shipping_zone' => ['required', 'string', 'in:' . implode(',', array_keys(config('shop.shipping_zones', [])))],
+            'shipping_provider' => ['required', 'string', 'in:' . implode(',', array_keys(config('shop.shipping_providers', [])))],
             'payment_method' => 'required|in:COD,PAYOS',
             'address_id' => ['nullable', 'integer', 'exists:addresses,id'],
         ], [
@@ -99,6 +100,8 @@ class OrderController extends Controller
             'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
             'shipping_zone.required' => 'Vui lòng chọn khu vực giao hàng.',
             'shipping_zone.in' => 'Khu vực giao hàng không hợp lệ.',
+            'shipping_provider.required' => 'Vui lòng chọn đơn vị vận chuyển.',
+            'shipping_provider.in' => 'Đơn vị vận chuyển không hợp lệ.',
         ]);
 
         if (!empty($validated['address_id'])) {
@@ -172,6 +175,7 @@ class OrderController extends Controller
             $order->customer_address = $validated['customer_address'];
             $order->shipping_zone = $validated['shipping_zone'];
             $order->shipping_fee = $shippingFee;
+            $order->shipping_provider = $validated['shipping_provider'];
             $order->latitude = $request->input('latitude');
             $order->longitude = $request->input('longitude');
             

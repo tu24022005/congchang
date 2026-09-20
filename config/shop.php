@@ -16,4 +16,11 @@ return [
             'fee' => 35000,
         ],
     ],
+    'shipping_providers' => [
+        'GHN' => 'Giao Hàng Nhanh (GHN)',
+        'GHTK' => 'Giao Hàng Tiết Kiệm (GHTK)',
+        'Viettel Post' => 'Viettel Post',
+        'J&T Express' => 'J&T Express',
+        'Shopee Express' => 'Shopee Express',
+    ],
 ];

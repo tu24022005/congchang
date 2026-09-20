@@ -17,17 +17,17 @@
                         <!-- Lấy sẵn tên và email của user đang đăng nhập -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Họ và tên người nhận</label>
-                            <input type="text" name="customer_name" class="form-control" value="{{ Auth::user()->name }}" required>
+                            <input type="text" name="customer_name" class="form-control" value="{{ old('customer_name', Auth::user()->name) }}" minlength="2" maxlength="120" required>
                         </div>
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Số điện thoại liên hệ</label>
-                            <input type="text" name="customer_phone" class="form-control" placeholder="Ví dụ: 0987654321" required>
+                            <input type="tel" name="customer_phone" class="form-control" value="{{ old('customer_phone') }}" placeholder="Ví dụ: 0987654321" pattern="(0|\+84)(3|5|7|8|9)[0-9]{8}" maxlength="12" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Địa chỉ giao hàng chi tiết</label>
-                            <textarea name="customer_address" class="form-control" rows="3" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required></textarea>
+                            <textarea name="customer_address" class="form-control" rows="3" minlength="10" maxlength="500" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>{{ old('customer_address') }}</textarea>
                         </div>
                     </div>
                 </div>

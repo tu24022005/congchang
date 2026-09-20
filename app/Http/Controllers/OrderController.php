@@ -77,8 +77,22 @@ class OrderController extends Controller
     // ==================================================
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
+            'customer_name' => ['required', 'string', 'min:2', 'max:120'],
+            'customer_phone' => ['required', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
+            'customer_address' => ['required', 'string', 'min:10', 'max:500'],
             'payment_method' => 'required|in:COD,PAYOS',
+        ], [
+            'customer_name.required' => 'Vui lòng nhập tên người nhận.',
+            'customer_name.min' => 'Tên người nhận phải có ít nhất 2 ký tự.',
+            'customer_name.max' => 'Tên người nhận không được vượt quá 120 ký tự.',
+            'customer_phone.required' => 'Vui lòng nhập số điện thoại.',
+            'customer_phone.regex' => 'Số điện thoại không đúng định dạng Việt Nam.',
+            'customer_address.required' => 'Vui lòng nhập địa chỉ giao hàng.',
+            'customer_address.min' => 'Địa chỉ giao hàng phải có ít nhất 10 ký tự.',
+            'customer_address.max' => 'Địa chỉ giao hàng không được vượt quá 500 ký tự.',
+            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
+            'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
         ]);
 
         $cart = $this->cartService->syncSession(Auth::user());
@@ -135,11 +149,11 @@ class OrderController extends Controller
             $order->user_id = Auth::id();
             $order->total = $finalTotal; 
             $order->status = 'processing';
-            $order->payment_method = $request->input('payment_method');
+            $order->payment_method = $validated['payment_method'];
             
-            $order->customer_name = $request->customer_name;
-            $order->customer_phone = $request->customer_phone;
-            $order->customer_address = $request->customer_address;
+            $order->customer_name = $validated['customer_name'];
+            $order->customer_phone = $validated['customer_phone'];
+            $order->customer_address = $validated['customer_address'];
             $order->latitude = $request->input('latitude');
             $order->longitude = $request->input('longitude');
             

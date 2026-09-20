@@ -70,6 +70,16 @@
                 @enderror
             </div>
 
+            <div class="border rounded-3 p-3 mb-4 bg-warning-subtle">
+                <h5 class="fw-bold mb-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Flash sale</h5>
+                <small class="text-muted d-block mb-3">Giá flash sale áp dụng cho toàn bộ biến thể trong khung giờ đã chọn.</small>
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label">Giá flash sale</label><input type="number" min="0" name="flash_sale_price" value="{{ old('flash_sale_price') }}" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Bắt đầu</label><input type="datetime-local" name="flash_sale_starts_at" value="{{ old('flash_sale_starts_at') }}" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Kết thúc</label><input type="datetime-local" name="flash_sale_ends_at" value="{{ old('flash_sale_ends_at') }}" class="form-control"></div>
+                </div>
+            </div>
+
             @php $variationRows = old('variations', [[]]); @endphp
             <div class="border rounded-3 p-3 mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">

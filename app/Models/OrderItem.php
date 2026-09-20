@@ -15,7 +15,9 @@ class OrderItem extends Model
         'product_id',
         'variation_id',
         'quantity',
-        'price'
+        'price',
+        'original_price',
+        'promotion_label',
     ];
 
     // Quan hệ: Chi tiết đơn hàng thuộc về 1 Đơn hàng[cite: 1]

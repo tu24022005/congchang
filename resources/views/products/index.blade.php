@@ -77,9 +77,9 @@
     @forelse($products as $product)
     <div class="col-lg-3 col-md-4 col-sm-6">
         @php
-            $variationPrices = $product->variations->pluck('price')->map(fn ($price) => (float) $price);
-            $displayMinPrice = $variationPrices->isNotEmpty() ? $variationPrices->min() : (float) $product->price;
-            $displayMaxPrice = $variationPrices->isNotEmpty() ? $variationPrices->max() : (float) $product->price;
+            $variationPrices = $product->variations->map(fn ($variation) => $product->effectivePrice($variation));
+            $displayMinPrice = $variationPrices->isNotEmpty() ? $variationPrices->min() : $product->effectivePrice();
+            $displayMaxPrice = $variationPrices->isNotEmpty() ? $variationPrices->max() : $product->effectivePrice();
         @endphp
         <div class="card product-card text-center h-100 shadow-sm">
             <div class="card-body p-4 d-flex flex-column">
@@ -111,6 +111,7 @@
                     {{ $product->description ?? 'Sản phẩm chăm sóc cá nhân chất lượng cho vẻ đẹp rạng ngời mỗi ngày.' }}
                 </p>
 
+                @if($product->isFlashSaleActive())<span class="badge bg-danger mb-2"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span>@endif
                 <h5 class="fw-bold text-danger mb-1">
                     @if($displayMinPrice < $displayMaxPrice)
                         {{ number_format($displayMinPrice, 0, ',', '.') }} - {{ number_format($displayMaxPrice, 0, ',', '.') }} ₫
@@ -118,6 +119,7 @@
                         {{ number_format($displayMinPrice, 0, ',', '.') }} ₫
                     @endif
                 </h5>
+                @if($product->isFlashSaleActive())<div class="small text-muted text-decoration-line-through">{{ number_format($product->price, 0, ',', '.') }} ₫</div><div class="small text-danger">Kết thúc {{ $product->flash_sale_ends_at->format('d/m/Y H:i') }}</div>@endif
                 <div class="small text-warning mb-2">
                     <i class="bi bi-star-fill"></i>
                     {{ $product->reviews_avg_rating ? number_format($product->reviews_avg_rating, 1) : 'Chưa có' }}

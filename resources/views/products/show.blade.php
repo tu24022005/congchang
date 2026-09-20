@@ -141,7 +141,7 @@
                     @endauth
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span><span class="text-muted small">Được lựa chọn bởi khách hàng Aloha</span></div>
-                <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-price">{{ number_format($product->price, 0, ',', '.') }} đ</span><span class="{{ $product->quantity > 0 ? 'detail-stock' : 'detail-stock out' }}"><i class="bi bi-{{ $product->quantity > 0 ? 'check-circle' : 'x-circle' }} me-1"></i>{{ $product->quantity > 0 ? 'Còn ' . $product->quantity . ' sản phẩm' : 'Hết hàng' }}</span></div>
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-4">@if($product->isFlashSaleActive())<span class="badge bg-danger"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span><span class="detail-price">{{ number_format($product->effectivePrice(), 0, ',', '.') }} đ</span><span class="text-muted text-decoration-line-through">{{ number_format($product->price, 0, ',', '.') }} đ</span><small class="text-danger">Đến {{ $product->flash_sale_ends_at->format('d/m H:i') }}</small>@else<span class="detail-price">{{ number_format($product->price, 0, ',', '.') }} đ</span>@endif<span class="{{ $product->quantity > 0 ? 'detail-stock' : 'detail-stock out' }}"><i class="bi bi-{{ $product->quantity > 0 ? 'check-circle' : 'x-circle' }} me-1"></i>{{ $product->quantity > 0 ? 'Còn ' . $product->quantity . ' sản phẩm' : 'Hết hàng' }}</span></div>
                 <p class="detail-copy mb-4">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
 
                 @auth
@@ -160,7 +160,7 @@
                                         @foreach($product->variations as $index => $variation)
                                             @php $variationLabel = collect([$variation->color, $variation->size_value ? rtrim(rtrim($variation->size_value, '0'), '.') . $variation->size_unit : null, $variation->storage])->filter()->implode(' · '); @endphp
                                             <label class="variation-option">
-                                                <input type="radio" name="variation_id" value="{{ $variation->id }}" data-price="{{ $variation->price }}" data-stock="{{ $variation->stock }}" data-image="{{ $variation->image ? asset('storage/' . $variation->image) : '' }}" data-label="{{ $variationLabel ?: 'Mặc định' }}" @checked($index === 0)>
+                                                <input type="radio" name="variation_id" value="{{ $variation->id }}" data-price="{{ $product->effectivePrice($variation) }}" data-stock="{{ $variation->stock }}" data-image="{{ $variation->image ? asset('storage/' . $variation->image) : '' }}" data-label="{{ $variationLabel ?: 'Mặc định' }}" @checked($index === 0)>
                                                 <span class="variation-code">{{ $variation->sku ?: 'Mã chưa đặt' }}</span><span class="variation-name">{{ $variationLabel ?: 'Mặc định' }}</span>
                                             </label>
                                         @endforeach

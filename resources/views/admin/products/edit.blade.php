@@ -71,6 +71,15 @@
                             @error('quantity')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                     </div>
+                    <div class="border rounded-3 p-3 mt-4 bg-warning-subtle">
+                        <h5 class="fw-bold mb-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Flash sale</h5>
+                        <small class="text-muted d-block mb-3">Giá flash sale áp dụng cho toàn bộ biến thể trong khung giờ đã chọn.</small>
+                        <div class="row g-3">
+                            <div class="col-md-4"><label class="form-label editor-label">Giá flash sale</label><input type="number" min="0" name="flash_sale_price" value="{{ old('flash_sale_price', $product->flash_sale_price) }}" class="form-control editor-input"></div>
+                            <div class="col-md-4"><label class="form-label editor-label">Bắt đầu</label><input type="datetime-local" name="flash_sale_starts_at" value="{{ old('flash_sale_starts_at', optional($product->flash_sale_starts_at)->format('Y-m-d\TH:i')) }}" class="form-control editor-input"></div>
+                            <div class="col-md-4"><label class="form-label editor-label">Kết thúc</label><input type="datetime-local" name="flash_sale_ends_at" value="{{ old('flash_sale_ends_at', optional($product->flash_sale_ends_at)->format('Y-m-d\TH:i')) }}" class="form-control editor-input"></div>
+                        </div>
+                    </div>
                 </div>
 
                 @php

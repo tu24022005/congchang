@@ -31,7 +31,8 @@ class CartService
             }
 
             $variation = $item->variation;
-            $currentPrice = $variation ? (float) $variation->price : (float) $item->product->price;
+            $originalPrice = $variation ? (float) $variation->price : (float) $item->product->price;
+            $currentPrice = $item->product->effectivePrice($variation);
             if ((float) $item->price !== $currentPrice) {
                 $item->update(['price' => $currentPrice]);
             }
@@ -50,6 +51,8 @@ class CartService
             $cart[$key] = [
                 'name' => $item->product->name,
                 'price' => $currentPrice,
+                'original_price' => $originalPrice,
+                'promotion_label' => $currentPrice < $originalPrice ? 'Flash sale' : null,
                 'quantity' => $item->quantity,
                 'image' => $item->product->image,
                 'category' => $item->product->category?->name ?? 'Chưa phân loại',
@@ -93,7 +96,8 @@ class CartService
                 'variation_id' => $variationId,
             ]);
             $product = Product::find($productId);
-            $item->price = $product ? (float) $product->price : (float) $details['price'];
+            $variation = $variationId ? $product?->variations()->find($variationId) : null;
+            $item->price = $product ? $product->effectivePrice($variation) : (float) $details['price'];
             $item->quantity = ($item->quantity ?? 0) + max(1, (int) $details['quantity']);
             $item->save();
         }

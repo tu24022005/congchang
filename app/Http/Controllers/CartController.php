@@ -69,7 +69,7 @@ class CartController extends Controller
                 'product_id' => $product->id,
                 'variation_id' => $variation?->id,
                 'quantity' => $quantity,
-                'price' => $variation ? $variation->price : $product->price,
+                'price' => $product->effectivePrice($variation),
             ]);
             $cart->items()->save($item);
         } else {

@@ -15,9 +15,36 @@ class Product extends Model
         'description',
         'quantity',
         'price',
+        'flash_sale_price',
+        'flash_sale_starts_at',
+        'flash_sale_ends_at',
         'category_id',
         'image',
     ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'flash_sale_price' => 'decimal:2',
+        'flash_sale_starts_at' => 'datetime',
+        'flash_sale_ends_at' => 'datetime',
+    ];
+
+    public function isFlashSaleActive(): bool
+    {
+        return $this->flash_sale_price !== null
+            && $this->flash_sale_starts_at?->isPast()
+            && $this->flash_sale_ends_at?->isFuture()
+            && (float) $this->flash_sale_price < (float) $this->price;
+    }
+
+    public function effectivePrice(?ProductVariation $variation = null): float
+    {
+        $basePrice = $variation ? (float) $variation->price : (float) $this->price;
+
+        return $this->isFlashSaleActive()
+            ? min($basePrice, (float) $this->flash_sale_price)
+            : $basePrice;
+    }
 
     public function getRouteKeyName(): string
     {

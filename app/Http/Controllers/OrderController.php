@@ -191,7 +191,16 @@ class OrderController extends Controller
             foreach ($cart as $id => $details) {
                 $productId = (int) ($details['product_id'] ?? explode(':', (string) $id)[0]);
                 $variationId = $details['variation_id'] ?? (isset(explode(':', (string) $id)[1]) ? (int) explode(':', (string) $id)[1] : null);
+                $product = Product::whereKey($productId)->lockForUpdate()->first();
+                if (!$product) {
+                    throw new \RuntimeException('Sản phẩm trong giỏ không còn tồn tại.');
+                }
                 $variation = $variationId ? ProductVariation::where('id', $variationId)->where('product_id', $productId)->lockForUpdate()->first() : null;
+                $originalPrice = $variation ? (float) $variation->price : (float) $product->price;
+                $effectivePrice = $product->effectivePrice($variation);
+                if (abs((float) $details['price'] - $effectivePrice) > 0.01) {
+                    throw new \RuntimeException('Giá sản phẩm vừa thay đổi. Vui lòng kiểm tra lại giỏ hàng.');
+                }
                 if ($variation) {
                     if ($variation->stock < $details['quantity']) {
                         throw new \RuntimeException('Biến thể ' . ($details['variation'] ?? '') . ' vừa hết hàng.');
@@ -201,8 +210,7 @@ class OrderController extends Controller
                     $variation->refresh();
                     InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Xuất kho theo đơn hàng', $order);
                 } else {
-                    $product = Product::whereKey($productId)->lockForUpdate()->first();
-                    if (!$product || $product->quantity < $details['quantity']) {
+                    if ($product->quantity < $details['quantity']) {
                         throw new \RuntimeException('Sản phẩm trong giỏ vừa hết hàng.');
                     }
                     $product->decrement('quantity', $details['quantity']);
@@ -213,7 +221,9 @@ class OrderController extends Controller
                     'product_id' => $productId,
                     'variation_id' => $variation?->id,
                     'quantity' => $details['quantity'],
-                    'price' => $details['price'],
+                    'price' => $effectivePrice,
+                    'original_price' => $originalPrice,
+                    'promotion_label' => $effectivePrice < $originalPrice ? 'Flash sale' : null,
                 ]);
             }
 

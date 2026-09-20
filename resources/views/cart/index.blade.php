@@ -74,7 +74,10 @@
                                                         @endif
                                                     </div>
                                                 </div>
-                                            <td>{{ number_format($details['price'], 0, ',', '.') }} đ</td>
+                                            <td>
+                                                @if(!empty($details['promotion_label']))<span class="badge bg-danger d-block mb-1">{{ $details['promotion_label'] }}</span><span class="text-muted text-decoration-line-through small">{{ number_format($details['original_price'], 0, ',', '.') }} đ</span><br>@endif
+                                                {{ number_format($details['price'], 0, ',', '.') }} đ
+                                            </td>
                                             <td>
                                                 <form action="{{ route('cart.update', $id) }}" method="POST" class="d-flex justify-content-center">
                                                     @csrf

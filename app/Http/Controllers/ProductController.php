@@ -239,7 +239,9 @@ class ProductController extends Controller
         };
 
         $products = $query->paginate(8)->withQueryString();
-        $wishlistProductIds = $request->user()->wishlistProducts()->pluck('products.id');
+        $wishlistProductIds = $request->user()
+            ? $request->user()->wishlistProducts()->pluck('products.id')
+            : collect();
 
         return view('products.index', compact('products', 'categories', 'wishlistProductIds'));
     }
@@ -248,7 +250,9 @@ class ProductController extends Controller
     public function show_normal(Request $request, Product $product)
     {
         $product->load(['category', 'images', 'variations']); 
-        $isWishlisted = $request->user()->wishlistProducts()->whereKey($product->id)->exists();
+        $isWishlisted = $request->user()
+            ? $request->user()->wishlistProducts()->whereKey($product->id)->exists()
+            : false;
 
         // =========================================================
         // THUẬT TOÁN APRIORI - KHAI PHÁ DỮ LIỆU ĐƠN HÀNG (AI TỰ HỌC)

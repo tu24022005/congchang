@@ -134,6 +134,12 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 // ==================================================
 // 6. KHU VỰC NGƯỜI DÙNG 
 // ==================================================
+// Các trang catalog có thể xem công khai để hỗ trợ SEO và khách vãng lai.
+Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
+Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show');
+Route::get('/categories', [CategoryController::class, 'indexNormal'])->name('categories.index');
+Route::get('/categories/{category}', [CategoryController::class, 'showNormal'])->name('categories.show');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
@@ -151,13 +157,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
     Route::put('/change-password', [AuthController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
     
-    // Sản phẩm & Danh mục
-    Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
-    Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show');
+    // Đánh giá sản phẩm yêu cầu đăng nhập và xác thực email.
     Route::post('/products/{product}/reviews', [ProductReviewController::class, 'store'])->name('products.reviews.store');
     Route::patch('/products/{product}/reviews/{review}', [ProductReviewController::class, 'update'])->name('products.reviews.update');
-    Route::get('/categories', [CategoryController::class, 'indexNormal'])->name('categories.index');
-    Route::get('/categories/{category}', [CategoryController::class, 'showNormal'])->name('categories.show');
     
     // Giỏ hàng
     Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');

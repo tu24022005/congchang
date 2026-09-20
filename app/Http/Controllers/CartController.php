@@ -172,7 +172,7 @@ class CartController extends Controller
             ->values();
 
         if ($codes->isEmpty() || $codes->count() > 2) {
-            return back()->with('error', 'Vui lòng chọn voucher hợp lệ.');
+            return back()->withInput()->with('error', 'Vui lòng chọn voucher hợp lệ.');
         }
 
         $cart = $this->cartService->syncSession(Auth::user());
@@ -182,10 +182,10 @@ class CartController extends Controller
         foreach ($codes as $code) {
             $voucher = Voucher::where('code', $code)->first();
             if (!$voucher || ($voucher->user_id && $voucher->user_id !== Auth::id()) || !$voucher->isAvailable()) {
-                return back()->with('error', 'Một voucher đã chọn không còn hợp lệ.');
+                return back()->withInput()->with('error', 'Một voucher đã chọn không còn hợp lệ.');
             }
             if ($total < $voucher->min_order_value) {
-                return back()->with('error', 'Đơn hàng chưa đạt mức tối thiểu của mã ' . $voucher->code . '.');
+                return back()->withInput()->with('error', 'Đơn hàng chưa đạt mức tối thiểu của mã ' . $voucher->code . '.');
             }
 
             $slot = $voucher->type === 'free_shipping' ? 'shipping' : 'discount';
@@ -208,7 +208,7 @@ class CartController extends Controller
         }
         session()->forget('voucher');
 
-        return back()->with('success', 'Đã áp dụng đồng thời các voucher đã chọn.');
+        return back()->withInput()->with('success', 'Đã áp dụng đồng thời các voucher đã chọn.');
     }
 
     public function checkout()

@@ -68,9 +68,10 @@
                             @error('email')<div class="field-error">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-4">
-                            <label for="phone" class="form-label">Số điện thoại</label>
+                            <label for="phone" class="form-label">Số điện thoại cá nhân</label>
                             <input id="phone" type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" pattern="^(0|\+84)(3|5|7|8|9)[0-9]{8}$" autocomplete="tel">
                             @error('phone')<div class="field-error">{{ $message }}</div>@enderror
+                            <div class="form-text">Dùng cho thông tin tài khoản, không tự động thay thế số người nhận hàng.</div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end mt-4">
@@ -120,7 +121,7 @@
                                 @csrf @method('PUT')
                                 <div class="col-md-3"><input name="label" class="form-control" value="{{ $address->label }}" required></div>
                                 <div class="col-md-3"><input name="recipient_name" class="form-control" value="{{ $address->recipient_name }}" required></div>
-                                <div class="col-md-3"><input name="phone" class="form-control" value="{{ $address->phone }}" required></div>
+                                <div class="col-md-3"><input name="phone" type="tel" class="form-control" value="{{ $address->phone }}" placeholder="SĐT người nhận" required></div>
                                 <div class="col-md-9"><input name="address" class="form-control" value="{{ $address->address }}" required></div>
                                 <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input" @checked($address->is_default)> <label class="form-check-label">Đặt mặc định</label></div>
                                 <div class="col-12"><button class="btn btn-primary btn-sm">Lưu địa chỉ</button></div>
@@ -138,7 +139,7 @@
                     @csrf
                     <div class="col-md-3"><input name="label" class="form-control" placeholder="Nhãn: Nhà riêng" required></div>
                     <div class="col-md-3"><input name="recipient_name" class="form-control" placeholder="Tên người nhận" required></div>
-                    <div class="col-md-3"><input name="phone" class="form-control" placeholder="Số điện thoại" required></div>
+                    <div class="col-md-3"><input name="phone" type="tel" class="form-control" placeholder="SĐT người nhận" required></div>
                     <div class="col-md-9"><input name="address" class="form-control" placeholder="Địa chỉ chi tiết" required></div>
                     <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input"> <label class="form-check-label">Đặt mặc định</label></div>
                     <div class="col-12"><button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Lưu địa chỉ</button></div>

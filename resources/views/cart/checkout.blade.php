@@ -17,7 +17,8 @@
             <div class="col-md-7 mb-4">
                 <div class="card shadow-sm border-0 bg-light">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa chỉ nhận hàng</h5>
+                        <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Thông tin người nhận</h5>
+                        <div class="alert alert-info border-0 small py-2">Thông tin người nhận và số điện thoại giao hàng là thông tin riêng, không phụ thuộc số điện thoại cá nhân trong tài khoản.</div>
                         @if ($addresses->isNotEmpty())
                             <div class="mb-3">
                                 <label for="saved-address" class="form-label fw-bold">Chọn địa chỉ đã lưu</label>
@@ -37,7 +38,7 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Số điện thoại liên hệ</label>
+                            <label class="form-label fw-bold">Số điện thoại người nhận hàng</label>
                             <input type="tel" name="customer_phone" class="form-control" value="{{ old('customer_phone') }}" placeholder="Ví dụ: 0987654321" pattern="(0|\+84)(3|5|7|8|9)[0-9]{8}" maxlength="12" required>
                         </div>
 

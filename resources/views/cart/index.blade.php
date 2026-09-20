@@ -113,17 +113,28 @@
                     <div class="card border-0 shadow-sm rounded-4 storefront-panel-card">
                         <div class="card-body p-4">
                             <div class="cart-card-heading border-bottom pb-3 mb-3"><div><h5 class="fw-bold mb-1"><i class="bi bi-geo-alt text-primary me-2"></i>Thông tin giao hàng</h5><small class="text-muted">Chọn vị trí trên bản đồ để địa chỉ chính xác hơn.</small></div><span class="step-badge">02</span></div>
+                            @if ($addresses->isNotEmpty())
+                                <div class="mb-3">
+                                    <label for="cart-saved-address" class="form-label text-muted small">Chọn địa chỉ đã lưu:</label>
+                                    <select id="cart-saved-address" name="address_id" class="form-select rounded-3">
+                                        <option value="">Nhập địa chỉ mới</option>
+                                        @foreach ($addresses as $address)
+                                            <option value="{{ $address->id }}" data-name="{{ $address->recipient_name }}" data-phone="{{ $address->phone }}" data-address="{{ $address->address }}" @selected(old('address_id', $address->is_default ? $address->id : '') == $address->id)>{{ $address->label }} - {{ $address->recipient_name }} - {{ $address->phone }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                             <div class="mb-3">
                                 <label class="form-label text-muted small">Họ và tên người nhận:</label>
-                                <input type="text" name="customer_name" class="form-control rounded-3" value="{{ old('customer_name', Auth::user()->name ?? '') }}" required>
+                                <input type="text" name="customer_name" class="form-control rounded-3" value="{{ old('customer_name', $addresses->firstWhere('is_default', true)?->recipient_name ?? Auth::user()->name ?? '') }}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted small">Số điện thoại liên hệ:</label>
-                                <input type="text" name="customer_phone" class="form-control rounded-3" placeholder="Ví dụ: 0987654321" value="{{ old('customer_phone') }}" required>
+                                <input type="tel" name="customer_phone" class="form-control rounded-3" placeholder="Ví dụ: 0987654321" value="{{ old('customer_phone', $addresses->firstWhere('is_default', true)?->phone) }}" required>
                             </div>
                             <div class="mb-0">
                                 <label class="form-label text-muted small">Địa chỉ nhận hàng chi tiết:</label>
-                                <textarea name="customer_address" id="customer-address" class="form-control rounded-3" rows="2" placeholder="Số nhà, Tên đường, Phường/Xã..." required>{{ old('customer_address') }}</textarea>
+                                <textarea name="customer_address" id="customer-address" class="form-control rounded-3" rows="2" placeholder="Số nhà, Tên đường, Phường/Xã..." required>{{ old('customer_address', $addresses->firstWhere('is_default', true)?->address) }}</textarea>
                                 <input type="hidden" name="latitude" id="delivery-latitude" value="{{ old('latitude') }}">
                                 <input type="hidden" name="longitude" id="delivery-longitude" value="{{ old('longitude') }}">
                             </div>
@@ -379,6 +390,24 @@
 
     document.getElementById('selected-vouchers-form')?.addEventListener('submit', function () {
         preserveCheckoutDetails(this);
+    });
+
+    document.getElementById('cart-saved-address')?.addEventListener('change', function () {
+        const option = this.options[this.selectedIndex];
+        const name = document.querySelector('#checkout-order-form [name="customer_name"]');
+        const phone = document.querySelector('#checkout-order-form [name="customer_phone"]');
+        const address = document.querySelector('#checkout-order-form [name="customer_address"]');
+
+        if (!this.value) {
+            name.value = '';
+            phone.value = '';
+            address.value = '';
+            return;
+        }
+
+        name.value = option.dataset.name || '';
+        phone.value = option.dataset.phone || '';
+        address.value = option.dataset.address || '';
     });
 
     document.querySelectorAll('.voucher-choice').forEach(function (choice) {

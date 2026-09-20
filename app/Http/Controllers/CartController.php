@@ -30,8 +30,12 @@ class CartController extends Controller
             ->where('scope', 'platform')
             ->latest()
             ->get();
+        $addresses = Auth::user()->addresses()
+            ->orderByDesc('is_default')
+            ->latest('id')
+            ->get();
 
-        return view('cart.index', compact('cart', 'total', 'vouchers'));
+        return view('cart.index', compact('cart', 'total', 'vouchers', 'addresses'));
     }
 
     public function add(Request $request, $id)

@@ -566,6 +566,10 @@
                 button.className = 'password-toggle';
                 button.setAttribute('aria-label', 'Hiện mật khẩu');
                 button.innerHTML = '<i class="bi bi-eye"></i>';
+                const positionToggle = function () {
+                    button.style.top = (input.offsetTop + (input.offsetHeight / 2)) + 'px';
+                };
+                positionToggle();
                 button.addEventListener('click', function () {
                     const visible = input.type === 'text';
                     input.type = visible ? 'password' : 'text';
@@ -573,6 +577,7 @@
                     button.innerHTML = visible ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
                 });
                 container.appendChild(button);
+                window.addEventListener('resize', positionToggle);
             });
         });
     </script>

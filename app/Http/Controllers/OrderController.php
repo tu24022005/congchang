@@ -12,6 +12,7 @@ use App\Models\InventoryLog;
 use App\Models\OrderVoucherUsage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Services\LoyaltyPointService;
 use App\Services\CartService;
 
@@ -229,7 +230,13 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            Log::error('Order creation failed.', [
+                'user_id' => Auth::id(),
+                'message' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+
+            return redirect()->back()->with('error', 'Không thể tạo đơn hàng lúc này. Vui lòng thử lại.');
         }
     }
 

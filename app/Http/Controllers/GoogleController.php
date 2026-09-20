@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Services\CartService;
@@ -50,7 +51,12 @@ class GoogleController extends Controller
             app(CartService::class)->mergeSession(Auth::user());
             return redirect()->intended('/');
         } catch (\Exception $e) {
-            return redirect('/login')->with('error', 'Lỗi đăng nhập Google: ' . $e->getMessage());
+            Log::error('Google login failed.', [
+                'message' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+
+            return redirect('/login')->with('error', 'Đăng nhập Google thất bại. Vui lòng thử lại.');
         }
     }
 }

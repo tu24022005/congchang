@@ -17,7 +17,7 @@ class AddressController extends Controller
             $makeDefault = (bool) ($validated['is_default'] ?? false)
                 || !$user->addresses()->exists();
             $address = $user->addresses()->create([
-                ...$validated,
+                ...$this->addressAttributes($validated),
                 'is_default' => $makeDefault,
             ]);
 
@@ -38,7 +38,7 @@ class AddressController extends Controller
 
         DB::transaction(function () use ($user, $address, $validated, $makeDefault): void {
             $address->update([
-                ...$validated,
+                ...$this->addressAttributes($validated),
                 'is_default' => $makeDefault,
             ]);
 
@@ -82,7 +82,7 @@ class AddressController extends Controller
         return $request->validate([
             'label' => ['required', 'string', 'max:50'],
             'recipient_name' => ['required', 'string', 'min:2', 'max:120'],
-            'phone' => ['required', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
+            'recipient_phone' => ['required', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/'],
             'address' => ['required', 'string', 'min:10', 'max:500'],
             'is_default' => ['sometimes', 'boolean'],
         ], [
@@ -91,12 +91,20 @@ class AddressController extends Controller
             'recipient_name.required' => 'Vui lòng nhập tên người nhận.',
             'recipient_name.min' => 'Tên người nhận phải có ít nhất 2 ký tự.',
             'recipient_name.max' => 'Tên người nhận không được dài quá 120 ký tự.',
-            'phone.required' => 'Vui lòng nhập số điện thoại nhận hàng.',
-            'phone.regex' => 'Số điện thoại Việt Nam không hợp lệ.',
+            'recipient_phone.required' => 'Vui lòng nhập số điện thoại nhận hàng.',
+            'recipient_phone.regex' => 'Số điện thoại Việt Nam không hợp lệ.',
             'address.required' => 'Vui lòng nhập địa chỉ giao hàng.',
             'address.min' => 'Địa chỉ giao hàng phải có ít nhất 10 ký tự.',
             'address.max' => 'Địa chỉ giao hàng không được dài quá 500 ký tự.',
         ]);
+    }
+
+    private function addressAttributes(array $validated): array
+    {
+        $validated['phone'] = $validated['recipient_phone'];
+        unset($validated['recipient_phone']);
+
+        return $validated;
     }
 
     private function ensureOwner(Request $request, Address $address): void

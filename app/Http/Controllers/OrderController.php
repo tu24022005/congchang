@@ -77,6 +77,10 @@ class OrderController extends Controller
     // ==================================================
     public function store(Request $request)
     {
+        $request->validate([
+            'payment_method' => 'required|in:COD,PAYOS',
+        ]);
+
         $cart = $this->cartService->syncSession(Auth::user());
         
         if (empty($cart)) {
@@ -131,7 +135,7 @@ class OrderController extends Controller
             $order->user_id = Auth::id();
             $order->total = $finalTotal; 
             $order->status = 'processing';
-            $order->payment_method = $request->input('payment_method', 'COD');
+            $order->payment_method = $request->input('payment_method');
             
             $order->customer_name = $request->customer_name;
             $order->customer_phone = $request->customer_phone;

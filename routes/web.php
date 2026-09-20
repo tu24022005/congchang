@@ -14,7 +14,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\OrderController; 
-use App\Http\Controllers\CheckoutController; 
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
@@ -166,8 +165,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Thanh toán (Checkout)
     Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
-    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
-    Route::get('/checkout/vpbank-qr', [CheckoutController::class, 'showMomoQr'])->name('checkout.vpbank');
 
     // Chat Real-time
     Route::get('/chat/messages', [App\Http\Controllers\ChatController::class, 'fetchMessages']);

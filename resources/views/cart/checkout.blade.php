@@ -67,7 +67,7 @@
                             </label>
                         </div>
                         <div class="form-check mb-4">
-                            <input class="form-check-input" type="radio" name="payment_method" id="payOnline" value="Online">
+                            <input class="form-check-input" type="radio" name="payment_method" id="payOnline" value="PAYOS">
                             <label class="form-check-label" for="payOnline">
                                 Chuyển khoản ngân hàng (Quét mã QR)
                             </label>

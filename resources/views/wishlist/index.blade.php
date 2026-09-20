@@ -28,7 +28,7 @@
                     <p class="text-muted small mb-3 flex-grow-1">{{ $product->description ?? 'Sản phẩm chăm sóc cá nhân chất lượng cho vẻ đẹp rạng ngời mỗi ngày.' }}</p>
                     <h5 class="fw-bold text-danger mb-3">{{ number_format($product->price, 0, ',', '.') }} ₫</h5>
                     <div class="d-flex gap-2 mt-auto">
-                        <a href="{{ route('products.show', $product) }}" class="btn btn-cyan flex-grow-1 rounded-pill py-2">XEM SẢN PHẨM</a>
+                        <a href="{{ route('products.show', ['product' => $product->slug]) }}" class="btn btn-cyan flex-grow-1 rounded-pill py-2">XEM SẢN PHẨM</a>
                         <form action="{{ route('wishlist.toggle', $product) }}" method="POST">@csrf<button type="submit" class="btn btn-danger rounded-circle" title="Bỏ khỏi yêu thích" aria-label="Bỏ khỏi yêu thích"><i class="bi bi-heart-fill"></i></button></form>
                     </div>
                 </div>

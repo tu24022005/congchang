@@ -9,6 +9,7 @@ use App\Models\InventoryLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Str;
 use App\Services\ActivityLogService;
 
 class ProductController extends Controller
@@ -51,6 +52,7 @@ class ProductController extends Controller
             'variations.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
         $validatedData['price'] = (float) $request->input('variations.0.price');
+        $validatedData['slug'] = $this->uniqueSlug($validatedData['name']);
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
@@ -107,6 +109,9 @@ class ProductController extends Controller
             'variations.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
         $validatedData['price'] = (float) $request->input('variations.0.price');
+        if ($product->name !== $validatedData['name']) {
+            $validatedData['slug'] = $this->uniqueSlug($validatedData['name'], $product->id);
+        }
 
         if ($request->hasFile('image')) {
             if ($product->image && Storage::disk('public')->exists($product->image)) {
@@ -363,10 +368,25 @@ class ProductController extends Controller
         foreach ($products as $p) {
             $p->image_url = $p->image ? asset('storage/' . $p->image) : null;
             $p->formatted_price = number_format($p->price, 0, ',', '.') . ' ₫';
-            $p->detail_url = route('products.show', $p->id);
+            $p->detail_url = route('products.show', ['product' => $p->slug]);
         }
 
         return response()->json($products);
+    }
+
+    private function uniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($name) ?: 'san-pham';
+        $slug = $base;
+        $suffix = 2;
+
+        while (Product::where('slug', $slug)
+            ->when($ignoreId, fn ($query) => $query->where('id', '<>', $ignoreId))
+            ->exists()) {
+            $slug = $base . '-' . $suffix++;
+        }
+
+        return $slug;
     }
 
     // HÀM LƯU ĐÁNH GIÁ SẢN PHẨM (REVIEW)

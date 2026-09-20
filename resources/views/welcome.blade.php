@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 $hotMinPrice = $hotPrices->isNotEmpty() ? $hotPrices->min() : (float) $hotProduct->price;
                 $hotMaxPrice = $hotPrices->isNotEmpty() ? $hotPrices->max() : (float) $hotProduct->price;
             @endphp
-            <a href="{{ route('products.show', $hotProduct->id) }}" class="hot-product-card">
+            <a href="{{ route('products.show', ['product' => $hotProduct->slug]) }}" class="hot-product-card">
                 <div class="hot-product-image">@if($hotProduct->image)<img src="{{ asset('storage/' . $hotProduct->image) }}" alt="{{ $hotProduct->name }}">@else<i class="bi bi-bag-heart"></i>@endif</div>
                 <div class="p-3"><span class="badge bg-info-subtle text-info-emphasis rounded-pill mb-2">{{ $hotProduct->category->name ?? 'Beauty' }}</span><h5>{{ $hotProduct->name }}</h5><strong>@if($hotMinPrice < $hotMaxPrice){{ number_format($hotMinPrice, 0, ',', '.') }} - {{ number_format($hotMaxPrice, 0, ',', '.') }}@else{{ number_format($hotMinPrice, 0, ',', '.') }}@endif ₫</strong></div>
             </a>
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <h5 class="fw-bold text-danger mb-1">@if($productMinPrice < $productMaxPrice){{ number_format($productMinPrice, 0, ',', '.') }} - {{ number_format($productMaxPrice, 0, ',', '.') }}@else{{ number_format($productMinPrice, 0, ',', '.') }}@endif ₫</h5>
                 <p class="text-muted small mb-3"><i class="bi bi-box-seam me-1"></i>Còn lại: {{ $product->quantity > 0 ? $product->quantity : 'Hết hàng' }}</p>
 
-                <a href="{{ route('products.show', $product->id) }}" class="btn btn-cyan w-100 rounded-pill py-2 mt-auto">KHÁM PHÁ NGAY</a>
+                <a href="{{ route('products.show', ['product' => $product->slug]) }}" class="btn btn-cyan w-100 rounded-pill py-2 mt-auto">KHÁM PHÁ NGAY</a>
             </div>
         </div>
     </div>

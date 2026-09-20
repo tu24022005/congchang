@@ -11,12 +11,18 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'quantity',
         'price',
         'category_id',
         'image',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
     // Một sản phẩm có nhiều biến thể
     public function variations()
     {

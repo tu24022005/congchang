@@ -149,7 +149,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 // ==================================================
 // Các trang catalog có thể xem công khai để hỗ trợ SEO và khách vãng lai.
 Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
-Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show');
+Route::get('/products/{product:slug}', [ProductController::class, 'show_normal'])->name('products.show');
 Route::get('/categories', [CategoryController::class, 'indexNormal'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'showNormal'])->name('categories.show');
 

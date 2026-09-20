@@ -115,6 +115,9 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::delete('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'destroy'])->middleware('role:admin')->name('staff.destroy');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->middleware('role:admin,manager')->name('activity-logs.index');
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->middleware('role:admin,manager,warehouse_staff')->name('inventory-logs.index');
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->middleware('role:admin,manager,warehouse_staff')->name('notifications.index');
+    Route::get('/notifications/{notification}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'read'])->middleware('role:admin,manager,warehouse_staff')->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'readAll'])->middleware('role:admin,manager,warehouse_staff')->name('notifications.read-all');
     
     // Đơn hàng (CHÍNH LÀ DÒNG ĐANG BỊ THIẾU GÂY LỖI)
     Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('role:admin,manager,customer_service')->name('orders.index'); 

@@ -74,6 +74,36 @@
                             </li>
                         @endif
 
+                        @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
+                            <li class="nav-item dropdown me-2">
+                                <a class="nav-link position-relative" href="{{ route('admin.notifications.index') }}"
+                                   id="admin-notifications-dropdown" role="button" data-bs-toggle="dropdown"
+                                   aria-expanded="false" title="Thông báo từ khách hàng">
+                                    <i class="bi bi-bell-fill fs-5"></i>
+                                    @if(Auth::user()->unreadNotifications()->exists())
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ Auth::user()->unreadNotifications()->count() > 99 ? '99+' : Auth::user()->unreadNotifications()->count() }}
+                                        </span>
+                                    @endif
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="admin-notifications-dropdown">
+                                    <li><h6 class="dropdown-header">Thông báo khách hàng</h6></li>
+                                    @forelse(Auth::user()->unreadNotifications()->latest()->limit(5)->get() as $notification)
+                                        <li>
+                                            <a class="dropdown-item small py-2" href="{{ route('admin.notifications.read', $notification->id) }}">
+                                                <strong class="d-block">{{ $notification->data['title'] ?? 'Thông báo mới' }}</strong>
+                                                <span class="text-muted">{{ \Illuminate\Support\Str::limit($notification->data['message'] ?? '', 60) }}</span>
+                                            </a>
+                                        </li>
+                                    @empty
+                                        <li><span class="dropdown-item-text small text-muted">Không có thông báo mới.</span></li>
+                                    @endforelse
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-center" href="{{ route('admin.notifications.index') }}">Xem tất cả thông báo</a></li>
+                                </ul>
+                            </li>
+                        @endif
+
                         <!-- Menu User Xổ xuống -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle active fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
@@ -102,7 +132,7 @@
         @yield('content')
     </main>
 
-    @if(!request()->routeIs('admin.chat.index'))
+    @if(!request()->routeIs('admin.chat.index') && in_array(Auth::user()->role, ['admin', 'customer_service'], true))
         <style>
             .admin-chat-dock { position: fixed; z-index: 1040; top: 52%; right: 0; display: flex; align-items: center; gap: .55rem; padding: .75rem .9rem .75rem .8rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 14px 0 0 14px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transform: translateY(-50%); transition: padding-right .2s, box-shadow .2s; }
             .admin-chat-dock:hover { color: #fff; padding-right: 1.2rem; box-shadow: 0 12px 28px rgba(24,59,86,.32); }

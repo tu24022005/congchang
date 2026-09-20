@@ -212,6 +212,11 @@ class OrderController extends Controller
             session()->forget(['voucher', 'voucher_discount', 'voucher_shipping']);
             
             DB::commit(); 
+            app(\App\Services\StaffNotificationService::class)->notify(
+                'Khách đặt đơn hàng mới',
+                $order->customer_name . ' vừa đặt đơn #' . $order->id . ' với tổng tiền ' . number_format($order->total, 0, ',', '.') . 'đ.',
+                route('admin.orders.index', ['search' => $order->id])
+            );
             
             // 6. KIỂM TRA PAYOS ĐỂ ĐẨY SANG TRANG QUÉT MÃ QR
             if ($order->payment_method === 'PAYOS') {
@@ -374,6 +379,17 @@ class OrderController extends Controller
 
         $order->refresh();
         app(\App\Services\OrderStatusNotificationService::class)->notify($order, $previousStatus);
+        if (in_array($order->status, ['cancelled', 'refund_pending'], true)) {
+            app(\App\Services\StaffNotificationService::class)->notify(
+                $order->status === 'refund_pending' ? 'Khách yêu cầu hoàn tiền' : 'Khách đã hủy đơn hàng',
+                $order->status === 'refund_pending'
+                    ? $order->customer_name . ' vừa yêu cầu hoàn tiền cho đơn #' . $order->id . '.'
+                    : $order->customer_name . ' vừa hủy đơn hàng #' . $order->id . '.',
+                $order->status === 'refund_pending'
+                    ? route('admin.refunds.index')
+                    : route('admin.orders.index', ['search' => $order->id])
+            );
+        }
         return redirect()->route('orders.show', $order)->with('success', $message);
     }
 

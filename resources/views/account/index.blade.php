@@ -119,11 +119,13 @@
                             <summary class="small text-primary">Chỉnh sửa</summary>
                             <form method="POST" action="{{ route('addresses.update', $address) }}" class="row g-2 mt-2">
                                 @csrf @method('PUT')
-                                <div class="col-md-3"><input name="label" class="form-control" value="{{ $address->label }}" required></div>
-                                <div class="col-md-3"><input name="recipient_name" class="form-control" value="{{ $address->recipient_name }}" required></div>
-                                <div class="col-md-3"><input name="recipient_phone" type="tel" class="form-control" value="{{ $address->phone }}" placeholder="SĐT người nhận" autocomplete="shipping tel" required></div>
-                                <div class="col-md-9"><input name="address" class="form-control" value="{{ $address->address }}" required></div>
-                                <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input" @checked($address->is_default)> <label class="form-check-label">Đặt mặc định</label></div>
+                                <input type="hidden" name="address_form" value="update">
+                                <input type="hidden" name="address_id" value="{{ $address->id }}">
+                                <div class="col-md-3"><input name="label" class="form-control" value="{{ old('address_id') == $address->id ? old('label') : $address->label }}" required></div>
+                                <div class="col-md-3"><input name="recipient_name" class="form-control" value="{{ old('address_id') == $address->id ? old('recipient_name') : $address->recipient_name }}" required></div>
+                                <div class="col-md-3"><input name="recipient_phone" type="tel" class="form-control" value="{{ old('address_id') == $address->id ? old('recipient_phone') : $address->phone }}" placeholder="SĐT người nhận" autocomplete="shipping tel" required></div>
+                                <div class="col-md-9"><input name="address" class="form-control" value="{{ old('address_id') == $address->id ? old('address') : $address->address }}" required></div>
+                                <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input" @checked(old('address_id') == $address->id ? old('is_default') : $address->is_default)> <label class="form-check-label">Đặt mặc định</label></div>
                                 <div class="col-12"><button class="btn btn-primary btn-sm">Lưu địa chỉ</button></div>
                             </form>
                         </details>
@@ -137,11 +139,12 @@
                 @endif
                 <form method="POST" action="{{ route('addresses.store') }}" class="row g-2">
                     @csrf
-                    <div class="col-md-3"><input name="label" class="form-control" placeholder="Nhãn: Nhà riêng" required></div>
-                    <div class="col-md-3"><input name="recipient_name" class="form-control" placeholder="Tên người nhận" required></div>
-                    <div class="col-md-3"><input name="recipient_phone" type="tel" class="form-control" placeholder="SĐT người nhận" autocomplete="shipping tel" required></div>
-                    <div class="col-md-9"><input name="address" class="form-control" placeholder="Địa chỉ chi tiết" required></div>
-                    <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input"> <label class="form-check-label">Đặt mặc định</label></div>
+                    <input type="hidden" name="address_form" value="create">
+                    <div class="col-md-3"><input name="label" class="form-control" value="{{ old('address_form') === 'create' ? old('label') : '' }}" placeholder="Nhãn: Nhà riêng" required></div>
+                    <div class="col-md-3"><input name="recipient_name" class="form-control" value="{{ old('address_form') === 'create' ? old('recipient_name') : '' }}" placeholder="Tên người nhận" required></div>
+                    <div class="col-md-3"><input name="recipient_phone" type="tel" class="form-control" value="{{ old('address_form') === 'create' ? old('recipient_phone') : '' }}" placeholder="SĐT người nhận" autocomplete="shipping tel" required></div>
+                    <div class="col-md-9"><input name="address" class="form-control" value="{{ old('address_form') === 'create' ? old('address') : '' }}" placeholder="Địa chỉ chi tiết" required></div>
+                    <div class="col-md-3 form-check ms-2"><input type="checkbox" name="is_default" value="1" class="form-check-input" @checked(old('address_form') === 'create' && old('is_default'))> <label class="form-check-label">Đặt mặc định</label></div>
                     <div class="col-12"><button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Lưu địa chỉ</button></div>
                 </form>
             </div>

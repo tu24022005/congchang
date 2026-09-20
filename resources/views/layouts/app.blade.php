@@ -107,7 +107,9 @@
                         @endif
 
                         @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
-                            @php($unreadStaffNotifications = Auth::user()->unreadNotifications()->latest()->limit(5)->get())
+                            @php
+                                $unreadStaffNotifications = Auth::user()->unreadNotifications()->latest()->limit(5)->get();
+                            @endphp
                             <li class="nav-item dropdown me-3">
                                 <a class="nav-link position-relative fw-semibold" href="{{ route('admin.notifications.index') }}"
                                    data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo từ khách hàng">

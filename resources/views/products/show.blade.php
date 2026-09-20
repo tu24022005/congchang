@@ -127,16 +127,34 @@
                 <div class="detail-kicker mb-2">{{ $product->category?->name ?? 'Aloha Beauty' }}</div>
                 <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
                     <h1 class="detail-title fw-bold mb-0">{{ $product->name }}</h1>
-                    <form action="{{ route('wishlist.toggle', $product) }}" method="POST" class="flex-shrink-0">
-                        @csrf
-                        <button type="submit" class="btn {{ $isWishlisted ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle" title="{{ $isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ $isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}"><i class="bi bi-heart{{ $isWishlisted ? '-fill' : '' }}"></i></button>
-                    </form>
+                    @auth
+                        @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
+                            @if(Auth::user()->role === 'admin')
+                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-primary rounded-pill px-3 flex-shrink-0"><i class="bi bi-pencil-square me-1"></i>Cập nhật sản phẩm</a>
+                            @else
+                                <a href="{{ route('admin.products.show', $product) }}" class="btn btn-outline-primary rounded-pill px-3 flex-shrink-0"><i class="bi bi-box-seam me-1"></i>Quản lý sản phẩm</a>
+                            @endif
+                        @else
+                            <form action="{{ route('wishlist.toggle', $product) }}" method="POST" class="flex-shrink-0">
+                                @csrf
+                                <button type="submit" class="btn {{ $isWishlisted ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle" title="{{ $isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ $isWishlisted ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}"><i class="bi bi-heart{{ $isWishlisted ? '-fill' : '' }}"></i></button>
+                            </form>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-outline-danger rounded-circle flex-shrink-0" title="Đăng nhập để lưu yêu thích" aria-label="Đăng nhập để lưu yêu thích"><i class="bi bi-heart"></i></a>
+                    @endauth
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span><span class="text-muted small">Được lựa chọn bởi khách hàng Aloha</span></div>
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-price">{{ number_format($product->price, 0, ',', '.') }} đ</span><span class="{{ $product->quantity > 0 ? 'detail-stock' : 'detail-stock out' }}"><i class="bi bi-{{ $product->quantity > 0 ? 'check-circle' : 'x-circle' }} me-1"></i>{{ $product->quantity > 0 ? 'Còn ' . $product->quantity . ' sản phẩm' : 'Hết hàng' }}</span></div>
                 <p class="detail-copy mb-4">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
 
                 @auth
+                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Đây là trang xem sản phẩm. Sử dụng nút quản lý phía trên để cập nhật thông tin hoặc tồn kho.
+                        </div>
+                    @else
                     @if($product->quantity > 0)
                         <form action="{{ route('cart.add', $product->id) }}" method="POST" id="detail-cart-form">
                             @csrf
@@ -176,6 +194,7 @@
                                 <button type="submit" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Báo khi có hàng</button>
                             </form>
                         @endif
+                    @endif
                     @endif
                 @else
                     @if($product->quantity > 0)

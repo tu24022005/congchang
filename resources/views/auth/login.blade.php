@@ -63,6 +63,9 @@
             <a href="{{ route('google.login') }}" class="btn btn-outline-danger w-100 rounded-pill d-flex align-items-center justify-content-center fw-bold shadow-sm mb-3 auth-google-button">
                 <i class="bi bi-google fs-5 me-2"></i> Google
             </a>
+            <a href="{{ route('facebook.login') }}" class="btn btn-primary w-100 rounded-pill d-flex align-items-center justify-content-center fw-bold shadow-sm mb-3">
+                <i class="bi bi-facebook fs-5 me-2"></i> Facebook
+            </a>
 
             <div class="text-center mt-4 pt-3 auth-register-divider">
                 <span class="auth-register-label">Chưa có tài khoản?</span>

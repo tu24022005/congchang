@@ -38,6 +38,8 @@ Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
 // ==================================================
 Route::get('/auth/google', [App\Http\Controllers\GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [App\Http\Controllers\GoogleController::class, 'handleGoogleCallback']);
+Route::get('/auth/facebook', [App\Http\Controllers\FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+Route::get('/auth/facebook/callback', [App\Http\Controllers\FacebookController::class, 'handleFacebookCallback'])->name('facebook.callback');
 
 // ==================================================
 // 2. ROUTE KHÁCH (CHƯA ĐĂNG NHẬP)

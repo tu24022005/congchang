@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
         'password', 
         'role',  
         'google_id', // Đã được gộp chung vào mảng này
+        'facebook_id',
         'loyalty_points',
     ]; 
 

@@ -27,7 +27,14 @@ class AuthController extends Controller
         $request->validate([ 
             'name' => 'required|string|max:255',
             'email' => [...self::VALID_EMAIL_RULES, 'max:255', 'unique:users'],
+            'phone' => ['required', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/', 'unique:users,phone'],
             'password' => 'required|string|min:8|confirmed', 
+            'terms' => 'accepted',
+        ], [
+            'phone.required' => 'Vui lòng nhập số điện thoại.',
+            'phone.regex' => 'Số điện thoại Việt Nam không hợp lệ.',
+            'phone.unique' => 'Số điện thoại này đã được sử dụng.',
+            'terms.accepted' => 'Bạn cần đồng ý với điều khoản sử dụng.',
         ]); 
 
         try { 
@@ -37,6 +44,7 @@ class AuthController extends Controller
             $user = User::create([ 
                 'name' => $request->name, 
                 'email' => $request->email, 
+                'phone' => $request->phone,
                 'password' => Hash::make($request->password), 
                 'role' => 'customer', 
             ]); 

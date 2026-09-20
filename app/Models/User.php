@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
     protected $fillable = [ 
         'name', 
         'email', 
+        'phone',
         'password', 
         'role',  
         'google_id', // Đã được gộp chung vào mảng này

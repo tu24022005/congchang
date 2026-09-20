@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     @stack('head')
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    @stack('styles')
 
 </head>
 <body class="{{ request()->routeIs('login', 'register', 'password.request', 'password.reset', 'verification.notice') ? 'auth-page' : '' }}">
@@ -84,18 +85,37 @@
                                 <a class="nav-link dropdown-toggle text-danger fw-bold text-nowrap" href="#" data-bs-toggle="dropdown">
                                     <i class="bi bi-shield-lock fs-5 me-1"></i> Quản trị
                                 </a>
-                                <ul class="dropdown-menu border-0 shadow-sm">
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 text-primary me-2"></i>Tổng quan</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.orders.index') }}"><i class="bi bi-truck text-danger me-2"></i>Quản lý Đơn hàng</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.refunds.index') }}"><i class="bi bi-cash-coin text-warning me-2"></i>Yêu cầu hoàn tiền</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.customers.index') }}"><i class="bi bi-person-lines-fill text-primary me-2"></i>Tài khoản khách hàng</a></li>@endif
-                                    <li><hr class="dropdown-divider"></li>
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.products.index') }}"><i class="bi bi-box-seam text-success me-2"></i>Kho sản phẩm</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.inventory-logs.index') }}"><i class="bi bi-clock-history text-primary me-2"></i>Lịch sử nhập xuất kho</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags text-warning me-2"></i>Danh mục</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.vouchers.index') }}"><i class="bi bi-ticket-perforated text-success me-2"></i>Mã giảm giá</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.posts.index') }}"><i class="bi bi-newspaper text-primary me-2"></i>Blog / Tin tức</a></li><li><a class="dropdown-item py-2" href="{{ route('admin.reports.index') }}"><i class="bi bi-bar-chart-line text-info me-2"></i>Báo cáo</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.home-banners.index') }}"><i class="bi bi-images text-primary me-2"></i>Banner trang chủ</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'customer_service'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.chat.index') }}"><i class="bi bi-chat-dots text-info me-2"></i>Chat CSKH</a></li>@endif
-                                    @if(Auth::user()->role === 'admin')<li><a class="dropdown-item py-2" href="{{ route('admin.staff.index') }}"><i class="bi bi-shield-lock text-danger me-2"></i>Phân quyền nhân viên</a></li>@endif
-                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))<li><a class="dropdown-item py-2" href="{{ route('admin.activity-logs.index') }}"><i class="bi bi-clock-history text-secondary me-2"></i>Lịch sử hoạt động</a></li>@endif
+                                <ul class="dropdown-menu admin-nav-menu border-0 shadow-sm">
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))
+                                        <li><div class="admin-menu-label">TỔNG QUAN</div><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 text-primary"></i><span>Dashboard</span></a></li>
+                                    @endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true))
+                                        <li><div class="admin-menu-label">BÁN HÀNG</div><a class="dropdown-item" href="{{ route('admin.orders.index') }}"><i class="bi bi-truck text-danger"></i><span>Đơn hàng</span></a></li>
+                                    @endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))
+                                        <li><a class="dropdown-item" href="{{ route('admin.refunds.index') }}"><i class="bi bi-cash-coin text-warning"></i><span>Hoàn tiền</span></a></li>
+                                    @endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
+                                        <li><div class="admin-menu-label">SẢN PHẨM & KHO</div><a class="dropdown-item" href="{{ route('admin.products.index') }}"><i class="bi bi-box-seam text-success"></i><span>Sản phẩm & tồn kho</span></a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.inventory-logs.index') }}"><i class="bi bi-clock-history text-primary"></i><span>Lịch sử nhập xuất</span></a></li>
+                                    @endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))
+                                        <li><div class="admin-menu-label">KHÁCH HÀNG & NỘI DUNG</div><a class="dropdown-item" href="{{ route('admin.customers.index') }}"><i class="bi bi-people text-primary"></i><span>Khách hàng</span></a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags text-warning"></i><span>Danh mục</span></a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.vouchers.index') }}"><i class="bi bi-ticket-perforated text-success"></i><span>Voucher</span></a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.posts.index') }}"><i class="bi bi-newspaper text-primary"></i><span>Blog</span></a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.home-banners.index') }}"><i class="bi bi-images text-primary"></i><span>Banner trang chủ</span></a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.reports.index') }}"><i class="bi bi-bar-chart-line text-info"></i><span>Báo cáo</span></a></li>
+                                    @endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'customer_service'], true))
+                                        <li><div class="admin-menu-label">HỖ TRỢ</div><a class="dropdown-item" href="{{ route('admin.chat.index') }}"><i class="bi bi-chat-dots text-info"></i><span>Chat CSKH</span></a></li>
+                                    @endif
+                                    @if(Auth::user()->role === 'admin')
+                                        <li><div class="admin-menu-label">HỆ THỐNG</div><a class="dropdown-item" href="{{ route('admin.staff.index') }}"><i class="bi bi-shield-lock text-danger"></i><span>Nhân viên & phân quyền</span></a></li>
+                                    @endif
+                                    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))
+                                        <li><a class="dropdown-item" href="{{ route('admin.activity-logs.index') }}"><i class="bi bi-clock-history text-secondary"></i><span>Nhật ký hệ thống</span></a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @else
@@ -532,6 +552,7 @@
         </script>
     @endauth
     @stack('scripts')
+    @include('components.product-advisor')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('input[type="password"]').forEach(function (input) {

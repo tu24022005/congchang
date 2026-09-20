@@ -32,6 +32,7 @@ Route::get('/about', [PageController::class, 'about'])->name('pages.about');
 Route::get('/contact', [PageController::class, 'contact'])->name('pages.contact');
 Route::get('/policies', [PageController::class, 'policies'])->name('pages.policies');
 Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
+Route::post('/product-advisor/recommend', [\App\Http\Controllers\ProductAdvisorController::class, 'recommend'])->name('product-advisor.recommend');
 
 // ==================================================
 // ĐĂNG NHẬP GOOGLE (ĐỂ NGOÀI CÙNG ĐỂ AI CŨNG BẤM ĐƯỢC)

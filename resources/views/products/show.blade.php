@@ -129,11 +129,7 @@
                     <h1 class="detail-title fw-bold mb-0">{{ $product->name }}</h1>
                     @auth
                         @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
-                            @if(Auth::user()->role === 'admin')
-                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-primary rounded-pill px-3 flex-shrink-0"><i class="bi bi-pencil-square me-1"></i>Cập nhật sản phẩm</a>
-                            @else
-                                <a href="{{ route('admin.products.show', $product) }}" class="btn btn-outline-primary rounded-pill px-3 flex-shrink-0"><i class="bi bi-box-seam me-1"></i>Quản lý sản phẩm</a>
-                            @endif
+                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-primary rounded-pill px-3 flex-shrink-0"><i class="bi bi-pencil-square me-1"></i>Chỉnh sửa sản phẩm</a>
                         @else
                             <form action="{{ route('wishlist.toggle', $product) }}" method="POST" class="flex-shrink-0">
                                 @csrf

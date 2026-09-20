@@ -93,8 +93,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/products/create', [ProductController::class, 'create'])->middleware('role:admin')->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->middleware('role:admin')->name('products.store');
     Route::get('/products/{product}', [ProductController::class, 'show'])->middleware('role:admin,manager,warehouse_staff')->name('products.show');
-    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->middleware('role:admin')->name('products.edit');
-    Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('role:admin')->name('products.update');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->middleware('role:admin,manager')->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('role:admin,manager')->name('products.update');
     Route::patch('/products/{product}/stock', [ProductController::class, 'updateStock'])->middleware('role:admin,warehouse_staff')->name('products.stock');
     Route::patch('/products/{product}/variation-stock', [ProductController::class, 'updateVariationStock'])->middleware('role:admin,warehouse_staff')->name('products.variation-stock');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('role:admin')->name('products.destroy');

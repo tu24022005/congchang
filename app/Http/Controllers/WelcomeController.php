@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\HomeBanner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 class WelcomeController extends Controller
@@ -26,7 +27,8 @@ $hotProductIds = DB::table('order_items')
 $hotProducts = $hotProductIds->isNotEmpty()
 	? Product::with(['category', 'variations'])->whereIn('id', $hotProductIds)->orderByRaw('FIELD(id, ' . $hotProductIds->implode(',') . ')')->get()
 	: Product::with(['category', 'variations'])->latest()->limit(8)->get();
+$banners = HomeBanner::where('is_active', true)->orderBy('sort_order')->orderByDesc('id')->get();
 // Trả về view 'welcome' và truyền biến $products sang cho view
-return view('welcome', compact('products', 'categories', 'hotProducts'));
+return view('welcome', compact('products', 'categories', 'hotProducts', 'banners'));
 }
 }

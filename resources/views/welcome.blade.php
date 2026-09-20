@@ -31,69 +31,25 @@
 <!-- BANNER TRƯỢT TỰ ĐỘNG (CAROUSEL) -->
 <div id="heroCarousel" class="carousel slide hero-carousel mb-5 animate__animated animate__fadeInDown" data-bs-ride="carousel" data-bs-interval="4000" data-bs-wrap="true">
     <div class="carousel-indicators">
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4"></button>
+        @foreach($banners as $index => $banner)
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}"></button>
+        @endforeach
     </div>
 
     <div class="carousel-inner">
-        <!-- Slide 1 -->
-        <div class="carousel-item active">
-            <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=2000&auto=format&fit=crop" alt="Bộ sưu tập mỹ phẩm Aloha Beauty">
+        @foreach($banners as $index => $banner)
+        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+            <img src="{{ $banner->image_source }}" alt="{{ $banner->alt_text ?: $banner->title }}">
             <div class="carousel-caption">
-                <span class="badge bg-warning text-dark mb-2 px-3 py-2 fs-6 rounded-pill">Bộ sưu tập mới</span>
-                <h1>Beauty Essentials</h1>
-                <p class="mb-4 w-50 d-none d-md-block">Những sản phẩm làm đẹp thiết yếu giúp bạn chăm sóc làn da và tỏa sáng mỗi ngày.</p>
-                <a href="{{ route('products.index') }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold me-2">Mua ngay <i class="bi bi-chevron-right"></i></a>
-                <a href="{{ route('products.show', 1) }}" class="btn btn-outline-light rounded-pill px-4 py-2 fw-bold">Xem chi tiết</a>
+                @if($banner->badge)<span class="badge bg-warning text-dark mb-2 px-3 py-2 fs-6 rounded-pill">{{ $banner->badge }}</span>@endif
+                <h1>{{ $banner->title }}</h1>
+                @if($banner->description)<p class="mb-4 w-50 d-none d-md-block">{{ $banner->description }}</p>@endif
+                @if($banner->button_text && $banner->button_url)
+                    <a href="{{ $banner->button_url }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold me-2">{{ $banner->button_text }} <i class="bi bi-chevron-right"></i></a>
+                @endif
             </div>
         </div>
-
-        <!-- Slide 2 -->
-        <div class="carousel-item">
-            <img src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?q=80&w=2000&auto=format&fit=crop" alt="Chăm sóc da">
-            <div class="carousel-caption">
-                <span class="badge bg-danger mb-2 px-3 py-2 fs-6 rounded-pill">Được yêu thích</span>
-                <h1>Skincare Ritual</h1>
-                <p class="mb-4 w-50 d-none d-md-block">Xây dựng chu trình chăm sóc da dịu lành, hiệu quả với những thành phần được chọn lọc.</p>
-                <a href="{{ route('products.index', ['category' => 1]) }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold me-2">Khám phá ngay <i class="bi bi-chevron-right"></i></a>
-            </div>
-        </div>
-
-        <!-- Slide 3 -->
-        <div class="carousel-item">
-            <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=2000&auto=format&fit=crop" alt="Chăm sóc cá nhân">
-            <div class="carousel-caption">
-                <span class="badge bg-info text-dark mb-2 px-3 py-2 fs-6 rounded-pill">Ưu đãi hôm nay</span>
-                <h1>Self-care Moment</h1>
-                <p class="mb-4 w-50 d-none d-md-block">Tận hưởng những phút giây chăm sóc bản thân với sản phẩm lành tính và tiện dụng.</p>
-                <a href="{{ route('products.index') }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold me-2">Săn ưu đãi <i class="bi bi-chevron-right"></i></a>
-            </div>
-        </div>
-
-        <!-- Slide 4 -->
-        <div class="carousel-item">
-            <img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?q=80&w=2000&auto=format&fit=crop" alt="Chăm sóc tóc">
-            <div class="carousel-caption">
-                <span class="badge bg-success mb-2 px-3 py-2 fs-6 rounded-pill">Hair care edit</span>
-                <h1>Tóc mềm, mood xinh</h1>
-                <p class="mb-4 w-50 d-none d-md-block">Khám phá routine chăm sóc tóc nhẹ nhàng, thơm dịu và phù hợp cho mỗi ngày.</p>
-                <a href="{{ route('products.index', ['category' => 3]) }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold me-2">Xem chăm sóc tóc <i class="bi bi-chevron-right"></i></a>
-            </div>
-        </div>
-
-        <!-- Slide 5 -->
-        <div class="carousel-item">
-            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=2000&auto=format&fit=crop" alt="Routine chăm sóc da">
-            <div class="carousel-caption">
-                <span class="badge bg-warning text-dark mb-2 px-3 py-2 fs-6 rounded-pill">Routine mới mỗi ngày</span>
-                <h1>Chăm mình thật dịu</h1>
-                <p class="mb-4 w-50 d-none d-md-block">Chọn những món nhỏ xinh để biến vài phút skincare thành khoảng thời gian dành riêng cho bạn.</p>
-                <a href="{{ route('products.index') }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold me-2">Khám phá bộ sưu tập <i class="bi bi-chevron-right"></i></a>
-            </div>
-        </div>
+        @endforeach
     </div>
 
     <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">

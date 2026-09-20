@@ -131,6 +131,10 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/reports', [ReportController::class, 'index'])->middleware('role:admin,manager')->name('reports.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->middleware('role:admin,manager')->name('reports.export');
     Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->middleware('role:admin,manager');
+    Route::resource('home-banners', \App\Http\Controllers\Admin\HomeBannerController::class)
+        ->parameters(['home-banners' => 'homeBanner'])
+        ->except(['show'])
+        ->middleware('role:admin,manager');
     Route::resource('posts', AdminPostController::class)->except(['show'])->middleware('role:admin,manager');
     Route::resource('post-categories', AdminPostCategoryController::class)
         ->parameters(['post-categories' => 'postCategory'])

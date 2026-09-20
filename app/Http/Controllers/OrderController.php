@@ -279,10 +279,12 @@ class OrderController extends Controller
             return back()->with('error', 'Đơn online đã thanh toán cần chuyển sang Chờ hoàn tiền, không hủy trực tiếp.');
         }
 
+        $previousStatus = $order->status;
         $order->status = $requestedStatus;
         $order->shipping_provider = $request->shipping_provider;
         $order->shipping_date = $request->shipping_date;
         $order->save();
+        app(\App\Services\OrderStatusNotificationService::class)->notify($order, $previousStatus);
 
         return back()->with('success', 'Đã cập nhật tiến độ vận chuyển cho đơn hàng!');
     }
@@ -297,7 +299,9 @@ class OrderController extends Controller
             return back()->with('error', 'Đơn hàng chưa ở trạng thái có thể xác nhận nhận hàng.');
         }
 
+        $previousStatus = $order->status;
         $order->update(['status' => 'completed']);
+        app(\App\Services\OrderStatusNotificationService::class)->notify($order, $previousStatus);
         app(LoyaltyPointService::class)->awardForCompletedOrder($order);
 
         return back()->with('success', 'Đã xác nhận nhận hàng. Bạn có thể đánh giá sản phẩm ngay bây giờ.');
@@ -313,6 +317,7 @@ class OrderController extends Controller
             return back()->with('error', 'Đơn hàng chỉ có thể hủy trước khi shop bắt đầu đóng gói.');
         }
 
+        $previousStatus = $order->status;
         $refundDetails = [];
         if ($order->payment_method !== 'COD' && $order->status === 'paid') {
             $refundDetails = $request->validate([
@@ -356,6 +361,8 @@ class OrderController extends Controller
             ? 'Đơn đã được hủy và chuyển sang trạng thái chờ hoàn tiền. Shop sẽ xác nhận sau khi chuyển khoản.'
             : 'Đã hủy đơn hàng thành công.';
 
+        $order->refresh();
+        app(\App\Services\OrderStatusNotificationService::class)->notify($order, $previousStatus);
         return redirect()->route('orders.show', $order)->with('success', $message);
     }
 

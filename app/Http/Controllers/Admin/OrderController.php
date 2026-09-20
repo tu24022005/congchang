@@ -98,6 +98,7 @@ class OrderController extends Controller
             $lockedOrder->update(['status' => $request->status]);
         });
         $order->refresh();
+        app(\App\Services\OrderStatusNotificationService::class)->notify($order, $beforeStatus);
         ActivityLogService::record('order.status.updated', 'Đã cập nhật trạng thái đơn #' . $order->id . '.', $order, ['status' => $beforeStatus], ['status' => $order->status]);
         if ($order->status === 'completed') {
             app(LoyaltyPointService::class)->awardForCompletedOrder($order);
@@ -139,6 +140,8 @@ class OrderController extends Controller
             return back()->with('error', 'Không thể xác nhận hoàn tiền lúc này. Vui lòng thử lại.');
         }
 
+        $order->refresh();
+        app(\App\Services\OrderStatusNotificationService::class)->notify($order, 'refund_pending');
         ActivityLogService::record('order.refunded', 'Đã ghi nhận hoàn tiền đơn #' . $order->id . '.', $order, ['status' => 'refund_pending'], ['status' => 'refunded'], ['refund_reference' => $validated['refund_reference']]);
         return back()->with('success', 'Đã ghi nhận hoàn tiền cho khách hàng #' . $order->id . '.');
     }

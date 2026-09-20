@@ -14,7 +14,7 @@ class OrderCancellationService
 {
     public function cancelUnpaidOnline(Order $order): bool
     {
-        return DB::transaction(function () use ($order): bool {
+        $cancelled = DB::transaction(function () use ($order): bool {
             $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->first();
             if (!$lockedOrder || $lockedOrder->status !== 'processing' || !$this->isOnline($lockedOrder)) {
                 return false;
@@ -26,6 +26,18 @@ class OrderCancellationService
 
             return true;
         });
+
+        if ($cancelled) {
+            $order->refresh();
+            app(self::class)->notifyStatusChange($order, 'processing');
+        }
+
+        return $cancelled;
+    }
+
+    public function notifyStatusChange(Order $order, string $previousStatus): void
+    {
+        app(OrderStatusNotificationService::class)->notify($order, $previousStatus);
     }
 
     public function cancel(Order $order, string $status = 'cancelled'): void

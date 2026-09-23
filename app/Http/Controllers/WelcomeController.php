@@ -15,6 +15,8 @@ public function index()
 {
 // Lấy danh sách sản phẩm mới nhất, kèm theo thông tin Danh mục và phân trang 6 sản phẩm/trang
 $products = Product::with(['category', 'variations'])
+->withAvg('reviews', 'rating')
+->withCount('reviews')
 ->latest()
 ->paginate(6);
 $categories = Category::withCount('products')->orderBy('name')->get();
@@ -25,6 +27,8 @@ $hotProductIds = DB::table('order_items')
 ->limit(8)
 ->pluck('product_id');
 $flashSaleProducts = Product::with(['category', 'variations'])
+    ->withAvg('reviews', 'rating')
+    ->withCount('reviews')
     ->whereNotNull('flash_sale_price')
     ->whereNotNull('flash_sale_starts_at')
     ->whereNotNull('flash_sale_ends_at')
@@ -37,6 +41,8 @@ $flashSaleProducts = Product::with(['category', 'variations'])
 $remainingSlots = max(0, 8 - $flashSaleProducts->count());
 $hotProducts = $remainingSlots > 0 && $hotProductIds->isNotEmpty()
     ? Product::with(['category', 'variations'])
+        ->withAvg('reviews', 'rating')
+        ->withCount('reviews')
         ->whereIn('id', $hotProductIds)
         ->whereNotIn('id', $flashSaleProducts->pluck('id'))
         ->orderByRaw('FIELD(id, ' . $hotProductIds->implode(',') . ')')
@@ -46,6 +52,8 @@ $hotProducts = $remainingSlots > 0 && $hotProductIds->isNotEmpty()
 
 if ($hotProducts->count() < $remainingSlots) {
     $fallbackProducts = Product::with(['category', 'variations'])
+        ->withAvg('reviews', 'rating')
+        ->withCount('reviews')
         ->whereNotIn('id', $flashSaleProducts->pluck('id')->merge($hotProducts->pluck('id')))
         ->latest()
         ->limit($remainingSlots - $hotProducts->count())

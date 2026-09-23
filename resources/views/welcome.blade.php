@@ -167,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p class="text-muted small mb-3"><i class="bi bi-box-seam me-1"></i>Còn lại: {{ $product->quantity > 0 ? $product->quantity : 'Hết hàng' }}</p>
 
                 <div class="product-card-price-wrap">
-                    <div class="product-card-price">{{ number_format($productMinPrice, 0, ',', '.') }} ₫</div>
                     @if($product->reviews_avg_rating)
                         <div class="product-card-meta-row">
                             <span class="product-card-rating"><i class="bi bi-star-fill"></i> {{ number_format($product->reviews_avg_rating, 1) }} / 5</span>

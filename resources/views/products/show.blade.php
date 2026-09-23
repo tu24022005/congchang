@@ -279,7 +279,35 @@
             <div class="d-flex align-items-end justify-content-between mb-3"><div><div class="detail-kicker">Có thể bạn sẽ thích</div><h2 class="h4 fw-bold mb-0">Thường được mua cùng</h2></div><span class="badge bg-danger rounded-pill"><i class="bi bi-stars me-1"></i>Gợi ý thông minh</span></div>
             <div class="row g-3">
                 @foreach($recommendations as $rec)
-                    <div class="col-6 col-md-3"><div class="recommendation-card h-100"><a href="{{ route('products.show', ['product' => $rec->slug]) }}">@if($rec->image)<img src="{{ asset('storage/' . $rec->image) }}" class="recommendation-image" alt="{{ $rec->name }}">@else<div class="recommendation-placeholder"><i class="bi bi-image text-muted fs-2"></i></div>@endif</a><div class="p-3 d-flex flex-column h-100"><a href="{{ route('products.show', ['product' => $rec->slug]) }}" class="text-decoration-none text-dark fw-bold small mb-2">{{ $rec->name }}</a><div class="mt-auto d-flex justify-content-between align-items-center"><span class="text-danger fw-bold small">{{ number_format($rec->price, 0, ',', '.') }} đ</span><a href="{{ route('products.show', ['product' => $rec->slug]) }}" class="btn btn-sm btn-outline-primary rounded-circle" title="Xem sản phẩm"><i class="bi bi-arrow-up-right"></i></a></div></div></div></div>
+                    @php
+                        $recommendationPrices = $rec->variations->map(fn ($variation) => $rec->effectivePrice($variation));
+                        $recommendationMinPrice = $recommendationPrices->isNotEmpty() ? $recommendationPrices->min() : $rec->effectivePrice();
+                        $recommendationMaxPrice = $recommendationPrices->isNotEmpty() ? $recommendationPrices->max() : $rec->effectivePrice();
+                    @endphp
+                    <div class="col-6 col-md-3">
+                        <div class="recommendation-card h-100">
+                            <a href="{{ route('products.show', ['product' => $rec->slug]) }}">
+                                @if($rec->image)
+                                    <img src="{{ asset('storage/' . $rec->image) }}" class="recommendation-image" alt="{{ $rec->name }}">
+                                @else
+                                    <div class="recommendation-placeholder"><i class="bi bi-image text-muted fs-2"></i></div>
+                                @endif
+                            </a>
+                            <div class="p-3 d-flex flex-column">
+                                <a href="{{ route('products.show', ['product' => $rec->slug]) }}" class="text-decoration-none text-dark fw-bold small mb-2">{{ $rec->name }}</a>
+                                <div class="d-flex justify-content-between align-items-center gap-2">
+                                    <span class="text-danger fw-bold small">
+                                        @if($recommendationMinPrice < $recommendationMaxPrice)
+                                            {{ number_format($recommendationMinPrice, 0, ',', '.') }} - {{ number_format($recommendationMaxPrice, 0, ',', '.') }} đ
+                                        @else
+                                            {{ number_format($recommendationMinPrice, 0, ',', '.') }} đ
+                                        @endif
+                                    </span>
+                                    <a href="{{ route('products.show', ['product' => $rec->slug]) }}" class="btn btn-sm btn-outline-primary rounded-circle" title="Xem sản phẩm"><i class="bi bi-arrow-up-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
             </div>
         </section>

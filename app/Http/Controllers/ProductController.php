@@ -237,10 +237,10 @@ class ProductController extends Controller
         }
 
         $priceExpression = 'COALESCE((SELECT MIN(pv.price) FROM product_variations pv WHERE pv.product_id = products.id), products.price)';
-        if (array_key_exists('min_price', $validated)) {
+        if ($request->filled('min_price')) {
             $query->whereRaw($priceExpression . ' >= ?', [$validated['min_price']]);
         }
-        if (array_key_exists('max_price', $validated)) {
+        if ($request->filled('max_price')) {
             $query->whereRaw($priceExpression . ' <= ?', [$validated['max_price']]);
         }
         if (!empty($validated['rating'])) {
@@ -291,11 +291,13 @@ class ProductController extends Controller
             ->pluck('product_id');
 
         if ($relatedProductIds->isNotEmpty()) {
-            $recommendations = Product::whereIn('id', $relatedProductIds)
+            $recommendations = Product::with('variations')
+                ->whereIn('id', $relatedProductIds)
                 ->orderByRaw("FIELD(id, " . $relatedProductIds->implode(',') . ")")
                 ->get();
         } else {
-            $recommendations = Product::where('category_id', $product->category_id)
+            $recommendations = Product::with('variations')
+                ->where('category_id', $product->category_id)
                 ->where('id', '!=', $product->id)
                 ->inRandomOrder()
                 ->take(4)

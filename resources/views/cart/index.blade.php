@@ -5,7 +5,7 @@
 @endpush
 
 @section('content')
-<div class="container py-4">
+<div class="container py-4 cart-shopee-page">
     @php
         $discountVoucher = session('voucher_discount');
         $shippingVoucher = session('voucher_shipping');
@@ -19,7 +19,7 @@
         $serviceFee = 0;
         $finalTotal = $total - $discount + $serviceFee;
     @endphp
-    <div class="cart-page-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / GIỎ HÀNG</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn</h2>    <p class="text-muted mb-0">Phí vận chuyển sẽ được tính theo khu vực ở bước thanh toán.</p></div><a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a></div>
+    <div class="cart-page-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / GIỎ HÀNG</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn</h2><p class="text-muted mb-0">Phí vận chuyển sẽ được tính theo khu vực ở bước thanh toán.</p></div><a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a></div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
@@ -43,30 +43,34 @@
                     <div class="card-body p-0">
                         <div class="cart-card-heading"><div><h5 class="fw-bold mb-1">Sản phẩm đã chọn</h5><small class="text-muted">{{ count(session('cart')) }} sản phẩm sẵn sàng thanh toán</small></div><div class="d-flex align-items-center gap-2"><span class="cart-secure-badge"><i class="bi bi-shield-check me-1"></i>An toàn</span><form action="{{ route('cart.clear') }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?');">@csrf @method('DELETE')<button class="btn btn-sm btn-link text-danger p-0" title="Xóa toàn bộ giỏ hàng"><i class="bi bi-trash3"></i></button></form></div></div>
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle text-center mb-0">
-                                <thead class="table-light">
+                            <table class="table align-middle text-center mb-0 cart-shopee-table">
+                                <thead>
                                     <tr>
-                                        <th class="py-3 ps-4 text-start">Sản phẩm & Phân loại</th>
-                                        <th class="py-3">Giá</th>
-                                        <th class="py-3">Số lượng</th>
-                                        <th class="py-3">Thành tiền</th>
-                                        <th class="py-3">Hành động</th>
+                                        <th class="ps-4 text-start"><input type="checkbox" class="cart-checkbox-input" id="cart-select-all" aria-label="Chọn tất cả sản phẩm" checked> <label for="cart-select-all">Sản phẩm</label></th>
+                                        <th>Đơn giá</th>
+                                        <th>Số lượng</th>
+                                        <th>Số tiền</th>
+                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <tr class="cart-shop-row">
+                                        <td colspan="5" class="text-start ps-4"><input type="checkbox" class="cart-checkbox-input cart-shop-select" aria-label="Chọn tất cả sản phẩm của Aloha Beauty" checked> <strong>Aloha Beauty</strong><span class="cart-shop-label">Yêu thích</span></td>
+                                    </tr>
                                     @php $total = 0; @endphp
                                     @foreach(session('cart') as $id => $details)
                                         @php $total += $details['price'] * $details['quantity']; @endphp
                                         <tr class="cart-item-row" data-unit-price="{{ $details['price'] }}">
                                             <td class="text-start ps-4">
-                                                <div class="d-flex align-items-center">
+                                                <div class="d-flex align-items-center cart-product-cell">
+                                                    <input type="checkbox" class="cart-checkbox-input cart-product-select" aria-label="Chọn {{ $details['name'] }}" checked>
                                                     @if(isset($details['image']) && $details['image'])
-                                                        <img src="{{ asset('storage/' . $details['image']) }}" width="60" class="img-thumbnail rounded-3 shadow-sm me-3">
+                                                        <img src="{{ asset('storage/' . $details['image']) }}" width="72" height="72" class="img-thumbnail rounded-3 shadow-sm me-3 cart-product-image">
                                                     @else
-                                                        <div class="bg-light rounded-3 border me-3 storefront-thumb-placeholder"></div>
+                                                        <div class="bg-light rounded-3 border me-3 storefront-thumb-placeholder cart-product-image"></div>
                                                     @endif
-                                                    <div>
-                                                        <div class="fw-bold">{{ $details['name'] }}</div>
+                                                    <div class="cart-product-info">
+                                                        <div class="fw-bold cart-product-name">{{ $details['name'] }}</div>
                                                         @if(isset($details['variation']))
                                                             <small class="text-muted">Phân loại: <span class="badge bg-info text-dark">{{ $details['variation'] }}</span></small>
                                                         @else
@@ -76,14 +80,14 @@
                                                 </div>
                                             <td>
                                                 @if(!empty($details['promotion_label']))<span class="badge bg-danger d-block mb-1">{{ $details['promotion_label'] }}</span><span class="text-muted text-decoration-line-through small">{{ number_format($details['original_price'], 0, ',', '.') }} đ</span><br>@endif
-                                                {{ number_format($details['price'], 0, ',', '.') }} đ
+                                                <span class="cart-unit-price">{{ number_format($details['price'], 0, ',', '.') }} đ</span>
                                             </td>
                                             <td>
                                                 <form action="{{ route('cart.update', $id) }}" method="POST" class="d-flex justify-content-center">
                                                     @csrf
                                                     <!-- ĐÃ SỬA TỪ PUT THÀNH PATCH Ở ĐÂY -->
                                                     @method('PATCH')
-                                                    <div class="quantity-control"><button type="button" class="quantity-step" data-step="-1">-</button><input type="number" name="quantity" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center quantity-input" min="1"><button type="button" class="quantity-step" data-step="1">+</button></div><button type="submit" class="btn btn-sm btn-outline-primary ms-2" title="Cập nhật số lượng"><i class="bi bi-check2"></i></button>
+                                                    <div class="quantity-control"><button type="button" class="quantity-step" data-step="-1">−</button><input type="number" name="quantity" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center quantity-input" min="1"><button type="button" class="quantity-step" data-step="1">+</button></div><button type="submit" class="btn btn-sm btn-outline-primary ms-2" title="Cập nhật số lượng"><i class="bi bi-check2"></i></button>
                                                 </form>
                                             </td>
                                             <td class="text-danger fw-bold line-total">{{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }} đ</td>
@@ -302,6 +306,38 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const selectAll = document.getElementById('cart-select-all');
+        const shopSelect = document.querySelector('.cart-shop-select');
+        const productSelects = Array.from(document.querySelectorAll('.cart-product-select'));
+
+        function syncSelectAllState() {
+            if (!selectAll || !productSelects.length) return;
+            const selectedCount = productSelects.filter(input => input.checked).length;
+            selectAll.checked = selectedCount === productSelects.length;
+            selectAll.indeterminate = selectedCount > 0 && selectedCount < productSelects.length;
+            if (shopSelect) {
+                shopSelect.checked = selectAll.checked;
+                shopSelect.indeterminate = selectAll.indeterminate;
+            }
+        }
+
+        function setProductsSelected(checked) {
+            productSelects.forEach(input => { input.checked = checked; });
+            syncSelectAllState();
+            window.refreshCartTotals?.();
+        }
+
+        selectAll?.addEventListener('change', function () {
+            setProductsSelected(this.checked);
+        });
+        shopSelect?.addEventListener('change', function () {
+            setProductsSelected(this.checked);
+        });
+        productSelects.forEach(input => input.addEventListener('change', function () {
+            syncSelectAllState();
+            window.refreshCartTotals?.();
+        }));
+
         document.querySelectorAll('.quantity-step').forEach(function (button) {
             button.addEventListener('click', function () {
                 const input = this.closest('.quantity-control').querySelector('input');
@@ -310,18 +346,46 @@
                 input.dispatchEvent(new Event('input', { bubbles: true }));
             });
         });
+        productSelects.forEach(input => { input.checked = true; });
+        syncSelectAllState();
+        window.refreshCartTotals?.();
         const mapElement = document.getElementById('delivery-map');
         if (!mapElement) return;
         const addressInput = document.getElementById('customer-address');
         const latitudeInput = document.getElementById('delivery-latitude');
         const longitudeInput = document.getElementById('delivery-longitude');
         const status = document.getElementById('map-status');
+        const shippingZone = document.getElementById('shipping-zone');
         const defaultPosition = [21.0285, 105.8542];
         const map = L.map(mapElement).setView(defaultPosition, 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
         let marker;
 
-        function setLocation(latitude, longitude, label) {
+        function updateShippingZone(address = {}, label = '') {
+            if (!shippingZone) return;
+            const locationText = [
+                address.city,
+                address.town,
+                address.municipality,
+                address.state,
+                address.county,
+                label,
+            ].filter(Boolean).join(' ').toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const isInnerCity = locationText.includes('ha noi')
+                || locationText.includes('hanoi')
+                || locationText.includes('ho chi minh')
+                || locationText.includes('thanh pho ho chi minh')
+                || locationText.includes('sai gon')
+                || locationText.includes('saigon');
+            const zone = isInnerCity ? 'inner_city' : 'other_city';
+            if (shippingZone.querySelector(`option[value="${zone}"]`)) {
+                shippingZone.value = zone;
+                shippingZone.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        function setLocation(latitude, longitude, label, address = {}) {
             latitudeInput.value = latitude.toFixed(7);
             longitudeInput.value = longitude.toFixed(7);
             if (!marker) marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
@@ -330,6 +394,7 @@
             marker.bindPopup('Vị trí giao hàng').openPopup();
             map.setView([latitude, longitude], 16);
             if (label) addressInput.value = label;
+            updateShippingZone(address, label);
             status.textContent = 'Đã chọn vị trí';
             status.className = 'small text-success ms-2';
         }
@@ -338,7 +403,7 @@
             status.textContent = 'Đang lấy địa chỉ...';
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`, { headers: { 'Accept-Language': 'vi' } });
             const data = await response.json();
-            setLocation(latitude, longitude, data.display_name || 'Vị trí đã chọn');
+            setLocation(latitude, longitude, data.display_name || 'Vị trí đã chọn', data.address || {});
         }
 
         map.on('click', event => reverseGeocode(event.latlng.lat, event.latlng.lng).catch(() => status.textContent = 'Không lấy được địa chỉ, bạn có thể nhập tay.'));
@@ -346,7 +411,12 @@
             const query = document.getElementById('map-search').value.trim();
             if (!query) return;
             status.textContent = 'Đang tìm...';
-            try { const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=vn&q=${encodeURIComponent(query)}`, { headers: { 'Accept-Language': 'vi' } }); const results = await response.json(); if (!results.length) throw new Error(); setLocation(Number(results[0].lat), Number(results[0].lon), results[0].display_name); } catch (error) { status.textContent = 'Không tìm thấy địa chỉ'; }
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&countrycodes=vn&q=${encodeURIComponent(query)}`, { headers: { 'Accept-Language': 'vi' } });
+                const results = await response.json();
+                if (!results.length) throw new Error();
+                setLocation(Number(results[0].lat), Number(results[0].lon), results[0].display_name, results[0].address || {});
+            } catch (error) { status.textContent = 'Không tìm thấy địa chỉ'; }
         });
         document.getElementById('use-current-location').addEventListener('click', function () { if (!navigator.geolocation) return; status.textContent = 'Đang lấy vị trí...'; navigator.geolocation.getCurrentPosition(position => reverseGeocode(position.coords.latitude, position.coords.longitude), () => status.textContent = 'Trình duyệt chưa cho phép định vị.'); });
         if (addressInput.value.trim()) document.getElementById('map-search').value = addressInput.value;
@@ -432,7 +502,8 @@
             const quantity = Math.max(1, Number(input.value || 1));
             input.value = quantity;
             const lineTotal = Number(row.dataset.unitPrice) * quantity;
-            subtotal += lineTotal;
+            const productSelect = row.querySelector('.cart-product-select');
+            if (productSelect?.checked) subtotal += lineTotal;
             row.querySelector('.line-total').textContent = money(lineTotal) + ' đ';
         });
 
@@ -451,6 +522,7 @@
             : shippingFee > 0 ? money(shippingFee) + ' đ' : 'Chọn khu vực';
         document.getElementById('cart-final-total').textContent = money(total) + ' đ';
     }
+    window.refreshCartTotals = refreshCartTotals;
 
     document.querySelectorAll('.quantity-input').forEach(function (input) {
         input.addEventListener('input', function () {

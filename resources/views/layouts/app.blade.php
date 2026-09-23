@@ -59,12 +59,12 @@
                 </ul>
 
                 <!-- THANH TÌM KIẾM TRUNG TÂM CO GỢI Ý (LIVE SEARCH) -->
-                <form action="{{ route('products.index') }}" method="GET" class="d-flex mx-lg-4 my-3 my-lg-0 flex-grow-1 position-relative live-search-form">
-                    <div class="input-group shadow-sm live-search-group">
-                        <span class="input-group-text bg-white border-0 text-dark ps-3 pe-2">
+                <form action="{{ route('products.index') }}" method="GET" class="d-flex mx-lg-3 my-3 my-lg-0 flex-grow-1 justify-content-center position-relative live-search-form">
+                    <div class="input-group live-search-group">
+                        <span class="input-group-text bg-transparent border-0 text-dark ps-3 pe-2">
                             <i class="bi bi-search fw-bold search-icon"></i>
                         </span>
-                        <input type="text" name="search" id="live-search-input" class="form-control border-0 shadow-none bg-white px-2 live-search-input" placeholder="Tìm kiếm mỹ phẩm, chăm sóc da..." value="{{ request('search') }}" autocomplete="off">
+                        <input type="text" name="search" id="live-search-input" class="form-control border-0 shadow-none bg-transparent px-2 live-search-input" placeholder="Tìm kiếm mỹ phẩm, chăm sóc da..." value="{{ request('search') }}" autocomplete="off">
                     </div>
                     
                     <!-- Khung Dropdown chứa kết quả gợi ý -->
@@ -118,13 +118,6 @@
                                     @endif
                                 </ul>
                             </li>
-                        @else
-                            <!-- ĐƠN HÀNG CỦA KHÁCH -->
-                            <li class="nav-item me-4">
-                                <a class="nav-link text-nowrap text-dark fw-bold" href="{{ route('orders.index') }}">
-                                    <i class="bi bi-receipt fs-5 me-1"></i> Đơn hàng
-                                </a>
-                            </li>
                         @endif
 
                         @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
@@ -177,6 +170,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('account') }}"><i class="bi bi-person-vcard text-primary me-2"></i> Tài khoản của tôi</a></li>
+                                <li><a class="dropdown-item fw-bold py-2" href="{{ route('orders.index') }}"><i class="bi bi-receipt text-dark me-2"></i> Đơn hàng của tôi</a></li>
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('wishlist.index') }}"><i class="bi bi-heart text-danger me-2"></i> Sản phẩm yêu thích</a></li>
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('refunds.index') }}"><i class="bi bi-arrow-counterclockwise text-success me-2"></i> Tiền hoàn của tôi</a></li>
                                 @if(Auth::user()->role !== 'admin')

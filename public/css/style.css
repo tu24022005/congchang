@@ -89,11 +89,11 @@ main {
 .search-item-hover:hover { background-color: rgba(0, 198, 255, 0.1); border-radius: 8px; margin: 0 8px; }
 #search-suggestions::-webkit-scrollbar { width: 6px; }
 #search-suggestions::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
-.live-search-form { max-width: 450px; }
-.live-search-group { background-color: white; border-radius: 50px; overflow: hidden; height: 42px; }
+.live-search-form { max-width: 560px; width: min(100%, 560px); }
+.live-search-group { background-color: white; border-radius: 50px; overflow: hidden; height: 46px; }
 .search-icon { font-size: 1.1rem; }
 .live-search-input { font-size: 0.95rem; font-weight: 500; }
-.search-suggestions { top: 50px; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); }
+.search-suggestions { top: 52px; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); }
 .search-result-image { width: 40px; height: 40px; object-fit: contain; }
 .search-result-name { max-width: 300px; }
 .cart-count-badge { font-size: 0.7rem; margin-top: 10px; }

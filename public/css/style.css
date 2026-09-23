@@ -95,15 +95,20 @@ main {
 
 .navbar-nav.me-auto {
     flex-wrap: nowrap;
+    flex: 0 0 auto;
+    margin-right: 0 !important;
 }
 
 .live-search-form {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     max-width: none;
-    min-width: 260px;
+    min-width: 0;
     width: 100%;
     margin-left: 0.75rem;
     margin-right: 0.75rem;
+}
+.live-search-form + .navbar-nav {
+    margin-left: 0 !important;
 }
 .live-search-group {
     background-color: rgba(255, 255, 255, 0.88);
@@ -1242,7 +1247,7 @@ main > .container-fluid {
 }
 
 .live-search-form {
-    max-width: 285px;
+    max-width: none;
 }
 
 .live-search-group {

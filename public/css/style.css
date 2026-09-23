@@ -89,11 +89,21 @@ main {
 .search-item-hover:hover { background-color: rgba(0, 198, 255, 0.1); border-radius: 8px; margin: 0 8px; }
 #search-suggestions::-webkit-scrollbar { width: 6px; }
 #search-suggestions::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+.navbar .navbar-collapse {
+    flex: 1 1 auto;
+}
+
+.navbar-nav.me-auto {
+    flex-wrap: nowrap;
+}
+
 .live-search-form {
-    flex: 1 1 420px;
-    max-width: 640px;
+    flex: 1 1 auto;
+    max-width: none;
     min-width: 260px;
-    width: min(100%, 640px);
+    width: 100%;
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
 }
 .live-search-group {
     background-color: rgba(255, 255, 255, 0.88);
@@ -101,6 +111,7 @@ main {
     border-radius: 18px;
     overflow: hidden;
     height: 52px;
+    width: 100%;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
 }
 .search-icon { font-size: 1.1rem; }

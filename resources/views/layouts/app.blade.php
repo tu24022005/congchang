@@ -32,6 +32,15 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <!-- CỤM BÊN TRÁI: DÀNH CHO KHÁCH -->
                 <ul class="navbar-nav me-auto align-items-center">
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle text-nowrap fw-semibold {{ request()->routeIs('pages.*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Về Aloha</a>
+                        <ul class="dropdown-menu border-0 shadow-sm">
+                            <li><a class="dropdown-item" href="{{ route('pages.about') }}">Giới thiệu</a></li>
+                            <li><a class="dropdown-item" href="{{ route('pages.contact') }}">Liên hệ</a></li>
+                            <li><a class="dropdown-item" href="{{ route('pages.policies') }}">Đổi trả & vận chuyển</a></li>
+                            <li><a class="dropdown-item" href="{{ route('pages.faq') }}">Câu hỏi thường gặp</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item me-3">
                         <a class="nav-link text-nowrap fw-semibold {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">
                             Trang chủ
@@ -46,15 +55,6 @@
                         <a class="nav-link text-nowrap fw-semibold {{ request()->routeIs('posts.*') ? 'active' : '' }}" href="{{ route('posts.index') }}">
                             Blog làm đẹp
                         </a>
-                    </li>
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link dropdown-toggle text-nowrap fw-semibold {{ request()->routeIs('pages.*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Về Aloha</a>
-                        <ul class="dropdown-menu border-0 shadow-sm">
-                            <li><a class="dropdown-item" href="{{ route('pages.about') }}">Giới thiệu</a></li>
-                            <li><a class="dropdown-item" href="{{ route('pages.contact') }}">Liên hệ</a></li>
-                            <li><a class="dropdown-item" href="{{ route('pages.policies') }}">Đổi trả & vận chuyển</a></li>
-                            <li><a class="dropdown-item" href="{{ route('pages.faq') }}">Câu hỏi thường gặp</a></li>
-                        </ul>
                     </li>
                 </ul>
 

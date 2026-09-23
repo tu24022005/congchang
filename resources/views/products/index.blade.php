@@ -112,22 +112,31 @@
                 </p>
 
                 @if($product->isFlashSaleActive())<span class="badge bg-danger mb-2"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span>@endif
-                <h5 class="fw-bold text-danger mb-1">
-                    @if($displayMinPrice < $displayMaxPrice)
-                        {{ number_format($displayMinPrice, 0, ',', '.') }} - {{ number_format($displayMaxPrice, 0, ',', '.') }} ₫
-                    @else
-                        {{ number_format($displayMinPrice, 0, ',', '.') }} ₫
-                    @endif
-                </h5>
-                @if($product->isFlashSaleActive())<div class="small text-muted text-decoration-line-through">{{ number_format($product->price, 0, ',', '.') }} ₫</div><div class="small text-danger">Kết thúc {{ $product->flash_sale_ends_at->format('d/m/Y H:i') }}</div>@endif
-                <div class="small text-warning mb-2">
-                    <i class="bi bi-star-fill"></i>
-                    {{ $product->reviews_avg_rating ? number_format($product->reviews_avg_rating, 1) : 'Chưa có' }}
-                    @if($product->reviews_avg_rating)<span class="text-muted">/ 5</span>@endif
-                </div>
-                <p class="text-muted small mb-3"><i class="bi bi-box-seam me-1"></i>Còn lại: {{ $product->quantity > 0 ? $product->quantity : 'Hết hàng' }}</p>
 
-                <a href="{{ route('products.show', ['product' => $product->slug]) }}" class="btn btn-cyan w-100 rounded-pill py-2 mt-auto">KHÁM PHÁ NGAY</a>
+                <div class="product-card-price-wrap">
+                    <div class="product-card-price">
+                        @if($displayMinPrice < $displayMaxPrice)
+                            {{ number_format($displayMinPrice, 0, ',', '.') }} - {{ number_format($displayMaxPrice, 0, ',', '.') }} ₫
+                        @else
+                            {{ number_format($displayMinPrice, 0, ',', '.') }} ₫
+                        @endif
+                    </div>
+                    @if($product->reviews_avg_rating)
+                        <div class="product-card-meta-row">
+                            <span class="product-card-rating"><i class="bi bi-star-fill"></i> {{ number_format($product->reviews_avg_rating, 1) }} / 5</span>
+                            <span class="product-card-reviews"><i class="bi bi-chat-left-text"></i> {{ $product->reviews_count ?? $product->reviews->count() }} đánh giá</span>
+                        </div>
+                    @else
+                        <div class="product-card-meta-row">
+                            <span class="product-card-rating muted"><i class="bi bi-star-fill"></i> 0 / 5</span>
+                            <span class="product-card-reviews"><i class="bi bi-chat-left-text"></i> 0 đánh giá</span>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="action-row single-action">
+                    <a href="{{ route('products.show', ['product' => $product->slug]) }}" class="btn btn-light border rounded-pill">Xem</a>
+                </div>
             </div>
         </div>
     </div>

@@ -173,7 +173,7 @@
                                 <small class="text-muted" id="detail-stock-note">Tối đa {{ $product->quantity }} sản phẩm</small>
                             </div>
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-success detail-buy flex-grow-1"><i class="bi bi-bag-plus me-2"></i>Thêm vào giỏ hàng</button>
+                                <button type="submit" class="aloha-cart-button flex-grow-1"><i class="bi bi-bag-plus"></i><span>Thêm vào giỏ hàng</span></button>
                                 <button type="submit" name="buy_now" value="1" class="btn btn-dark detail-buy flex-grow-1"><i class="bi bi-lightning-charge me-2"></i>Mua ngay</button>
                             </div>
                         </form>

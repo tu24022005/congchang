@@ -46,17 +46,25 @@ class InventoryLog extends Model
         int $before,
         int $after,
         string $reason,
-        ?Model $reference = null
+        ?Model $reference = null,
+        ?int $actorId = null,
+        bool $useCurrentUser = true
     ): ?self {
         $quantity = $after - $before;
         if ($quantity === 0) {
             return null;
         }
 
+        $isOrderReservation = $quantity < 0
+            && $reference instanceof Order
+            && $actorId === null;
+
         return static::create([
             'product_variation_id' => $variation->id,
             'product_id' => $variation->product_id,
-            'user_id' => auth()->id(),
+            'user_id' => $isOrderReservation
+                ? null
+                : ($useCurrentUser ? ($actorId ?? auth()->id()) : $actorId),
             'type' => $quantity > 0 ? 'in' : 'out',
             'quantity' => $quantity,
             'stock_before' => $before,

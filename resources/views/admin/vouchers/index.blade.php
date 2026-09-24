@@ -42,6 +42,28 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label small fw-bold">Điều kiện sản phẩm</label>
+                            <select name="applies_to" class="form-select" id="voucher-applies-to">
+                                <option value="all">Toàn shop</option>
+                                <option value="category">Danh mục</option>
+                                <option value="product">Sản phẩm</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 d-none" id="voucher-category-field">
+                            <label class="form-label small fw-bold">Danh mục áp dụng</label>
+                            <select name="category_id" class="form-select">
+                                <option value="">-- Chọn danh mục --</option>
+                                @foreach($categories as $category)<option value="{{ $category->id }}">{{ $category->name }}</option>@endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3 d-none" id="voucher-product-field">
+                            <label class="form-label small fw-bold">Sản phẩm áp dụng</label>
+                            <select name="product_id" class="form-select">
+                                <option value="">-- Chọn sản phẩm --</option>
+                                @foreach($products as $product)<option value="{{ $product->id }}">{{ $product->name }}</option>@endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-bold">Loại giảm giá</label>
                             <select name="type" class="form-select">
                                 <option value="fixed">Giảm tiền mặt (VNĐ)</option>
@@ -102,6 +124,11 @@
                                         @endif
                                     </td>
                                     <td>{{ number_format($voucher->min_order_value, 0, ',', '.') }} đ</td>
+                                    <td class="small text-start">
+                                        @if($voucher->applies_to === 'category') Danh mục: {{ $voucher->category->name ?? 'Đã xoá' }}
+                                        @elseif($voucher->applies_to === 'product') Sản phẩm: {{ $voucher->product->name ?? 'Đã xoá' }}
+                                        @else Toàn shop @endif
+                                    </td>
                                     <td>
                                         <strong>{{ $voucher->used_count }}</strong>
                                         <span class="text-muted">/ {{ $voucher->usage_limit ?? '∞' }}</span>
@@ -124,7 +151,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7" class="py-4 text-muted">Chưa có mã giảm giá nào</td></tr>
+                                <tr><td colspan="8" class="py-4 text-muted">Chưa có mã giảm giá nào</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -133,4 +160,10 @@
         </div>
     </div>
 </div>
+<script>
+document.getElementById('voucher-applies-to')?.addEventListener('change', function () {
+    document.getElementById('voucher-category-field').classList.toggle('d-none', this.value !== 'category');
+    document.getElementById('voucher-product-field').classList.toggle('d-none', this.value !== 'product');
+});
+</script>
 @endsection

@@ -1,12 +1,13 @@
 @extends('layouts.app')
-@section('title', 'Trang chủ - Aloha Beauty')
+@section('title', 'Trang chủ - BeatyCare 🌸')
 
 @section('content')
 @auth
     @if(Auth::user()->role === 'admin')
         <style>
-            .home-admin-chat-dock { position: fixed; z-index: 1040; top: 52%; right: 0; display: flex; align-items: center; gap: .55rem; padding: .75rem .9rem .75rem .8rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 14px 0 0 14px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transform: translateY(-50%); }
-            .home-admin-chat-dock:hover { color: #fff; padding-right: 1.2rem; }
+            .home-admin-chat-dock { position: fixed; z-index: 1040; right: 24px; bottom: 24px; display: flex; align-items: center; gap: .55rem; padding: .75rem 1rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
+            .home-admin-chat-dock:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(24,59,86,.32); }
+            @media (max-width: 576px) { .home-admin-chat-dock { right: 16px; bottom: 16px; padding: .7rem .85rem; } .home-admin-chat-dock span { display: none; } }
             .home-admin-chat-dock i { font-size: 1.15rem; }
             .home-admin-chat-dock span { font-size: .78rem; font-weight: 800; }
             .home-admin-chat-dock .home-chat-badge { position: absolute; top: -7px; left: -7px; min-width: 20px; padding: .2rem .35rem; color: #fff; background: #e63950; border: 2px solid #fff; border-radius: 999px; font-size: .65rem; text-align: center; }
@@ -28,6 +29,7 @@
         </script>
     @endif
 @endauth
+
 <!-- BANNER TRƯỢT TỰ ĐỘNG (CAROUSEL) -->
 <div id="heroCarousel" class="carousel slide hero-carousel mb-5 animate__animated animate__fadeInDown" data-bs-ride="carousel" data-bs-interval="4000" data-bs-wrap="true">
     <div class="carousel-indicators">
@@ -79,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- LỜI CHÀO -->
 <div class="text-center mb-5 animate__animated animate__fadeInUp">
-    <h2 class="fw-bold product-page-title">ALOHA! MÙA HÈ RỰC RỠ</h2>
+    <h2 class="fw-bold product-page-title">BEATYCARE 🌸 MÙA HÈ RỰC RỠ</h2>
     <p class="text-muted">Khám phá không gian mua sắm thư giãn cho làn da và cơ thể</p>
 </div>
 
@@ -101,6 +103,56 @@ document.addEventListener('DOMContentLoaded', function () {
         @endforeach
     </div>
 </section>
+
+<!-- FLASH SALE -->
+@if($flashSaleProducts->isNotEmpty())
+<section class="flash-sale-section mb-5" aria-labelledby="flash-sale-title">
+    <div class="flash-sale-heading">
+        <div>
+            <span class="flash-sale-kicker"><i class="bi bi-lightning-charge-fill me-1"></i> ƯU ĐÃI CÓ HẠN</span>
+            <h3 id="flash-sale-title" class="fw-bold mb-0"><i class="bi bi-fire text-danger me-1"></i> FLASH SALE</h3>
+        </div>
+        <span class="flash-sale-note">Săn deal đẹp, giá siêu hời mỗi ngày</span>
+    </div>
+    <div class="flash-sale-track">
+        @foreach($flashSaleProducts as $flashProduct)
+            @php
+                $flashPrice = $flashProduct->effectivePrice();
+                $discountPercent = $flashProduct->price > 0
+                    ? round((1 - ($flashPrice / (float) $flashProduct->price)) * 100)
+                    : 0;
+            @endphp
+            <a href="{{ route('products.show', ['product' => $flashProduct->slug]) }}" class="flash-sale-card">
+                <div class="flash-sale-image">
+                    @if($flashProduct->image)
+                        <img src="{{ asset('storage/' . $flashProduct->image) }}" alt="{{ $flashProduct->name }}">
+                    @else
+                        <i class="bi bi-bag-heart"></i>
+                    @endif
+                    <span class="flash-sale-discount">-{{ $discountPercent }}%</span>
+                </div>
+                <div class="flash-sale-card-body">
+                    <h5>{{ $flashProduct->name }}</h5>
+                    <div class="flash-sale-prices">
+                        <strong>{{ number_format($flashPrice, 0, ',', '.') }}đ</strong>
+                        <del>{{ number_format($flashProduct->price, 0, ',', '.') }}đ</del>
+                    </div>
+                    <div class="flash-sale-progress-label">
+                        <span>Đã bán {{ $flashProduct->sold_percent }}%</span>
+                        <span>Còn {{ $flashProduct->quantity }}</span>
+                    </div>
+                    <div class="flash-sale-progress" role="progressbar" aria-label="Đã bán {{ $flashProduct->sold_percent }}%" aria-valuenow="{{ $flashProduct->sold_percent }}" aria-valuemin="0" aria-valuemax="100">
+                        <span style="width: {{ $flashProduct->sold_percent }}%"></span>
+                    </div>
+                    <div class="flash-sale-countdown" data-countdown="{{ $flashProduct->flash_sale_ends_at->toIso8601String() }}">
+                        <i class="bi bi-clock-history me-1"></i><span>Còn: --:--:--</span>
+                    </div>
+                </div>
+            </a>
+        @endforeach
+    </div>
+</section>
+@endif
 
 <!-- SAN PHAM HOT -->
 <section class="hot-products-section mb-5" aria-labelledby="hot-products-title">
@@ -190,6 +242,22 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-countdown]').forEach(function (element) {
+        const endAt = new Date(element.dataset.countdown).getTime();
+        const label = element.querySelector('span');
+        const updateCountdown = function () {
+            const remaining = Math.max(0, endAt - Date.now());
+            const totalSeconds = Math.floor(remaining / 1000);
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            label.textContent = remaining > 0 ? `Còn: ${hours}:${minutes}:${seconds}` : 'Flash Sale đã kết thúc';
+            if (remaining <= 0) element.classList.add('is-expired');
+        };
+        updateCountdown();
+        window.setInterval(updateCountdown, 1000);
+    });
+
     const track = document.getElementById('hot-products-track');
     document.querySelectorAll('.hot-scroll-button').forEach(button => button.addEventListener('click', function () {
         track.scrollBy({left: Number(this.dataset.direction) * 300, behavior: 'smooth'});

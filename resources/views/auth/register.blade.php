@@ -20,7 +20,7 @@
                 <div class="text-center mb-4">
                     <i class="bi bi-sun-fill auth-register-icon"></i>
                     <h2 class="fw-bold mt-2 auth-register-heading">ĐĂNG KÝ TÀI KHOẢN</h2>
-                    <p class="mb-0 text-light fw-medium">Cùng Aloha đón nắng, đón gió và chăm sóc làn da mỗi ngày</p>
+                    <p class="mb-0 text-light fw-medium">Cùng BeatyCare 🌸 đón nắng, đón gió và chăm sóc làn da mỗi ngày</p>
                 </div>
 
                 <form method="POST" action="{{ route('register') }}">
@@ -58,7 +58,7 @@
 
                     <div class="form-check mb-4">
                         <input class="form-check-input" type="checkbox" value="1" id="terms" name="terms" {{ old('terms') ? 'checked' : '' }} required>
-                        <label class="form-check-label small" for="terms">Tôi đồng ý với <a href="{{ route('pages.policies') }}" class="auth-register-login-link">điều khoản và chính sách</a> của Aloha Beauty.</label>
+                        <label class="form-check-label small" for="terms">Tôi đồng ý với <a href="{{ route('pages.policies') }}" class="auth-register-login-link">điều khoản và chính sách</a> của BeatyCare 🌸.</label>
                     </div>
 
                     <!-- Nút Đăng ký (Nút mạ vàng) -->

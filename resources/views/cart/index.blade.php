@@ -19,7 +19,7 @@
         $serviceFee = 0;
         $finalTotal = $total - $discount + $serviceFee;
     @endphp
-    <div class="cart-page-heading mb-4"><div><span class="cart-eyebrow">ALOHA BEAUTY / GIỎ HÀNG</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn</h2><p class="text-muted mb-0">Phí vận chuyển sẽ được tính theo khu vực ở bước thanh toán.</p></div><a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a></div>
+    <div class="cart-page-heading mb-4"><div><span class="cart-eyebrow">BEATYCARE 🌸 / GIỎ HÀNG</span><h2 class="fw-bold storefront-title mb-1"><i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn</h2><p class="text-muted mb-0">Phí vận chuyển sẽ được tính theo khu vực ở bước thanh toán.</p></div><a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm</a></div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
@@ -55,7 +55,7 @@
                                 </thead>
                                 <tbody>
                                     <tr class="cart-shop-row">
-                                        <td colspan="5" class="text-start ps-4"><input type="checkbox" class="cart-checkbox-input cart-shop-select" aria-label="Chọn tất cả sản phẩm của Aloha Beauty" checked> <strong>Aloha Beauty</strong><span class="cart-shop-label">Yêu thích</span></td>
+                                        <td colspan="5" class="text-start ps-4"><input type="checkbox" class="cart-checkbox-input cart-shop-select" aria-label="Chọn tất cả sản phẩm của BeatyCare 🌸" checked> <strong>BeatyCare 🌸</strong><span class="cart-shop-label">Yêu thích</span></td>
                                     </tr>
                                     @php $total = 0; @endphp
                                     @foreach(session('cart') as $id => $details)

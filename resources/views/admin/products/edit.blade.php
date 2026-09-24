@@ -48,6 +48,21 @@
                         <input type="text" name="name" id="name" class="form-control editor-input @error('name') is-invalid @enderror" value="{{ old('name', $product->name) }}" required>
                         @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="product_code" class="form-label editor-label">Mã sản phẩm</label>
+                            <input type="text" name="product_code" id="product_code" class="form-control editor-input @error('product_code') is-invalid @enderror" value="{{ old('product_code', $product->product_code) }}" placeholder="SP001">
+                            @error('product_code')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label for="brand_id" class="form-label editor-label">Thương hiệu</label>
+                            <select name="brand_id" id="brand_id" class="form-select editor-input @error('brand_id') is-invalid @enderror">
+                                <option value="">-- Chọn thương hiệu --</option>
+                                @foreach($brands as $brand)<option value="{{ $brand->id }}" @selected(old('brand_id', $product->brand_id) == $brand->id)>{{ $brand->name }}</option>@endforeach
+                            </select>
+                            @error('brand_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label for="category_id" class="form-label editor-label">Danh mục</label>
                         <select name="category_id" id="category_id" class="form-select editor-input @error('category_id') is-invalid @enderror" required>

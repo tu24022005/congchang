@@ -17,7 +17,7 @@ class ProductReviewController extends Controller
             'comment' => 'nullable|string|max:1000',
             'variant_label' => 'nullable|string|max:150',
             'images' => 'nullable|array|max:3',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'file|mimes:jpg,jpeg,png,webp,mp4,mov,webm|max:10240',
         ]);
 
         $order = Order::whereKey($validated['order_id'])
@@ -68,7 +68,7 @@ class ProductReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
             'images' => 'nullable|array|max:3',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'file|mimes:jpg,jpeg,png,webp,mp4,mov,webm|max:10240',
         ]);
 
         $mediaPaths = $review->media_paths ?? [];

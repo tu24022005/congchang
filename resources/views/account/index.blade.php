@@ -23,6 +23,27 @@
         </div>
     @endif
 
+    <section class="account-hub mb-4" aria-labelledby="account-hub-title">
+        <div class="account-hub-heading">
+            <div><span class="account-kicker">TÀI KHOẢN</span><h2 id="account-hub-title">Không gian quản lý của bạn</h2></div>
+            @if($unreadNotificationCount > 0)<a href="{{ route('account.notifications') }}" class="account-notification-pill"><i class="bi bi-bell-fill me-1"></i>{{ $unreadNotificationCount }} thông báo mới</a>@endif
+        </div>
+        <div class="account-hub-grid">
+            <a href="#personal-info" class="account-hub-card account-hub-card-featured"><span class="account-hub-icon"><i class="bi bi-person-fill"></i></span><span><strong>Thông tin cá nhân</strong><small>{{ $user->name }}</small></span></a>
+            <a href="{{ route('orders.index') }}" class="account-hub-card"><span class="account-hub-icon"><i class="bi bi-box-seam"></i></span><span><strong>Đơn hàng</strong><small>{{ $orderStats['processing'] + $orderStats['shipping'] }} đơn đang xử lý</small></span><em>{{ $orderStats['processing'] + $orderStats['shipping'] }}</em></a>
+            <a href="{{ route('orders.index', ['status' => 'processing']) }}" class="account-hub-subcard"><i class="bi bi-hourglass-split"></i><span>Chờ xác nhận</span><strong>{{ $orderStats['processing'] }}</strong></a>
+            <a href="{{ route('orders.index', ['status' => 'shipping']) }}" class="account-hub-subcard"><i class="bi bi-truck"></i><span>Đang giao</span><strong>{{ $orderStats['shipping'] }}</strong></a>
+            <a href="{{ route('orders.index', ['status' => 'paid']) }}" class="account-hub-subcard"><i class="bi bi-check2-circle"></i><span>Hoàn thành</span><strong>{{ $orderStats['completed'] }}</strong></a>
+            <a href="{{ route('orders.index', ['status' => 'cancelled']) }}" class="account-hub-subcard"><i class="bi bi-x-circle"></i><span>Đã hủy</span><strong>{{ $orderStats['cancelled'] }}</strong></a>
+            <a href="{{ route('wishlist.index') }}" class="account-hub-card"><span class="account-hub-icon account-hub-icon-heart"><i class="bi bi-heart-fill"></i></span><span><strong>Sản phẩm yêu thích</strong><small>Đã lưu {{ $wishlistCount }} sản phẩm</small></span><em>{{ $wishlistCount }}</em></a>
+            <a href="{{ route('account.vouchers') }}" class="account-hub-card"><span class="account-hub-icon account-hub-icon-gold"><i class="bi bi-ticket-perforated-fill"></i></span><span><strong>Voucher</strong><small>Voucher đang khả dụng</small></span><em>{{ $voucherCount }}</em></a>
+            <a href="{{ route('loyalty.index') }}" class="account-hub-card"><span class="account-hub-icon account-hub-icon-gold"><i class="bi bi-star-fill"></i></span><span><strong>Điểm thành viên</strong><small>{{ number_format($user->loyalty_points) }} điểm · {{ $membershipTier['name'] }}</small></span></a>
+            <a href="#shipping-addresses" class="account-hub-card"><span class="account-hub-icon"><i class="bi bi-geo-alt-fill"></i></span><span><strong>Địa chỉ nhận hàng</strong><small>{{ $addresses->count() }} địa chỉ đã lưu</small></span></a>
+            <a href="{{ route('password.change') }}" class="account-hub-card"><span class="account-hub-icon account-hub-icon-gold"><i class="bi bi-shield-lock-fill"></i></span><span><strong>Đổi mật khẩu</strong><small>Bảo vệ tài khoản an toàn</small></span></a>
+            <a href="{{ route('account.notifications') }}" class="account-hub-card"><span class="account-hub-icon"><i class="bi bi-bell-fill"></i></span><span><strong>Thông báo</strong><small>{{ $unreadNotificationCount ? $unreadNotificationCount . ' thông báo chưa đọc' : 'Bạn đã xem hết thông báo' }}</small></span><em>{{ $unreadNotificationCount }}</em></a>
+        </div>
+    </section>
+
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="account-sidebar h-100">
@@ -49,7 +70,7 @@
         </div>
 
         <div class="col-lg-8">
-            <div class="account-panel mb-4">
+            <div class="account-panel mb-4" id="personal-info">
                 <div class="account-panel-heading">
                     <div><span class="account-panel-icon"><i class="bi bi-person-lines-fill"></i></span><div><h3>Thông tin cá nhân</h3><p class="mb-0">Cập nhật thông tin hiển thị của bạn.</p></div></div>
                 </div>
@@ -88,7 +109,7 @@
                 <div class="account-security-note"><i class="bi bi-lock-fill"></i><span>Mật khẩu của bạn được mã hóa và không hiển thị cho bất kỳ ai.</span></div>
             </div>
 
-            <div class="account-panel mt-4">
+            <div class="account-panel mt-4" id="shipping-addresses">
                 <div class="account-panel-heading">
                     <div><span class="account-panel-icon"><i class="bi bi-geo-alt-fill"></i></span><div><h3>Sổ địa chỉ giao hàng</h3><p class="mb-0">Lưu nhiều địa chỉ để chọn nhanh khi đặt hàng.</p></div></div>
                 </div>

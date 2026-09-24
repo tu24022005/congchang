@@ -3,6 +3,18 @@
 
 @section('content')
 @php
+    $shippingProviderLabel = config('shop.shipping_providers.' . $order->shipping_provider, $order->shipping_provider);
+    $shippingStatusLabels = [
+        'processing' => 'Chờ xác nhận',
+        'confirmed' => 'Đã xác nhận',
+        'paid' => 'Đã thanh toán',
+        'packing' => 'Đang đóng gói',
+        'shipping' => 'Đang giao hàng',
+        'completed' => 'Đã giao thành công',
+        'cancelled' => 'Đã hủy',
+        'refund_pending' => 'Chờ hoàn tiền',
+        'refunded' => 'Đã hoàn tiền',
+    ];
     $statusSteps = [
         'processing' => ['label' => 'Chờ xác nhận', 'icon' => 'bi-hourglass-split'],
         'confirmed' => ['label' => 'Đã xác nhận', 'icon' => 'bi-check2'],
@@ -22,15 +34,30 @@
 @endphp
 
 <div class="container py-4 order-detail-page">
+    <style>
+        /* Timeline styles for order status */
+        .order-timeline { display:flex; gap:1rem; align-items:flex-start; overflow:auto; }
+        .order-timeline-step { display:flex; flex-direction:column; align-items:center; gap:.5rem; text-align:center; min-width:110px; position:relative; padding:0 0.75rem; }
+        .order-timeline-step::after { content:''; height:2px; background:#e9eef5; position:absolute; left:50%; top:26px; right:-50%; z-index:0; }
+        .order-timeline-step:first-child::after { left:50%; }
+        .order-timeline-step.is-done::after { background:linear-gradient(90deg,#a78bfa,#60a5fa); }
+        .order-timeline-icon { z-index:2; display:grid; place-items:center; width:46px; height:46px; border-radius:50%; background:#f1f5f9; color:#64748b; border:2px solid #f1f5f9; }
+        .order-timeline-step.is-done .order-timeline-icon { background:linear-gradient(135deg,#a78bfa,#60a5fa); color:#fff; border-color:transparent; box-shadow:0 6px 18px rgba(99,102,241,.18); }
+        .order-timeline-step.is-current .order-timeline-icon { box-shadow:0 10px 28px rgba(99,102,241,.18); transform:scale(1.06); }
+        .order-timeline-step strong { display:block; font-size:.85rem; color:#16324f; }
+        .order-timeline-step small { color:#6b7280; font-size:.75rem; }
+        @media (max-width:576px){ .order-timeline { gap:.6rem; } .order-timeline-step { min-width:96px; } }
+    </style>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <span class="order-detail-eyebrow"><i class="bi bi-bag-heart me-1"></i> ALOHA BEAUTY / TRUNG TÂM ĐƠN HÀNG</span>
+            <span class="order-detail-eyebrow"><i class="bi bi-bag-heart me-1"></i> BeatyCare 🌸 / TRUNG TÂM ĐƠN HÀNG</span>
             <h3 class="fw-bold mb-1 storefront-title"><i class="bi bi-receipt text-primary me-2"></i>Đơn hàng #{{ $order->id }}</h3>
             <p class="text-muted mb-0">Đặt lúc {{ $order->created_at->format('d/m/Y \l\ú\c H:i') }}</p>
         </div>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-light border rounded-pill shadow-sm" onclick="window.print()"><i class="bi bi-printer me-1"></i> In đơn</button>
-            <a href="{{ Auth::user()->role === 'admin' ? route('admin.orders.index') : route('orders.index') }}" class="btn btn-secondary rounded-pill shadow-sm"><i class="bi bi-arrow-left me-1"></i> Quay lại</a>
+            <a href="{{ in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true) ? route('admin.orders.index') : route('orders.index') }}" class="btn btn-secondary rounded-pill shadow-sm"><i class="bi bi-arrow-left me-1"></i> Quay lại</a>
         </div>
     </div>
 
@@ -97,12 +124,14 @@
                         {{ $order->payment_method == 'COD' ? 'Thanh toán khi nhận hàng (COD)' : 'Chuyển khoản Ngân hàng (PayOS)' }}
                     </p>
                     
-                    @if($order->shipping_provider)
-                        <p class="mb-2 mt-3"><strong>Đơn vị vận chuyển:</strong> <span class="badge bg-info text-dark">{{ $order->shipping_provider }}</span></p>
-                    @endif
-                    @if($order->shipping_date)
-                        <p class="mb-2"><strong>Ngày giao dự kiến:</strong> <span class="text-primary fw-bold">{{ \Carbon\Carbon::parse($order->shipping_date)->format('d/m/Y') }}</span></p>
-                    @endif
+                    <div class="shipping-info-box mt-3">
+                        <div class="fw-bold mb-2"><i class="bi bi-truck text-primary me-2"></i>Thông tin giao hàng</div>
+                        <p class="mb-2"><strong>Đơn vị vận chuyển:</strong> {{ $shippingProviderLabel ?: 'Chưa chỉ định' }}</p>
+                        <p class="mb-2"><strong>Mã vận đơn:</strong> {{ $order->tracking_number ?: 'Chưa có mã vận đơn' }}</p>
+                        <p class="mb-2"><strong>Trạng thái giao hàng:</strong> <span class="badge bg-primary rounded-pill">{{ $shippingStatusLabels[$order->status] ?? ucfirst($order->status) }}</span></p>
+                        <p class="mb-2"><strong>Ngày giao dự kiến:</strong> {{ $order->shipping_date ? \Carbon\Carbon::parse($order->shipping_date)->format('d/m/Y') : 'Chưa cập nhật' }}</p>
+                        <p class="mb-0"><strong>Phí vận chuyển:</strong> {{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }} đ</p>
+                    </div>
 
                     <div class="order-summary-box mt-3">
                         <div><span>Tạm tính sản phẩm</span><strong>{{ number_format($subtotal, 0, ',', '.') }} đ</strong></div>
@@ -110,7 +139,7 @@
                         <div class="order-summary-total"><span>Tổng thanh toán</span><strong>{{ number_format($order->total, 0, ',', '.') }} đ</strong></div>
                     </div>
 
-                    @if(Auth::user()->role !== 'admin' && in_array($order->status, ['processing', 'confirmed', 'paid'], true))
+                    @if(!in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true) && in_array($order->status, ['processing', 'confirmed', 'paid'], true))
                         <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
                         <form action="{{ route('orders.cancel', $order) }}" method="POST" class="d-grid">
                             @csrf
@@ -231,15 +260,15 @@
     </div>
 
     <!-- KHU VỰC ĐỘC QUYỀN CỦA ADMIN -->
-    @if(Auth::user()->role === 'admin')
+    @if(in_array(Auth::user()->role, ['admin', 'manager'], true))
     <div class="card border-primary shadow-lg rounded-4 mt-2 mb-4 order-payment-card">
         <div class="card-header bg-primary text-white fw-bold p-3 order-payment-header">
             <i class="bi bi-gear-fill me-2"></i>ĐIỀU PHỐI ĐƠN HÀNG (Chỉ dành cho Admin)
         </div>
         <div class="card-body p-4">
-            <form action="{{ Auth::user()->role === 'admin' ? route('admin.orders.updateStatus', $order->id) : route('orders.update_status', $order->id) }}" method="POST">
+            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST">
                 @csrf
-                @if(Auth::user()->role === 'admin') @method('PATCH') @endif
+                @method('PATCH')
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-secondary small">TRẠNG THÁI HIỆN TẠI</label>
@@ -263,6 +292,11 @@
                         </select>
                     </div>
                     <div class="col-md-4">
+                        <label class="form-label fw-bold text-secondary small">MÃ VẬN ĐƠN</label>
+                        <input type="text" name="tracking_number" class="form-control border-primary shadow-sm" value="{{ old('tracking_number', $order->tracking_number) }}" maxlength="100" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" placeholder="VD: GHN123456789">
+                        <small class="text-muted">Nhập mã do đơn vị vận chuyển cung cấp.</small>
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label fw-bold text-secondary small">ĐƠN VỊ VẬN CHUYỂN</label>
                         <select name="shipping_provider" class="form-select border-primary shadow-sm">
                             <option value="">-- Chưa chỉ định --</option>
@@ -274,6 +308,13 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-secondary small">NGÀY VẬN CHUYỂN / GIAO HÀNG</label>
                         <input type="date" name="shipping_date" class="form-control border-primary shadow-sm" value="{{ $order->shipping_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-secondary small">PHÍ VẬN CHUYỂN</label>
+                        <div class="input-group">
+                            <input type="number" name="shipping_fee" class="form-control border-primary shadow-sm" value="{{ old('shipping_fee', $order->shipping_fee ?? 0) }}" min="0" max="100000000" step="1000">
+                            <span class="input-group-text">đ</span>
+                        </div>
                     </div>
                 </div>
                 @if($order->status === 'refunded')
@@ -358,9 +399,9 @@
 
                                 <textarea name="comment" class="form-control rounded-3 bg-light border-0 p-3" rows="3" placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm này nhé! (Tùy chọn)">{{ old('comment', $existingReview?->comment) }}</textarea>
                                 <div class="text-start mt-3">
-                                    <label for="review-images-{{ $item->product->id }}" class="form-label fw-bold small"><i class="bi bi-images me-1"></i>Thêm ảnh (tối đa 3 ảnh)</label>
-                                    <input type="file" name="images[]" id="review-images-{{ $item->product->id }}" class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
-                                    <small class="text-muted">Mỗi ảnh tối đa 2MB. Review này còn {{ max(0, 3 - count($existingReview?->media_paths ?? [])) }} lượt ảnh.</small>
+                                    <label for="review-images-{{ $item->product->id }}" class="form-label fw-bold small"><i class="bi bi-images me-1"></i>Thêm ảnh/video (tối đa 3 file)</label>
+                                    <input type="file" name="images[]" id="review-images-{{ $item->product->id }}" class="form-control" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" multiple>
+                                    <small class="text-muted">Ảnh tối đa 2MB, video tối đa 10MB. Review này còn {{ max(0, 3 - count($existingReview?->media_paths ?? [])) }} lượt.</small>
                                 </div>
                             </div>
                             <div class="modal-footer border-top-0 pt-0">

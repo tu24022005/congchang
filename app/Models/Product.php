@@ -11,6 +11,7 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'product_code',
         'slug',
         'description',
         'quantity',
@@ -19,6 +20,7 @@ class Product extends Model
         'flash_sale_starts_at',
         'flash_sale_ends_at',
         'category_id',
+        'brand_id',
         'image',
     ];
 
@@ -69,6 +71,11 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
     }
 
     public function wishlistedByUsers()

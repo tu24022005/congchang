@@ -29,6 +29,15 @@ $hotProductIds = DB::table('order_items')
 $flashSaleProducts = Product::with(['category', 'variations'])
     ->withAvg('reviews', 'rating')
     ->withCount('reviews')
+    ->select('products.*')
+    ->selectSub(
+        DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereColumn('order_items.product_id', 'products.id')
+            ->whereNotIn('orders.status', ['cancelled', 'refund_pending', 'refunded'])
+            ->selectRaw('COALESCE(SUM(order_items.quantity), 0)'),
+        'sold_quantity'
+    )
     ->whereNotNull('flash_sale_price')
     ->whereNotNull('flash_sale_starts_at')
     ->whereNotNull('flash_sale_ends_at')
@@ -38,6 +47,14 @@ $flashSaleProducts = Product::with(['category', 'variations'])
     ->orderBy('flash_sale_ends_at')
     ->limit(8)
     ->get();
+$flashSaleProducts->each(function (Product $product): void {
+    $product->setAttribute(
+        'sold_percent',
+        min(99, (int) round(
+            ((int) $product->sold_quantity / max(1, (int) $product->sold_quantity + (int) $product->quantity)) * 100
+        ))
+    );
+});
 $remainingSlots = max(0, 8 - $flashSaleProducts->count());
 $hotProducts = $remainingSlots > 0 && $hotProductIds->isNotEmpty()
     ? Product::with(['category', 'variations'])
@@ -61,9 +78,8 @@ if ($hotProducts->count() < $remainingSlots) {
     $hotProducts = $hotProducts->concat($fallbackProducts);
 }
 
-$hotProducts = $flashSaleProducts->concat($hotProducts);
 $banners = HomeBanner::where('is_active', true)->orderBy('sort_order')->orderByDesc('id')->get();
 // Trả về view 'welcome' và truyền biến $products sang cho view
-return view('welcome', compact('products', 'categories', 'hotProducts', 'banners'));
+return view('welcome', compact('products', 'categories', 'hotProducts', 'flashSaleProducts', 'banners'));
 }
 }

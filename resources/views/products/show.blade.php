@@ -57,12 +57,19 @@
     .review-score strong { display: block; font-size: 2.2rem; line-height: 1; }
     .review-stars { color: #ee4d2d; letter-spacing: .08em; }
     .review-filters { display: flex; flex: 1; flex-wrap: wrap; align-content: center; gap: .5rem; }
+    .review-distribution { display: grid; flex: 1 1 360px; gap: .35rem; min-width: 280px; }
+    .review-distribution-row { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; gap: .5rem; color: #526170; font-size: .76rem; }
+    .review-distribution-bar { height: 8px; overflow: hidden; background: #f1e3df; border-radius: 999px; }
+    .review-distribution-bar span { display: block; height: 100%; background: linear-gradient(90deg, #ffc107, #ee4d2d); border-radius: inherit; }
     .review-filter { padding: .45rem .7rem; color: #526170; background: #fff; border: 1px solid #d8dee8; border-radius: 4px; }
     .review-filter.active, .review-filter:hover { color: #ee4d2d; border-color: #ee4d2d; }
     .review-item { display: flex; gap: .75rem; padding: 1.2rem 0; border-bottom: 1px solid #edf0f3; }
     .review-image-button { padding: 0; background: transparent; border: 0; cursor: zoom-in; }
     .review-image-button img { width: 76px; height: 76px; object-fit: cover; border: 1px solid #e2e8f0; border-radius: 8px; transition: transform .2s, box-shadow .2s; }
     .review-image-button:hover img { transform: scale(1.04); box-shadow: 0 8px 18px rgba(38,60,80,.18); }
+    .review-video-wrap { position: relative; width: 150px; height: 96px; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 8px; background: #111827; }
+    .review-video-wrap video { width: 100%; height: 100%; object-fit: cover; }
+    .review-video-wrap > span { position: absolute; left: .35rem; bottom: .35rem; padding: .2rem .35rem; color: #fff; background: rgba(0,0,0,.6); border-radius: 4px; font-size: .65rem; pointer-events: none; }
     .review-image-preview { display: block; max-width: min(92vw, 1100px); max-height: 82vh; margin: 0 auto; border-radius: 12px; object-fit: contain; }
         .review-image-lightbox { display: none; position: fixed; inset: 0; z-index: 1080; align-items: center; justify-content: center; padding: 3rem 1rem 1rem; background: rgba(0,0,0,.72); }
         .review-image-lightbox.is-open { display: flex; }
@@ -124,7 +131,7 @@
             </div>
 
             <div class="col-lg-6">
-                <div class="detail-kicker mb-2">{{ $product->category?->name ?? 'Aloha Beauty' }}</div>
+                <div class="detail-kicker mb-2">{{ $product->category?->name ?? 'BeatyCare 🌸' }}</div>
                 <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
                     <h1 class="detail-title fw-bold mb-0">{{ $product->name }}</h1>
                     @auth
@@ -140,7 +147,7 @@
                         <a href="{{ route('login') }}" class="btn btn-outline-danger rounded-circle flex-shrink-0" title="Đăng nhập để lưu yêu thích" aria-label="Đăng nhập để lưu yêu thích"><i class="bi bi-heart"></i></a>
                     @endauth
                 </div>
-                <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span><span class="text-muted small">Được lựa chọn bởi khách hàng Aloha</span></div>
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span><span class="text-muted small">Được lựa chọn bởi khách hàng BeatyCare</span></div>
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4">@if($product->isFlashSaleActive())<span class="badge bg-danger"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span><span class="detail-price">{{ number_format($product->effectivePrice(), 0, ',', '.') }} đ</span><span class="text-muted text-decoration-line-through">{{ number_format($product->price, 0, ',', '.') }} đ</span><small class="text-danger">Đến {{ $product->flash_sale_ends_at->format('d/m H:i') }}</small>@else<span class="detail-price">{{ number_format($product->price, 0, ',', '.') }} đ</span>@endif<span class="{{ $product->quantity > 0 ? 'detail-stock' : 'detail-stock out' }}"><i class="bi bi-{{ $product->quantity > 0 ? 'check-circle' : 'x-circle' }} me-1"></i>{{ $product->quantity > 0 ? 'Còn ' . $product->quantity . ' sản phẩm' : 'Hết hàng' }}</span></div>
                 <p class="detail-copy mb-4">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
 
@@ -212,8 +219,10 @@
         <h2 id="product-information-title" class="product-information-title">Chi tiết sản phẩm</h2>
         <table class="product-detail-table">
             <tbody>
+                <tr><th>Thương hiệu</th><td>{{ $product->brand?->name ?? 'Chưa cập nhật' }}</td></tr>
                 <tr><th>Danh mục</th><td>{{ $product->category?->name ?? 'Mỹ phẩm & chăm sóc cá nhân' }}</td></tr>
-                <tr><th>Mã sản phẩm</th><td>@forelse($product->variations as $variation)<span class="product-detail-chip">{{ $variation->sku ?: 'Chưa có SKU' }}</span>@empty<span>Chưa có mã biến thể</span>@endforelse</td></tr>
+                <tr><th>Mã sản phẩm</th><td><span class="product-detail-chip">{{ $product->product_code ?: 'Chưa có mã sản phẩm' }}</span></td></tr>
+                <tr><th>Mã biến thể / SKU</th><td>@forelse($product->variations as $variation)<span class="product-detail-chip">{{ $variation->sku ?: 'Chưa có SKU' }}</span>@empty<span>Chưa có mã biến thể</span>@endforelse</td></tr>
                 <tr><th>Màu / phân loại</th><td>@php $colors = $product->variations->pluck('color')->filter()->unique(); @endphp @forelse($colors as $color)<span class="product-detail-chip">{{ $color }}</span>@empty<span>Phân loại mặc định</span>@endforelse</td></tr>
                 <tr><th>Khối lượng / dung tích</th><td>@php $sizes = $product->variations->map(fn ($variation) => $variation->size_value ? rtrim(rtrim($variation->size_value, '0'), '.') . $variation->size_unit : $variation->storage)->filter()->unique(); @endphp @forelse($sizes as $size)<span class="product-detail-chip">{{ $size }}</span>@empty<span>Chưa cập nhật</span>@endforelse</td></tr>
                 <tr><th>Số phiên bản</th><td>{{ $product->variations->count() ?: 1 }} phiên bản</td></tr>
@@ -235,7 +244,13 @@
     <section class="product-reviews" aria-labelledby="product-reviews-title">
         <h2 id="product-reviews-title" class="product-information-title">Đánh giá sản phẩm</h2>
         <div class="review-summary">
-            <div class="review-score"><strong>{{ number_format($ratingAverage, 1) }}</strong><span>trên 5</span><div class="review-stars mt-2">★★★★★</div><small class="text-muted">{{ $reviewCount }} đánh giá</small></div>
+            <div class="review-score"><strong>{{ number_format($ratingAverage, 1) }}</strong><span>/5</span><div class="review-stars mt-2">★★★★★</div><small class="text-muted">{{ $reviewCount }} đánh giá</small></div>
+            <div class="review-distribution" aria-label="Phân bố đánh giá">
+                @for($rating = 5; $rating >= 1; $rating--)
+                    @php $ratingPercent = $reviewCount ? round(($ratingCounts[$rating] / $reviewCount) * 100) : 0; @endphp
+                    <div class="review-distribution-row"><span>{{ $rating }} <i class="bi bi-star-fill text-warning"></i></span><div class="review-distribution-bar"><span style="width: {{ $ratingPercent }}%"></span></div><strong>{{ $ratingPercent }}%</strong></div>
+                @endfor
+            </div>
             <div class="review-filters">
                 <button type="button" class="review-filter active" data-review-filter="all">Tất cả</button>
                 @for($rating = 5; $rating >= 1; $rating--)
@@ -251,13 +266,22 @@
                 <article class="review-item" data-review-rating="{{ $review->rating }}" data-review-media="{{ !empty($review->media_paths) ? '1' : '0' }}">
                     <div class="review-avatar">{{ strtoupper(substr($review->reviewer_name ?: $review->user?->name ?: 'A', 0, 1)) }}</div>
                     <div class="flex-grow-1">
-                        <strong>{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng Aloha' }}</strong>
+                        <strong>{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng BeatyCare' }}</strong>
                         <div class="review-stars">{{ str_repeat('★', $review->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $review->rating) }}</span></div>
                         <div class="review-meta">{{ $review->created_at->format('d/m/Y H:i') }} @if($review->variant_label) | Phân loại hàng: {{ $review->variant_label }} @endif</div>
                         @if($review->is_verified_purchase)<div class="review-verified"><i class="bi bi-patch-check-fill me-1"></i>Đã mua hàng</div>@endif
                         <p class="review-comment">{{ $review->comment }}</p>
                         @if($review->media_paths)
-                            <div class="d-flex flex-wrap gap-2 mt-2">@foreach($review->media_paths as $path)<button type="button" class="review-image-button" data-review-image="{{ request()->getSchemeAndHttpHost() . '/storage/' . ltrim($path, '/') }}" aria-label="Xem ảnh đánh giá"><img src="{{ request()->getSchemeAndHttpHost() . '/storage/' . ltrim($path, '/') }}" alt="Ảnh đánh giá" onerror="this.closest('.review-image-button').style.display='none'"></button>@endforeach</div>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                @foreach($review->media_paths as $path)
+                                    @php $mediaUrl = asset('storage/' . ltrim($path, '/')); $isVideo = in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), ['mp4', 'mov', 'webm'], true); @endphp
+                                    @if($isVideo)
+                                        <div class="review-video-wrap"><video src="{{ $mediaUrl }}" controls preload="metadata" aria-label="Video đánh giá"></video><span><i class="bi bi-play-circle me-1"></i>Video</span></div>
+                                    @else
+                                        <button type="button" class="review-image-button" data-review-image="{{ $mediaUrl }}" aria-label="Xem ảnh đánh giá"><img src="{{ $mediaUrl }}" alt="Ảnh đánh giá" onerror="this.closest('.review-image-button').style.display='none'"></button>
+                                    @endif
+                                @endforeach
+                            </div>
                         @endif
                     </div>
                 </article>

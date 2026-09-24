@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <!-- Hàng 1: 4 Thẻ Tổng Quan -->
+    <!-- KPI tổng quan -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-3 h-100">
@@ -87,6 +87,37 @@
                     <p class="text-muted admin-stat-note">{{ $totalCategories }} danh mục đang bán</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-body">
+                <p class="text-muted small fw-bold mb-1">DOANH THU HÔM NAY</p>
+                <h3 class="text-success fw-bold mb-1">{{ number_format($todayRevenue, 0, ',', '.') }} đ</h3>
+                <p class="text-muted admin-stat-note">{{ $todayOrders }} đơn hôm nay</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-body">
+                <p class="text-muted small fw-bold mb-1">DOANH THU THÁNG</p>
+                <h3 class="text-primary fw-bold mb-1">{{ number_format($monthRevenue, 0, ',', '.') }} đ</h3>
+                <p class="text-muted admin-stat-note">Tháng {{ now()->format('m/Y') }}</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-body">
+                <p class="text-muted small fw-bold mb-1">ĐƠN HOÀN THÀNH</p>
+                <h3 class="text-success fw-bold mb-1">{{ $countCompleted }}</h3>
+                <p class="text-muted admin-stat-note">Đã giao thành công</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100"><div class="card-body">
+                <p class="text-muted small fw-bold mb-1">ĐƠN ĐÃ HỦY</p>
+                <h3 class="text-danger fw-bold mb-1">{{ $countCancelled }}</h3>
+                <p class="text-muted admin-stat-note">Gồm cả yêu cầu hoàn tiền</p>
+            </div></div>
         </div>
     </div>
 
@@ -185,6 +216,16 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4 admin-dashboard-panel">
         <div class="card-header bg-transparent border-0 pt-4 px-4">
             <h5 class="fw-bold mb-0"><i class="bi bi-trophy text-warning me-2"></i>Sản phẩm bán chạy</h5>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8"><div class="card border-0 shadow-sm rounded-4 h-100 admin-chart-card"><div class="card-header bg-transparent border-0 pt-4 px-4"><h5 class="fw-bold mb-0"><i class="bi bi-graph-up-arrow text-success me-2"></i>Doanh thu 7 ngày</h5></div><div class="card-body"><div id="weeklyRevenueChart"></div></div></div></div>
+            <div class="col-lg-4"><div class="card border-0 shadow-sm rounded-4 h-100 admin-chart-card"><div class="card-header bg-transparent border-0 pt-4 px-4"><h5 class="fw-bold mb-0"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Đơn hàng theo trạng thái</h5></div><div class="card-body"><div id="orderStatusChart"></div></div></div></div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6"><div class="card border-0 shadow-sm rounded-4 h-100 admin-dashboard-panel"><div class="card-header bg-transparent border-0 pt-4 px-4"><h5 class="fw-bold mb-0"><i class="bi bi-trophy text-warning me-2"></i>Top sản phẩm bán chạy</h5></div><div class="card-body">@foreach($topProducts as $index => $product)<div class="top-product-item mb-2"><span class="top-product-rank">{{ $index + 1 }}</span><div class="flex-grow-1 text-truncate"><strong>{{ $product->name }}</strong><small class="d-block text-muted">{{ $product->sold_quantity }} sản phẩm đã bán</small></div><i class="bi bi-chevron-right text-muted"></i></div>@endforeach</div></div></div>
+            <div class="col-lg-6"><div class="card border-0 shadow-sm rounded-4 h-100 admin-dashboard-panel"><div class="card-header bg-transparent border-0 pt-4 px-4"><h5 class="fw-bold mb-0"><i class="bi bi-people text-primary me-2"></i>Khách hàng mới</h5></div><div class="card-body">@forelse($newCustomers as $customer)<div class="d-flex align-items-center gap-3 py-2 border-bottom"><span class="account-avatar m-0" style="width:38px;height:38px;font-size:1rem">{{ strtoupper(substr($customer->name, 0, 1)) }}</span><div class="flex-grow-1"><strong class="d-block">{{ $customer->name }}</strong><small class="text-muted">{{ $customer->email }}</small></div><small class="text-muted">{{ $customer->created_at->format('d/m/Y') }}</small></div>@empty<p class="text-muted">Chưa có khách hàng mới.</p>@endforelse</div></div></div>
         </div>
         <div class="card-body px-4">
             <div class="row g-3">
@@ -286,6 +327,24 @@ document.addEventListener("DOMContentLoaded", function() {
     var paymentChart = new ApexCharts(document.querySelector("#paymentChart"), payOptions);
     paymentChart.render();
 
+    var weeklyRevenueChart = new ApexCharts(document.querySelector("#weeklyRevenueChart"), {
+        series: [{ name: 'Doanh thu', data: [] }],
+        chart: { type: 'bar', height: 300, toolbar: { show: false } },
+        colors: ['#20c997'],
+        plotOptions: { bar: { borderRadius: 6, columnWidth: '48%' } },
+        xaxis: { categories: [] },
+        yaxis: { labels: { formatter: function (val) { return val.toLocaleString('vi-VN') + ' đ'; } } },
+        tooltip: { y: { formatter: function (val) { return val.toLocaleString('vi-VN') + ' VNĐ'; } } }
+    });
+    weeklyRevenueChart.render();
+
+    var orderStatusChart = new ApexCharts(document.querySelector("#orderStatusChart"), {
+        series: [], chart: { type: 'donut', height: 300 },
+        labels: [], colors: ['#ffc107', '#0d6efd', '#198754', '#dc3545'],
+        legend: { position: 'bottom' }, dataLabels: { enabled: true }
+    });
+    orderStatusChart.render();
+
     // HÀM GỌI DỮ LIỆU TỪ API
     function loadChartData(year) {
         fetch("{{ route('admin.chart.data') }}?year=" + year)
@@ -293,6 +352,12 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(data => {
                 revenueChart.updateSeries([{ data: data.revenue }]);
                 paymentChart.updateSeries(data.payments);
+                weeklyRevenueChart.updateOptions({
+                    xaxis: { categories: data.lastSevenDays.map(function (item) { return item.label; }) }
+                });
+                weeklyRevenueChart.updateSeries([{ name: 'Doanh thu', data: data.lastSevenDays.map(function (item) { return item.revenue; }) }]);
+                orderStatusChart.updateOptions({ labels: data.statuses.labels });
+                orderStatusChart.updateSeries(data.statuses.series);
             })
             .catch(error => console.error('Lỗi tải dữ liệu:', error));
     }

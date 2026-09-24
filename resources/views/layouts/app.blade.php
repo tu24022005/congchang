@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Aloha Beauty')</title>
+    <title>@yield('title', 'BeatyCare 🌸')</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -23,7 +23,7 @@
     <nav class="navbar navbar-expand-lg glass-navbar shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url('/') }}">
-                <i class="bi bi-flower1"></i> Aloha Beauty
+                <i class="bi bi-flower1"></i> BeatyCare 🌸
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -48,7 +48,7 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown me-3">
-                        <a class="nav-link dropdown-toggle text-nowrap fw-semibold {{ request()->routeIs('pages.*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Về Aloha</a>
+                        <a class="nav-link dropdown-toggle text-nowrap fw-semibold {{ request()->routeIs('pages.*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Về BeatyCare</a>
                         <ul class="dropdown-menu border-0 shadow-sm">
                             <li><a class="dropdown-item" href="{{ route('pages.about') }}">Giới thiệu</a></li>
                             <li><a class="dropdown-item" href="{{ route('pages.contact') }}">Liên hệ</a></li>
@@ -192,6 +192,31 @@
         </div>
     </nav>
 
+    @if(!request()->is('admin*') && !request()->routeIs('login', 'register', 'password.*', 'verification.*'))
+        <div class="home-side-promotions" aria-label="Ưu đãi nổi bật">
+            <aside class="home-side-rail home-side-rail-left">
+                <a href="{{ route('products.index') }}" class="side-promo-card side-promo-pink" aria-label="Xem sản phẩm skincare giảm 20 phần trăm">
+                    <span>SKINCARE</span><strong>GIẢM 20%</strong><small>Cho đơn từ 399K</small><b>NHẬN NGAY <i class="bi bi-arrow-up-right"></i></b>
+                </a>
+                <a href="{{ route('products.index') }}" class="side-promo-card side-promo-teal" aria-label="Mua sắm sản phẩm được miễn phí vận chuyển">
+                    <span>BEATYCARE 🌸</span><strong>FREESHIP</strong><small>Toàn quốc từ 299K</small><b>MUA SẮM <i class="bi bi-arrow-up-right"></i></b>
+                </a>
+            </aside>
+            <aside class="home-side-rail home-side-rail-right">
+                <a href="{{ route('products.index') }}" class="side-promo-card side-promo-pink" aria-label="Xem deal mỹ phẩm hôm nay">
+                    <span>DEAL HÔM NAY</span><strong>SALE 30%</strong><small>Mỹ phẩm chọn lọc</small><b>XEM DEAL <i class="bi bi-arrow-up-right"></i></b>
+                </a>
+                @auth
+                    <a href="{{ route('account.vouchers') }}" class="side-promo-card side-promo-teal" aria-label="Khám phá voucher và quà tặng">
+                @else
+                    <a href="{{ route('login') }}" class="side-promo-card side-promo-teal" aria-label="Đăng nhập để khám phá voucher và quà tặng">
+                @endauth
+                    <span>QUÀ XINH</span><strong>TẶNG QUÀ</strong><small>Đơn càng lớn, quà càng xinh</small><b>KHÁM PHÁ <i class="bi bi-arrow-up-right"></i></b>
+                </a>
+            </aside>
+        </div>
+    @endif
+
     <!-- NỘI DUNG CHÍNH -->
     <main class="container py-4 flex-grow-1">
         @yield('content')
@@ -322,9 +347,12 @@
                     .then(data => {
                         suggestionsBox.innerHTML = ''; 
                         
-                        if (data.length > 0) {
-                            let html = '<ul class="list-unstyled mb-0 py-2">';
-                            data.forEach(item => {
+                        if (data.products.length > 0 || data.categories.length > 0 || data.keywords.length > 0) {
+                            let html = '';
+                            if (data.products.length > 0) {
+                                html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Sản phẩm</div><ul class="list-unstyled mb-0">';
+                            }
+                            data.products.forEach(item => {
                                 let imgHtml = item.image_url 
                                     ? `<img src="${item.image_url}" class="me-3 rounded search-result-image">`
                                     : `<div class="d-flex align-items-center justify-content-center bg-light rounded me-3 search-result-image"><i class="bi bi-box text-muted"></i></div>`;
@@ -340,7 +368,19 @@
                                     </a>
                                 </li>`;
                             });
-                            html += '</ul>';
+                            if (data.products.length > 0) html += '</ul></div>';
+                            if (data.categories.length > 0) {
+                                html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Danh mục</div><ul class="list-unstyled mb-0">';
+                                data.categories.forEach(item => {
+                                    html += `<li><a href="${item.url}" class="search-related-link"><i class="bi bi-grid-3x3-gap me-2"></i><span>${item.name}</span><small>${item.count} sản phẩm</small></a></li>`;
+                                });
+                                html += '</ul></div>';
+                            }
+                            html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Từ khóa liên quan</div><div class="search-related-keywords">';
+                            data.keywords.forEach(keyword => {
+                                html += `<a href="/products?search=${encodeURIComponent(keyword)}" class="search-keyword-chip">${keyword}</a>`;
+                            });
+                            html += '</div></div>';
                             suggestionsBox.innerHTML = html;
                             suggestionsBox.classList.remove('d-none');
                         } else {
@@ -364,9 +404,9 @@
                     <i class="bi bi-chat-square-text-fill"></i><span>Chat hỗ trợ</span><b id="storefront-chat-badge" class="storefront-chat-badge d-none">0</b>
                 </a>
                 <style>
-                    .storefront-admin-chat-dock { position: fixed; z-index: 1040; right: 0; top: 52%; display: flex; align-items: center; gap: .55rem; padding: .75rem .9rem .75rem .8rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 14px 0 0 14px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transform: translateY(-50%); }
-                    .storefront-admin-chat-dock:hover { color: #fff; padding-right: 1.2rem; }
-                    .storefront-admin-chat-dock { position: relative; }
+                    .storefront-admin-chat-dock { position: fixed; z-index: 1040; right: 24px; bottom: 24px; display: flex; align-items: center; gap: .55rem; padding: .75rem 1rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
+                    .storefront-admin-chat-dock:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(24,59,86,.32); }
+                    @media (max-width: 576px) { .storefront-admin-chat-dock { right: 16px; bottom: 16px; padding: .7rem .85rem; } .storefront-admin-chat-dock span { display: none; } }
                     .storefront-admin-chat-dock i { font-size: 1.15rem; }
                     .storefront-admin-chat-dock span { font-size: .78rem; font-weight: 800; }
                     .storefront-admin-chat-dock .storefront-chat-badge { position: absolute; top: -7px; left: -7px; min-width: 20px; padding: .2rem .35rem; color: #fff; background: #e63950; border: 2px solid #fff; border-radius: 999px; font-size: .65rem; text-align: center; }

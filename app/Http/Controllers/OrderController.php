@@ -47,7 +47,12 @@ class OrderController extends Controller
         }
 
         if ($request->filled('status')) {
-            $ordersQuery->where('status', $request->input('status'));
+            $statusFilters = [
+                'processing' => ['processing', 'confirmed', 'packing'],
+                'paid' => ['paid', 'completed'],
+                'cancelled' => ['cancelled', 'refund_pending', 'refunded'],
+            ];
+            $ordersQuery->whereIn('status', $statusFilters[$request->input('status')] ?? [$request->input('status')]);
         }
 
         $orders = $ordersQuery->get();
@@ -208,7 +213,7 @@ class OrderController extends Controller
                     $beforeStock = (int) $variation->stock;
                     $variation->decrement('stock', $details['quantity']);
                     $variation->refresh();
-                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Xuất kho theo đơn hàng', $order);
+                    InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Giữ hàng theo đơn hàng', $order, null, false);
                 } else {
                     if ($product->quantity < $details['quantity']) {
                         throw new \RuntimeException('Sản phẩm trong giỏ vừa hết hàng.');
@@ -435,7 +440,8 @@ class OrderController extends Controller
     // ==================================================
     public function show(Order $order)
     {
-        if ($order->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+        $isOrderManager = in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true);
+        if ($order->user_id !== Auth::id() && !$isOrderManager) {
             abort(403, 'BẠN KHÔNG CÓ QUYỀN TRUY CẬP ĐƠN HÀNG NÀY.');
         }
 

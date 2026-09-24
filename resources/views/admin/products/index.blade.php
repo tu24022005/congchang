@@ -30,6 +30,7 @@
                             <th class="py-3" width="5%">STT</th>
                             <th class="py-3" width="10%">Hình ảnh</th>
                             <th class="py-3 text-start">Tên Sản phẩm</th>
+                            <th class="py-3">Mã SP / Thương hiệu</th>
                             <th class="py-3">Danh mục</th>
                             <th class="py-3">Giá bán</th>
                             <th class="py-3" width="20%">Hành động</th>
@@ -54,6 +55,7 @@
                                     @endif
                                 </td>
                                 <td class="text-start fw-semibold fs-6 text-dark">{{ $product->name }}</td>
+                                <td><strong>{{ $product->product_code ?: '—' }}</strong><small class="d-block text-muted">{{ $product->brand->name ?? 'Chưa có thương hiệu' }}</small></td>
                                 <td><span class="badge bg-secondary rounded-pill px-3 py-2">{{ $product->category->name ?? 'N/A' }}</span></td>
                                 <td class="text-danger fw-bold">
                                     @if($displayMinPrice < $displayMaxPrice)

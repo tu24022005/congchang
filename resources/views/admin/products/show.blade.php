@@ -50,7 +50,7 @@
         <div class="col-lg-7">
             <div class="overview-panel p-4 h-100">
                 <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
-                    <div><span class="badge bg-info-subtle text-info-emphasis rounded-pill mb-2">{{ $product->category->name ?? 'Chưa phân loại' }}</span><h2 class="h4 fw-bold mb-1">{{ $product->name }}</h2><small class="text-muted">Mã sản phẩm: #{{ $product->id }}</small></div>
+                    <div><span class="badge bg-info-subtle text-info-emphasis rounded-pill mb-2">{{ $product->category->name ?? 'Chưa phân loại' }}</span>@if($product->brand)<span class="badge bg-light text-dark rounded-pill mb-2 ms-1">{{ $product->brand->name }}</span>@endif<h2 class="h4 fw-bold mb-1">{{ $product->name }}</h2><small class="text-muted">Mã sản phẩm: {{ $product->product_code ?: '#' . $product->id }}</small></div>
                     <span class="badge rounded-pill {{ $product->quantity > 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2">{{ $product->quantity > 0 ? 'Đang bán' : 'Hết hàng' }}</span>
                 </div>
                 <div class="row g-3 mb-4">

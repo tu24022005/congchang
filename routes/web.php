@@ -162,6 +162,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Tài khoản người dùng
     Route::get('/account', [AuthController::class, 'account'])->name('account');
+    Route::get('/account/vouchers', [AuthController::class, 'vouchers'])->name('account.vouchers');
+    Route::post('/account/vouchers/{voucher}/collect', [AuthController::class, 'collectVoucher'])->name('account.vouchers.collect');
+    Route::get('/account/notifications', [AuthController::class, 'notifications'])->name('account.notifications');
+    Route::get('/account/notifications/{notification}/read', [AuthController::class, 'readNotification'])->name('account.notifications.read');
     Route::get('/refunds', [OrderController::class, 'refunds'])->name('refunds.index');
     Route::get('/loyalty-points', [\App\Http\Controllers\LoyaltyController::class, 'index'])->name('loyalty.index');
     Route::post('/loyalty-points/redeem', [\App\Http\Controllers\LoyaltyController::class, 'redeem'])->name('loyalty.redeem');

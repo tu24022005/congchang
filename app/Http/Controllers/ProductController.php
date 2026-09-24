@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\InventoryLog;
@@ -21,23 +22,26 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         // Hàm này dành cho trang "Kho (Admin)" - Route: admin.products.index
-        $products = Product::with(['category', 'variations'])->latest()->paginate(10);
+        $products = Product::with(['category', 'brand', 'variations'])->latest()->paginate(10);
         return view('admin.products.index', compact('products'));
     }
 
     public function create()
     {
         $categories = Category::all();
-        return view('admin.products.create', compact('categories'));
+        $brands = Brand::orderBy('name')->get();
+        return view('admin.products.create', compact('categories', 'brands'));
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'product_code' => 'nullable|string|max:50|alpha_dash|unique:products,product_code',
             'description' => 'nullable|string',
             'quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
+            'brand_id' => 'nullable|exists:brands,id',
             'flash_sale_price' => 'nullable|numeric|min:0',
             'flash_sale_starts_at' => 'nullable|date',
             'flash_sale_ends_at' => 'nullable|date|after:flash_sale_starts_at',
@@ -81,23 +85,26 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         // Hàm show này đang dành cho Admin (hiển thị ở views admin.products.show)
-        $product->load(['category', 'images', 'variations', 'reviews.user']);
+        $product->load(['category', 'brand', 'images', 'variations', 'reviews.user']);
         return view('admin.products.show', compact('product'));
     }
 
     public function edit(Product $product)
     {
         $categories = Category::all();
-        return view('admin.products.edit', compact('product', 'categories'));
+        $brands = Brand::orderBy('name')->get();
+        return view('admin.products.edit', compact('product', 'categories', 'brands'));
     }
 
     public function update(Request $request, Product $product)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'product_code' => 'nullable|string|max:50|alpha_dash|unique:products,product_code,' . $product->id,
             'description' => 'nullable|string',
             'quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
+            'brand_id' => 'nullable|exists:brands,id',
             'flash_sale_price' => 'nullable|numeric|min:0',
             'flash_sale_starts_at' => 'nullable|date',
             'flash_sale_ends_at' => 'nullable|date|after:flash_sale_starts_at',
@@ -213,19 +220,25 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category' => ['nullable', 'integer', 'exists:categories,id'],
+            'brand' => ['nullable', 'integer', 'exists:brands,id'],
             'min_price' => ['nullable', 'numeric', 'min:0'],
             'max_price' => ['nullable', 'numeric', 'gte:min_price'],
             'rating' => ['nullable', 'numeric', 'min:1', 'max:5'],
             'sort' => ['nullable', 'in:newest,price_asc,price_desc,rating_desc'],
+            'availability' => ['nullable', 'in:in_stock,out_of_stock'],
         ]);
 
-        $query = Product::with(['category', 'variations'])
+        $query = Product::with(['category', 'brand', 'variations'])
             ->withAvg('reviews', 'rating')
             ->withMin('variations', 'price');
         $categories = Category::withCount('products')->orderBy('name')->get();
+        $brands = Brand::withCount('products')->orderBy('name')->get();
 
         if (!empty($validated['category'])) {
             $query->where('category_id', $validated['category']);
+        }
+        if (!empty($validated['brand'])) {
+            $query->where('brand_id', $validated['brand']);
         }
 
         if ($request->filled('search')) {
@@ -246,6 +259,11 @@ class ProductController extends Controller
         if (!empty($validated['rating'])) {
             $query->whereRaw('(SELECT COALESCE(AVG(pr.rating), 0) FROM product_reviews pr WHERE pr.product_id = products.id) >= ?', [$validated['rating']]);
         }
+        if (($validated['availability'] ?? null) === 'in_stock') {
+            $query->where('quantity', '>', 0);
+        } elseif (($validated['availability'] ?? null) === 'out_of_stock') {
+            $query->where('quantity', '<=', 0);
+        }
 
         match ($validated['sort'] ?? 'newest') {
             'price_asc' => $query->orderByRaw($priceExpression . ' ASC'),
@@ -259,13 +277,13 @@ class ProductController extends Controller
             ? $request->user()->wishlistProducts()->pluck('products.id')
             : collect();
 
-        return view('products.index', compact('products', 'categories', 'wishlistProductIds'));
+        return view('products.index', compact('products', 'categories', 'brands', 'wishlistProductIds'));
     }
 
     // ĐÃ TÍCH HỢP AI GỢI Ý VÀO HÀM NÀY CHO NGƯỜI DÙNG XEM
     public function show_normal(Request $request, Product $product)
     {
-        $product->load(['category', 'images', 'variations']); 
+        $product->load(['category', 'brand', 'images', 'variations', 'reviews.user']);
         $isWishlisted = $request->user()
             ? $request->user()->wishlistProducts()->whereKey($product->id)->exists()
             : false;
@@ -366,20 +384,57 @@ class ProductController extends Controller
     // HÀM TÌM KIẾM TRỰC TIẾP (LIVE SEARCH API)
     public function suggestions(Request $request)
     {
-        $search = $request->get('query');
-        if ($search == '') return response()->json([]);
-
-        // Tìm tối đa 5 sản phẩm khớp với từ khóa
-        $products = Product::where('name', 'LIKE', '%' . $search . '%')->take(5)->get();
-
-        // Gắn thêm đường dẫn ảnh, giá tiền định dạng sẵn để JS dễ hiển thị
-        foreach ($products as $p) {
-            $p->image_url = $p->image ? asset('storage/' . $p->image) : null;
-            $p->formatted_price = number_format($p->price, 0, ',', '.') . ' ₫';
-            $p->detail_url = route('products.show', ['product' => $p->slug]);
+        $search = trim((string) $request->get('query', ''));
+        if ($search === '') {
+            return response()->json([
+                'products' => [],
+                'categories' => [],
+                'keywords' => [],
+            ]);
         }
 
-        return response()->json($products);
+        $products = Product::with('category')
+            ->where(function ($query) use ($search): void {
+                $query->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('description', 'LIKE', '%' . $search . '%')
+                    ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'LIKE', '%' . $search . '%'));
+            })
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn (Product $product): array => [
+                'name' => $product->name,
+                'image_url' => $product->image ? asset('storage/' . $product->image) : null,
+                'formatted_price' => number_format($product->effectivePrice(), 0, ',', '.') . ' ₫',
+                'detail_url' => route('products.show', ['product' => $product->slug]),
+            ]);
+
+        $categories = Category::withCount('products')
+            ->where('name', 'LIKE', '%' . $search . '%')
+            ->take(4)
+            ->get()
+            ->map(fn (Category $category): array => [
+                'name' => $category->name,
+                'count' => $category->products_count,
+                'url' => route('products.index', ['category' => $category->id, 'search' => $search]),
+            ]);
+
+        $keywordMap = [
+            'serum' => ['serum vitamin C', 'serum trị mụn', 'serum cấp ẩm'],
+            'kem' => ['kem dưỡng ẩm', 'kem chống nắng', 'kem phục hồi'],
+            'son' => ['son dưỡng môi', 'son lì lâu trôi', 'son tint'],
+            'sữa' => ['sữa rửa mặt', 'sữa tắm dịu nhẹ', 'sữa dưỡng thể'],
+        ];
+        $keywords = collect($keywordMap)
+            ->filter(fn ($items, $key) => Str::contains(Str::lower($search), $key))
+            ->flatten()
+            ->take(4)
+            ->values();
+        if ($keywords->isEmpty()) {
+            $keywords = collect([$search . ' bán chạy', $search . ' chính hãng', $search . ' giá tốt']);
+        }
+
+        return response()->json(compact('products', 'categories', 'keywords'));
     }
 
     private function uniqueSlug(string $name, ?int $ignoreId = null): string

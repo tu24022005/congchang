@@ -2,6 +2,7 @@
 namespace App\Http\Controllers; 
 
 use App\Models\User; 
+use App\Models\Voucher;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\Hash; 
@@ -193,8 +194,71 @@ class AuthController extends Controller
         $completedSpend = $user->orders()->where('status', 'completed')->sum('total');
         $membershipTier = User::membershipTierFor($completedSpend);
         $addresses = $user->addresses()->orderByDesc('is_default')->latest('id')->get();
+        $orderStats = [
+            'processing' => $user->orders()->whereIn('status', ['processing', 'confirmed', 'packing'])->count(),
+            'shipping' => $user->orders()->where('status', 'shipping')->count(),
+            'completed' => $user->orders()->where('status', 'completed')->count(),
+            'cancelled' => $user->orders()->whereIn('status', ['cancelled', 'refund_pending', 'refunded'])->count(),
+        ];
+        $wishlistCount = $user->wishlistProducts()->count();
+        $voucherCount = Voucher::where('user_id', $user->id)->where(function ($query) {
+            $query->whereNull('expires_at')->orWhereDate('expires_at', '>=', today());
+        })->where(function ($query) {
+            $query->whereNull('usage_limit')->orWhereColumn('used_count', '<', 'usage_limit');
+        })->count();
+        $unreadNotificationCount = $user->unreadNotifications()->count();
 
-        return view('account.index', compact('user', 'completedSpend', 'membershipTier', 'addresses'));
+        return view('account.index', compact(
+            'user', 'completedSpend', 'membershipTier', 'addresses', 'orderStats',
+            'wishlistCount', 'voucherCount', 'unreadNotificationCount'
+        ));
+    }
+
+    public function vouchers(Request $request)
+    {
+        $vouchers = Voucher::with(['category', 'product'])
+            ->where(function ($query) use ($request) {
+                $query->where('user_id', $request->user()->id)
+                    ->orWhereHas('collectedByUsers', fn ($users) => $users->whereKey($request->user()->id));
+            })->latest()->get();
+        $availableVouchers = Voucher::with(['category', 'product'])
+            ->where('scope', 'platform')
+            ->whereNull('user_id')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')->orWhereDate('expires_at', '>=', today());
+            })
+            ->where(function ($query) {
+                $query->whereNull('usage_limit')->orWhereColumn('used_count', '<', 'usage_limit');
+            })
+            ->whereDoesntHave('collectedByUsers', fn ($users) => $users->whereKey($request->user()->id))
+            ->latest()->get();
+
+        return view('account.vouchers', compact('vouchers', 'availableVouchers'));
+    }
+
+    public function collectVoucher(Request $request, Voucher $voucher)
+    {
+        abort_unless($voucher->scope === 'platform' && !$voucher->user_id, 404);
+        if (!$voucher->isAvailable()) {
+            return back()->with('error', 'Voucher này đã hết hạn hoặc hết lượt.');
+        }
+        $request->user()->collectedVouchers()->syncWithoutDetaching([$voucher->id]);
+        return back()->with('success', 'Đã thu thập voucher ' . $voucher->code . '.');
+    }
+
+    public function notifications(Request $request)
+    {
+        $notifications = $request->user()->notifications()->latest()->paginate(15);
+
+        return view('account.notifications', compact('notifications'));
+    }
+
+    public function readNotification(Request $request, string $notification)
+    {
+        $item = $request->user()->notifications()->whereKey($notification)->firstOrFail();
+        $item->markAsRead();
+
+        return redirect()->route('account.notifications');
     }
 
     public function updateAccount(Request $request)

@@ -1,5 +1,5 @@
 @extends('layouts.app') 
-@section('title', 'Aloha - Đăng nhập') 
+@section('title', 'BeatyCare 🌸 - Đăng nhập') 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 @endpush
@@ -9,8 +9,8 @@
     <div class="chill-card">
         
         <div class="chill-header">
-            <h3>Aloha!</h3>
-            <p>Chào mừng bạn trở lại bên bờ biển Aloha 🌴</p>
+            <h3>BeatyCare 🌸!</h3>
+            <p>Chào mừng bạn trở lại tại BeatyCare 🌸</p>
         </div>
 
         {{-- Thông báo --}}

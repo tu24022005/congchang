@@ -28,11 +28,52 @@
 
     <div class="card border-0 shadow-sm rounded-4 mb-4 order-filter-card">
         <div class="card-body p-3">
-            <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-2 align-items-center">
-                <div class="col-lg-6"><div class="input-group"><span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span><input type="search" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Mã đơn, tên khách hàng hoặc sản phẩm..."></div></div>
-                <div class="col-sm-5 col-lg-3"><select name="status" class="form-select"><option value="">Tất cả trạng thái</option><option value="processing" @selected(request('status') === 'processing')>Chờ xử lý</option><option value="paid" @selected(request('status') === 'paid')>Đã thanh toán</option><option value="refund_pending" @selected(request('status') === 'refund_pending')>Chờ hoàn tiền</option><option value="refunded" @selected(request('status') === 'refunded')>Đã hoàn tiền</option><option value="cancelled" @selected(request('status') === 'cancelled')>Đã hủy</option></select></div>
-                <div class="col-sm-3 col-lg-1"><button class="btn btn-primary w-100" title="Lọc"><i class="bi bi-funnel"></i></button></div>
-                <div class="col-sm-4 col-lg-2"><a href="{{ route('admin.orders.index') }}" class="btn btn-light border w-100">Xóa bộ lọc</a></div>
+            <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3 align-items-end">
+                <div class="col-md-6 col-xl-4">
+                    <label class="form-label small fw-bold mb-1">Tìm kiếm</label>
+                    <div class="input-group"><span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span><input type="search" name="search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Mã đơn, tên khách hàng hoặc sản phẩm..."></div>
+                </div>
+                <div class="col-md-3 col-xl-2">
+                    <label class="form-label small fw-bold mb-1">Trạng thái</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        @foreach(['processing' => 'Chờ xử lý', 'confirmed' => 'Đã xác nhận', 'packing' => 'Đang đóng gói', 'shipping' => 'Đang giao hàng', 'paid' => 'Đã thanh toán', 'completed' => 'Đã nhận hàng', 'refund_pending' => 'Chờ hoàn tiền', 'refunded' => 'Đã hoàn tiền', 'cancelled' => 'Đã hủy'] as $status => $label)
+                            <option value="{{ $status }}" @selected(request('status') === $status)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 col-xl-2">
+                    <label class="form-label small fw-bold mb-1">Thanh toán</label>
+                    <select name="payment_method" class="form-select">
+                        <option value="">Tất cả phương thức</option>
+                        <option value="COD" @selected(request('payment_method') === 'COD')>COD</option>
+                        <option value="PAYOS" @selected(request('payment_method') === 'PAYOS')>Thanh toán online</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-xl-2">
+                    <label class="form-label small fw-bold mb-1">Đơn vị vận chuyển</label>
+                    <select name="shipping_provider" class="form-select">
+                        <option value="">Tất cả đơn vị</option>
+                        @foreach(config('shop.shipping_providers', []) as $provider => $label)
+                            <option value="{{ $provider }}" @selected(request('shipping_provider') === $provider)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 col-xl-2">
+                    <label class="form-label small fw-bold mb-1">Khu vực giao</label>
+                    <select name="shipping_zone" class="form-select">
+                        <option value="">Tất cả khu vực</option>
+                        @foreach(['inner_city' => 'Nội thành', 'other_city' => 'Tỉnh/thành khác', 'remote' => 'Khu vực xa'] as $zone => $label)
+                            <option value="{{ $zone }}" @selected(request('shipping_zone') === $zone)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 col-xl-2"><label class="form-label small fw-bold mb-1">Từ ngày</label><input type="date" name="date_from" value="{{ request('date_from') }}" class="form-control"></div>
+                <div class="col-md-3 col-xl-2"><label class="form-label small fw-bold mb-1">Đến ngày</label><input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control"></div>
+                <div class="col-md-3 col-xl-2"><label class="form-label small fw-bold mb-1">Tổng tiền từ</label><input type="number" name="min_total" min="0" value="{{ request('min_total') }}" class="form-control" placeholder="0"></div>
+                <div class="col-md-3 col-xl-2"><label class="form-label small fw-bold mb-1">Tổng tiền đến</label><input type="number" name="max_total" min="0" value="{{ request('max_total') }}" class="form-control" placeholder="Không giới hạn"></div>
+                <div class="col-md-3 col-xl-2"><button class="btn btn-primary w-100" title="Lọc"><i class="bi bi-funnel me-1"></i>Lọc</button></div>
+                <div class="col-md-3 col-xl-2"><a href="{{ route('admin.orders.index') }}" class="btn btn-light border w-100">Xóa bộ lọc</a></div>
             </form>
         </div>
     </div>
@@ -91,6 +132,16 @@
                                         <span class="badge bg-danger rounded-pill px-3">Đã huỷ</span>
                                     @else
                                         <span class="badge bg-dark rounded-pill px-3">{{ ucfirst($order->status) }}</span>
+                                    @endif
+                                    @if($order->tracking_number)
+                                        <small class="d-block text-muted mt-1" title="Mã vận đơn">
+                                            <i class="bi bi-upc-scan me-1"></i>{{ $order->tracking_number }}
+                                        </small>
+                                    @endif
+                                    @if($order->shipping_provider)
+                                        <small class="d-block text-muted mt-1">
+                                            <i class="bi bi-truck me-1"></i>{{ config('shop.shipping_providers.' . $order->shipping_provider, $order->shipping_provider) }}
+                                        </small>
                                     @endif
                                 </td>
                                 <td><span class="d-block">{{ $order->created_at->format('d/m/Y') }}</span><small class="text-muted">{{ $order->created_at->format('H:i') }}</small></td>

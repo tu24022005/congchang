@@ -26,6 +26,16 @@ class OrderController extends Controller
     // Hiển thị tất cả đơn hàng cho admin quản lý 
     public function index(Request $request)
     {
+        $request->validate([
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
+            'min_total' => ['nullable', 'numeric', 'min:0'],
+            'max_total' => ['nullable', 'numeric', 'min:0', 'gte:min_total'],
+            'payment_method' => ['nullable', 'in:COD,PAYOS'],
+            'shipping_provider' => ['nullable', 'in:' . implode(',', array_keys(config('shop.shipping_providers', [])))],
+            'shipping_zone' => ['nullable', 'in:inner_city,other_city,remote'],
+        ]);
+
         $query = Order::with('user', 'items.product')->latest();
 
         if ($request->filled('search')) {
@@ -42,6 +52,15 @@ class OrderController extends Controller
             $query->where('status', $request->input('status'));
         }
 
+        $query
+            ->when($request->filled('payment_method'), fn ($builder) => $builder->where('payment_method', $request->input('payment_method')))
+            ->when($request->filled('shipping_provider'), fn ($builder) => $builder->where('shipping_provider', $request->input('shipping_provider')))
+            ->when($request->filled('shipping_zone'), fn ($builder) => $builder->where('shipping_zone', $request->input('shipping_zone')))
+            ->when($request->filled('date_from'), fn ($builder) => $builder->whereDate('created_at', '>=', $request->input('date_from')))
+            ->when($request->filled('date_to'), fn ($builder) => $builder->whereDate('created_at', '<=', $request->input('date_to')))
+            ->when($request->filled('min_total'), fn ($builder) => $builder->where('total', '>=', $request->input('min_total')))
+            ->when($request->filled('max_total'), fn ($builder) => $builder->where('total', '<=', $request->input('max_total')));
+
         $orders = $query->paginate(12)->withQueryString();
         $totalOrders = Order::count();
         $pendingOrders = Order::where('status', 'processing')->count();
@@ -57,9 +76,15 @@ class OrderController extends Controller
     // Cập nhật trạng thái đơn hàng (Admin tự sửa bằng tay nếu cần)
     public function updateStatus(Request $request, $id) 
     { 
-        $request->validate([ 
+        $request->validate([
             'status' => 'required|in:processing,confirmed,packing,shipping,paid,completed,cancelled,refund_pending',
-        ]); 
+            'shipping_provider' => ['nullable', 'string', 'in:' . implode(',', array_keys(config('shop.shipping_providers', [])))],
+            'tracking_number' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9][A-Za-z0-9._-]*$/'],
+            'shipping_fee' => ['nullable', 'integer', 'min:0', 'max:100000000'],
+            'shipping_date' => ['nullable', 'date'],
+        ], [
+            'tracking_number.regex' => 'Mã vận đơn chỉ được chứa chữ, số, dấu chấm, gạch ngang hoặc gạch dưới.',
+        ]);
         
         $order = Order::findOrFail($id); 
         $allowedTransitions = [
@@ -95,7 +120,34 @@ class OrderController extends Controller
                 $cancellationService->restoreStock($lockedOrder);
                 $cancellationService->releaseVouchers($lockedOrder);
             }
-            $lockedOrder->update(['status' => $request->status]);
+            $updateData = ['status' => $request->status];
+            if ($request->has('shipping_provider')) {
+                $updateData['shipping_provider'] = $request->input('shipping_provider') ?: null;
+            }
+            if ($request->has('tracking_number')) {
+                $updateData['tracking_number'] = $request->input('tracking_number') ?: null;
+            }
+            if ($request->has('shipping_date')) {
+                $updateData['shipping_date'] = $request->input('shipping_date') ?: null;
+            }
+            if ($request->has('shipping_fee')) {
+                $shippingFee = $request->filled('shipping_fee') ? (int) $request->input('shipping_fee') : 0;
+                $totalBeforeShipping = max(0, (int) $lockedOrder->total - (int) ($lockedOrder->shipping_fee ?? 0));
+                $updateData['shipping_fee'] = $shippingFee;
+                $updateData['total'] = $totalBeforeShipping + $shippingFee;
+            }
+            $lockedOrder->update($updateData);
+
+            // Chỉ nhân viên xử lý kho khi chuyển đơn sang giao hàng mới là người xuất kho.
+            if ($request->status === 'shipping') {
+                InventoryLog::where('reference_type', $lockedOrder->getMorphClass())
+                    ->where('reference_id', $lockedOrder->id)
+                    ->where('type', 'out')
+                    ->update([
+                        'user_id' => Auth::id(),
+                        'reason' => 'Xuất kho theo đơn hàng',
+                    ]);
+            }
         });
         $order->refresh();
         app(\App\Services\OrderStatusNotificationService::class)->notify($order, $beforeStatus);

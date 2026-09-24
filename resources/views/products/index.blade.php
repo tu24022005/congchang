@@ -1,10 +1,10 @@
 @extends('layouts.app')
-@section('title', 'Mỹ phẩm & chăm sóc cá nhân - Aloha Beauty')
+@section('title', 'Mỹ phẩm & chăm sóc cá nhân - BeatyCare 🌸')
 
 @section('content')
 <!-- LỜI CHÀO -->
 <div class="text-center mb-5 animate__animated animate__fadeInDown">
-    <h2 class="fw-bold product-page-title">ALOHA! KHÁM PHÁ SẢN PHẨM</h2>
+    <h2 class="fw-bold product-page-title">BEATYCARE 🌸 KHÁM PHÁ SẢN PHẨM</h2>
     <p class="text-muted">Khám phá mỹ phẩm và sản phẩm chăm sóc cá nhân dành cho bạn</p>
 </div>
 
@@ -27,6 +27,13 @@
     </div>
 </section>
 
+@if(request('search'))
+    <div class="search-results-heading mb-4">
+        <div><span class="search-results-kicker"><i class="bi bi-search me-1"></i> KẾT QUẢ TÌM KIẾM</span><h2 class="fw-bold mb-1">Tìm kiếm "{{ request('search') }}"</h2><p class="text-muted mb-0">Có <strong>{{ $products->total() }}</strong> sản phẩm phù hợp</p></div>
+        <a href="{{ route('products.index') }}" class="btn btn-light border rounded-pill"><i class="bi bi-x-lg me-1"></i>Xóa tìm kiếm</a>
+    </div>
+@endif
+
 <form method="GET" action="{{ route('products.index') }}" class="card border-0 shadow-sm p-3 mb-4">
     <div class="row g-2 align-items-end">
         <div class="col-md-3">
@@ -35,6 +42,15 @@
                 <option value="">Tất cả danh mục</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Thương hiệu</label>
+            <select name="brand" class="form-select">
+                <option value="">Tất cả thương hiệu</option>
+                @foreach($brands as $brand)
+                    <option value="{{ $brand->id }}" @selected((string) request('brand') === (string) $brand->id)>{{ $brand->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -62,6 +78,14 @@
                 <option value="price_asc" @selected(request('sort') === 'price_asc')>Giá tăng dần</option>
                 <option value="price_desc" @selected(request('sort') === 'price_desc')>Giá giảm dần</option>
                 <option value="rating_desc" @selected(request('sort') === 'rating_desc')>Đánh giá cao nhất</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Tình trạng</label>
+            <select name="availability" class="form-select">
+                <option value="">Tất cả sản phẩm</option>
+                <option value="in_stock" @selected(request('availability') === 'in_stock')>Còn hàng</option>
+                <option value="out_of_stock" @selected(request('availability') === 'out_of_stock')>Hết hàng</option>
             </select>
         </div>
         <div class="col-12 d-flex gap-2">
@@ -94,9 +118,10 @@
                     @endif
                 </div>
                 
-                <span class="badge text-primary rounded-pill mb-2 mx-auto product-category-badge">
-                    {{ $product->category->name ?? 'Mỹ phẩm chăm sóc da' }}
-                </span>
+                <div class="d-flex justify-content-center gap-2 flex-wrap mb-2">
+                    <span class="badge text-primary rounded-pill product-category-badge">{{ $product->category->name ?? 'Mỹ phẩm chăm sóc da' }}</span>
+                    @if($product->brand)<span class="badge bg-light text-dark rounded-pill">{{ $product->brand->name }}</span>@endif
+                </div>
 
                 <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
                     <h5 class="fw-bold text-dark mb-0">{{ $product->name }}</h5>
@@ -107,6 +132,7 @@
                         </form>
                     @endauth
                 </div>
+                @if($product->product_code)<small class="text-muted d-block mb-2">Mã SP: {{ $product->product_code }}</small>@endif
                 <p class="text-muted small mb-3 flex-grow-1 product-description">
                     {{ $product->description ?? 'Sản phẩm chăm sóc cá nhân chất lượng cho vẻ đẹp rạng ngời mỗi ngày.' }}
                 </p>

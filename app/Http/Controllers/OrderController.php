@@ -341,7 +341,7 @@ class OrderController extends Controller
         }
 
         $previousStatus = $order->status;
-        $order->update(['status' => 'completed']);
+        $order->update(['status' => 'completed', 'received_at' => now()]);
         app(\App\Services\OrderStatusNotificationService::class)->notify($order, $previousStatus);
         app(LoyaltyPointService::class)->awardForCompletedOrder($order);
 

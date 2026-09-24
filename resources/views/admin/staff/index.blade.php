@@ -16,6 +16,34 @@
             <div class="col-md-3"><strong>Nhân viên CSKH</strong><small class="d-block text-muted">Đơn hàng và chat khách hàng</small></div>
         </div>
     </div></div>
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <form method="GET" action="{{ route('admin.staff.index') }}" class="row g-2 align-items-center">
+                <div class="col-lg-6">
+                    <label for="staff-search" class="visually-hidden">Tìm nhân viên</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input id="staff-search" type="search" name="search" class="form-control" value="{{ $filters['search'] ?? '' }}" placeholder="Tìm theo tên hoặc email nhân viên...">
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <label for="staff-role" class="visually-hidden">Lọc theo vai trò</label>
+                    <select id="staff-role" name="role" class="form-select">
+                        <option value="">Tất cả vai trò</option>
+                        @foreach(['admin' => 'Quản trị viên', 'manager' => 'Quản lý', 'warehouse_staff' => 'Nhân viên kho', 'customer_service' => 'Nhân viên CSKH'] as $role => $label)
+                            <option value="{{ $role }}" @selected(($filters['role'] ?? '') === $role)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-lg-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel me-1"></i> Lọc</button>
+                    @if(($filters['search'] ?? '') !== '' || ($filters['role'] ?? '') !== '')
+                        <a href="{{ route('admin.staff.index') }}" class="btn btn-outline-secondary" title="Xóa bộ lọc"><i class="bi bi-x-lg"></i></a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="card border-0 shadow-sm rounded-4"><div class="table-responsive"><table class="table align-middle mb-0"><thead class="table-dark"><tr><th>Nhân viên</th><th>Email</th><th>Vai trò</th><th>Ngày tạo</th><th></th></tr></thead><tbody>
         @forelse($staff as $member)<tr><td class="fw-semibold">{{ $member->name }}</td><td>{{ $member->email }}</td><td><form action="{{ route('admin.staff.update', $member) }}" method="POST" class="d-flex gap-2">@csrf @method('PATCH')<select name="role" class="form-select form-select-sm">@foreach(['admin' => 'Quản trị viên', 'manager' => 'Quản lý', 'warehouse_staff' => 'Nhân viên kho', 'customer_service' => 'Nhân viên CSKH'] as $role => $label)<option value="{{ $role }}" @selected($member->role === $role)>{{ $label }}</option>@endforeach</select><button class="btn btn-sm btn-primary" {{ $member->id === Auth::id() ? 'disabled' : '' }}>Lưu</button></form></td><td>{{ $member->created_at?->format('d/m/Y') }}</td><td class="text-end">@if($member->id !== Auth::id())<form action="{{ route('admin.staff.destroy', $member) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn xoá tài khoản này?');">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger" title="Xoá tài khoản"><i class="bi bi-trash"></i></button></form>@else<span class="text-muted small">Tài khoản hiện tại</span>@endif</td></tr>@empty<tr><td colspan="5" class="text-center text-muted py-4">Chưa có tài khoản nhân viên.</td></tr>@endforelse
     </tbody></table></div></div>

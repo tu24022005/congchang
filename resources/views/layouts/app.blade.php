@@ -404,9 +404,10 @@
                     <i class="bi bi-chat-square-text-fill"></i><span>Chat hỗ trợ</span><b id="storefront-chat-badge" class="storefront-chat-badge d-none">0</b>
                 </a>
                 <style>
-                    .storefront-admin-chat-dock { position: fixed; z-index: 1040; right: 24px; bottom: 24px; display: flex; align-items: center; gap: .55rem; padding: .75rem 1rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
+                    /* ĐÃ SỬA Z-INDEX CHO ADMIN Ở ĐÂY LÊN 99999 */
+                    .storefront-admin-chat-dock { position: fixed; z-index: 10001 !important; right: 1rem; bottom: 1rem; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; gap: .55rem; padding: .58rem .82rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
                     .storefront-admin-chat-dock:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(24,59,86,.32); }
-                    @media (max-width: 576px) { .storefront-admin-chat-dock { right: 16px; bottom: 16px; padding: .7rem .85rem; } .storefront-admin-chat-dock span { display: none; } }
+                    @media (max-width: 1100px) { .storefront-admin-chat-dock { right: .75rem; bottom: .75rem; width: 44px; height: 44px; padding: 0; justify-content: center; } .storefront-admin-chat-dock span { display: none; } .storefront-admin-chat-dock i { margin: 0; } }
                     .storefront-admin-chat-dock i { font-size: 1.15rem; }
                     .storefront-admin-chat-dock span { font-size: .78rem; font-weight: 800; }
                     .storefront-admin-chat-dock .storefront-chat-badge { position: absolute; top: -7px; left: -7px; min-width: 20px; padding: .2rem .35rem; color: #fff; background: #e63950; border: 2px solid #fff; border-radius: 999px; font-size: .65rem; text-align: center; }
@@ -427,9 +428,22 @@
         @else
             <!-- KHUNG CHAT MÀU XANH DÀNH CHO KHÁCH HÀNG -->
             <div id="chat-widget-button" class="shadow-lg chat-widget-button chat-widget-button-user">
-                <i class="bi bi-chat-dots-fill text-white fs-3"></i>
+                <i class="bi bi-chat-dots-fill text-white"></i><span>Hỗ trợ</span>
                 <span id="chat-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white d-none chat-badge">0</span>
             </div>
+
+            <!-- ĐÃ THÊM CSS FIX LỖI KHUẤT NÚT CHO KHÁCH HÀNG Ở ĐÂY -->
+            <style>
+                .chat-widget-button {
+                    position: fixed !important;
+                    right: 24px !important;
+                    bottom: 24px !important;
+                    z-index: 99999 !important;
+                }
+                .chat-widget-window {
+                    z-index: 999999 !important;
+                }
+            </style>
 
             <div id="chat-widget-window" class="shadow-lg border-0 d-none chat-widget-window">
                 <div class="p-3 text-white d-flex justify-content-between align-items-center chat-header-user">

@@ -14,6 +14,7 @@ class Order extends Model
         'user_id',
         'total',
         'status',
+        'received_at',
         'payment_method',
         // Bổ sung 3 trường khách hàng để tránh lỗi Mass Assignment
         'customer_name',
@@ -43,6 +44,7 @@ class Order extends Model
         'refunded_at' => 'datetime',
         'refund_reviewed_at' => 'datetime',
         'shipping_fee' => 'integer',
+        'received_at' => 'datetime',
     ];
 
     // Quan hệ: Một Đơn hàng (Order) có nhiều Chi tiết đơn hàng (OrderItem)[cite: 1]

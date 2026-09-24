@@ -234,12 +234,20 @@
                                     @if(Auth::user()->role !== 'admin')
                                         @php $existingReview = $item->product ? $item->product->reviews->where('user_id', Auth::id())->first() : null; @endphp
                                         @if($existingReview)
+                                            @php
+                                                $reviewReceivedAt = $order->received_at ?? $order->updated_at;
+                                                $canEditReview = $reviewReceivedAt && now()->lessThanOrEqualTo($reviewReceivedAt->copy()->addDays(3));
+                                            @endphp
                                             <div class="my-review-box mt-2">
                                                 <div class="small fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>Bạn đã đánh giá sản phẩm này</div>
                                                 <div class="text-warning">{{ str_repeat('★', $existingReview->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $existingReview->rating) }}</span></div>
                                                 @if($existingReview->comment)<div class="small text-muted">{{ $existingReview->comment }}</div>@endif
                                                 @if($existingReview->media_paths)<div class="d-flex gap-1 mt-1">@foreach($existingReview->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" class="review-thumbnail">@endforeach</div>@endif
-                                                <button type="button" class="btn btn-link btn-sm p-0 mt-1 text-decoration-none" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item->product->id }}"><i class="bi bi-pencil-square me-1"></i>Chỉnh sửa / thêm ảnh</button>
+                                                @if($canEditReview)
+                                                    <button type="button" class="btn btn-link btn-sm p-0 mt-1 text-decoration-none" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item->product->id }}"><i class="bi bi-pencil-square me-1"></i>Chỉnh sửa / thêm ảnh</button>
+                                                @else
+                                                    <div class="small text-muted mt-1"><i class="bi bi-lock me-1"></i>Đã hết thời gian chỉnh sửa (3 ngày sau khi nhận hàng).</div>
+                                                @endif
                                             </div>
                                         @elseif(strtolower($order->status) == 'completed' && $item->product)
                                             <button type="button" class="btn btn-sm btn-outline-warning rounded-pill mt-2 fw-bold" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item->product->id }}">

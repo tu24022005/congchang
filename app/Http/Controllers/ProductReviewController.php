@@ -64,6 +64,16 @@ class ProductReviewController extends Controller
     {
         abort_unless($review->product_id === $product->id && $review->user_id === $request->user()->id, 403);
 
+        $order = Order::whereKey($review->order_id)
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'completed')
+            ->first();
+        $receivedAt = $order?->received_at ?? $order?->updated_at;
+
+        if (!$order || !$receivedAt || now()->greaterThan($receivedAt->copy()->addDays(3))) {
+            return back()->with('error', 'Đã quá 3 ngày kể từ khi nhận hàng. Bạn không thể chỉnh sửa đánh giá này.');
+        }
+
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',

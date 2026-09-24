@@ -10,12 +10,28 @@ use App\Services\ActivityLogService;
 
 class StaffController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'role' => ['nullable', Rule::in(['admin', 'manager', 'warehouse_staff', 'customer_service'])],
+        ]);
+
         $staff = User::whereIn('role', ['admin', 'manager', 'warehouse_staff', 'customer_service'])
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+                });
+            })
+            ->when($filters['role'] ?? null, fn ($query, $role) => $query->where('role', $role))
             ->latest()
             ->get();
-        return view('admin.staff.index', compact('staff'));
+
+        return view('admin.staff.index', [
+            'staff' => $staff,
+            'filters' => $filters,
+        ]);
     }
 
     public function store(Request $request)

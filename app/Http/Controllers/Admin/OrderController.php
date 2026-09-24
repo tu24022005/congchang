@@ -121,6 +121,9 @@ class OrderController extends Controller
                 $cancellationService->releaseVouchers($lockedOrder);
             }
             $updateData = ['status' => $request->status];
+            if ($request->status === 'completed' && $lockedOrder->status !== 'completed') {
+                $updateData['received_at'] = now();
+            }
             if ($request->has('shipping_provider')) {
                 $updateData['shipping_provider'] = $request->input('shipping_provider') ?: null;
             }

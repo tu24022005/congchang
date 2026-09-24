@@ -5,9 +5,9 @@
 @auth
     @if(Auth::user()->role === 'admin')
         <style>
-            .home-admin-chat-dock { position: fixed; z-index: 1040; right: 24px; bottom: 24px; display: flex; align-items: center; gap: .55rem; padding: .75rem 1rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
+            .home-admin-chat-dock { position: fixed; z-index: 10001; right: calc(max(0px, calc(50% - 750px)) + 156px); bottom: 1rem; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; gap: .55rem; padding: .58rem .82rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
             .home-admin-chat-dock:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(24,59,86,.32); }
-            @media (max-width: 576px) { .home-admin-chat-dock { right: 16px; bottom: 16px; padding: .7rem .85rem; } .home-admin-chat-dock span { display: none; } }
+            @media (max-width: 1250px) { .home-admin-chat-dock { right: .75rem; bottom: .75rem; width: 44px; height: 44px; padding: 0; justify-content: center; } .home-admin-chat-dock span { display: none; } }
             .home-admin-chat-dock i { font-size: 1.15rem; }
             .home-admin-chat-dock span { font-size: .78rem; font-weight: 800; }
             .home-admin-chat-dock .home-chat-badge { position: absolute; top: -7px; left: -7px; min-width: 20px; padding: .2rem .35rem; color: #fff; background: #e63950; border: 2px solid #fff; border-radius: 999px; font-size: .65rem; text-align: center; }

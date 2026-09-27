@@ -47,7 +47,13 @@
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="account-sidebar h-100">
-                <div class="account-avatar"><i class="bi bi-person"></i></div>
+                <div class="account-avatar">
+                    @if($user->avatar_path)
+                        <img src="{{ Storage::url($user->avatar_path) }}" alt="Ảnh đại diện của {{ $user->name }}">
+                    @else
+                        <i class="bi bi-person"></i>
+                    @endif
+                </div>
                 <h2>{{ $user->name }}</h2>
                 <p class="text-muted mb-4">{{ $user->email }}</p>
                 <p class="text-muted mb-4"><i class="bi bi-telephone me-1"></i>{{ $user->phone ?: 'Chưa cập nhật số điện thoại' }}</p>
@@ -60,6 +66,27 @@
                     <div><i class="bi bi-shield-check"></i><span>Bảo mật<strong>Mật khẩu riêng tư</strong></span></div>
                     <div><i class="bi bi-stars"></i><span>Điểm thành viên<strong>{{ number_format($user->loyalty_points) }} điểm</strong></span></div>
                     <div><i class="bi bi-award"></i><span>Hạng thành viên<strong class="{{ $membershipTier['class'] }}">{{ $membershipTier['name'] }}</strong></span></div>
+                </div>
+                <div class="account-membership-card mt-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small fw-bold text-uppercase">Điểm & hạng thành viên</span>
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end mt-2">
+                        <div><strong class="account-membership-points">{{ number_format($user->loyalty_points) }}</strong><small> điểm</small></div>
+                        <strong class="{{ $membershipTier['class'] }}">{{ $membershipTier['name'] }}</strong>
+                    </div>
+                    <div class="progress mt-3" role="progressbar" aria-label="Tiến độ hạng thành viên" aria-valuenow="{{ round($tierProgress) }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width: {{ $tierProgress }}%"></div>
+                    </div>
+                    <small class="d-block mt-2">
+                        @if($nextTier)
+                            Còn {{ number_format(max(0, $nextTier['threshold'] - $completedSpend), 0, ',', '.') }} đ để lên hạng {{ $nextTier['name'] }}.
+                        @else
+                            Bạn đang ở hạng thành viên cao nhất.
+                        @endif
+                    </small>
+                    <a href="{{ route('loyalty.index') }}" class="btn btn-light btn-sm rounded-pill w-100 mt-3">Xem lịch sử điểm</a>
                 </div>
                 <div class="small text-muted mt-3">Doanh số đơn hoàn thành: <strong>{{ number_format($completedSpend, 0, ',', '.') }} đ</strong></div>
                 <a href="{{ route('loyalty.index') }}" class="btn btn-outline-primary w-100 rounded-pill mt-3">Đổi điểm lấy voucher</a>
@@ -74,10 +101,16 @@
                 <div class="account-panel-heading">
                     <div><span class="account-panel-icon"><i class="bi bi-person-lines-fill"></i></span><div><h3>Thông tin cá nhân</h3><p class="mb-0">Cập nhật thông tin hiển thị của bạn.</p></div></div>
                 </div>
-                <form action="{{ route('account.update') }}" method="POST">
+                <form action="{{ route('account.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="row g-3">
+                        <div class="col-12">
+                            <label for="avatar" class="form-label">Ảnh đại diện</label>
+                            <input id="avatar" type="file" name="avatar" class="form-control" accept="image/jpeg,image/png,image/webp">
+                            <div class="form-text">JPG, PNG hoặc WEBP, tối đa 2MB.</div>
+                            @error('avatar')<div class="field-error">{{ $message }}</div>@enderror
+                        </div>
                         <div class="col-md-6">
                             <label for="name" class="form-label">Họ và tên</label>
                             <input id="name" type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required autocomplete="name">

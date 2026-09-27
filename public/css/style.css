@@ -127,16 +127,30 @@ main {
 }
 .search-suggestions {
     top: 60px;
-    left: 0;
+    left: 50%;
+    width: min(560px, calc(100vw - 2rem)) !important;
+    transform: translateX(-50%);
     z-index: 1050;
     max-height: 420px;
     overflow-y: auto;
+    overflow-x: hidden;
     border: 1px solid rgba(0,0,0,0.08);
     border-radius: 18px;
     box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12);
 }
 .search-suggestion-group { padding: .65rem 0; border-bottom: 1px solid #edf0f3; }
 .search-suggestion-group:last-child { border-bottom: 0; }
+.search-suggestions .search-item-hover {
+    min-width: 0;
+}
+.search-suggestions .search-item-hover > div {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.search-suggestions .search-result-name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
 .search-suggestion-title { padding: 0 1rem .35rem; color: #0082c8; font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .search-related-link { display: flex; align-items: center; gap: .25rem; padding: .5rem 1rem; color: #334155; text-decoration: none; }
 .search-related-link:hover { color: #0082c8; background: #f3fbfd; }
@@ -334,6 +348,8 @@ body.auth-page .auth-register-submit {
 .report-label { font-size: 0.85rem; }
 .report-icon { width: 50px; height: 50px; }
 .admin-dashboard-panel { background: rgba(255, 255, 255, 0.94); }
+.dashboard-action-alert { background: #fff; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.dashboard-action-alert:hover { transform: translateY(-2px); border-color: var(--aloha-teal) !important; box-shadow: 0 8px 20px rgba(15, 23, 42, .08); }
 .admin-dashboard-table thead th { padding: 0.85rem 0.75rem; font-size: 0.75rem; color: #6c757d; text-transform: uppercase; }
 .admin-dashboard-table tbody td { padding: 0.85rem 0.75rem; }
 .top-product-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem; height: 100%; background: #f8fbff; border: 1px solid #e7f0ff; border-radius: 12px; }
@@ -532,6 +548,9 @@ body.auth-page .auth-register-submit {
     transform: translateY(-4px);
 }
 .category-card-icon { color: #00a6c7; font-size: 1.65rem; line-height: 1; }
+.category-card-cover { width: calc(100% + 2rem); height: 92px; margin: -1rem -1rem .35rem; overflow: hidden; border-radius: 16px 16px 0 0; }
+.category-card-cover img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
+.category-card:hover .category-card-cover img { transform: scale(1.06); }
 .category-card-name { font-weight: 700; }
 .category-card small { color: #6c757d; }
 
@@ -703,6 +722,12 @@ a { transition: color .2s ease, transform .2s ease, opacity .2s ease; }
 .account-sidebar, .account-panel { background: rgba(255, 255, 255, .82); border: 1px solid var(--aloha-line); border-radius: 18px; box-shadow: var(--aloha-shadow); }
 .account-sidebar { padding: 2rem; text-align: center; }
 .account-avatar { display: grid; place-items: center; width: 76px; height: 76px; margin: 0 auto 1rem; color: #fff; background: linear-gradient(135deg, var(--aloha-teal), var(--aloha-teal-dark)); border-radius: 50%; font-size: 2rem; box-shadow: 0 10px 24px rgba(17, 124, 131, .2); }
+.account-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.account-membership-card { padding: 1rem; border-radius: 1rem; color: #fff; background: linear-gradient(135deg, #117c83, #0b5960); box-shadow: 0 10px 24px rgba(17, 124, 131, .18); }
+.account-membership-card small { color: rgba(255, 255, 255, .78); }
+.account-membership-card .progress { height: .45rem; background: rgba(255, 255, 255, .25); }
+.account-membership-card .progress-bar { background: #f6d365; }
+.account-membership-points { font-size: 1.75rem; line-height: 1; }
 .account-sidebar h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; }
 .account-status { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .8rem; border-radius: 999px; font-size: .78rem; font-weight: 700; }
 .account-status.is-verified { color: #16745d; background: #e2f5ed; }

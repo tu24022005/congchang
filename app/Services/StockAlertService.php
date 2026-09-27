@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\StockAlertSubscription;
 use App\Notifications\ProductBackInStock;
 use Illuminate\Support\Facades\Log;
+use App\Services\StaffNotificationService;
 
 class StockAlertService
 {
@@ -14,6 +15,13 @@ class StockAlertService
         if ($previousQuantity > 0 || $currentQuantity <= 0) {
             return;
         }
+
+        app(StaffNotificationService::class)->notify(
+            'Sản phẩm đã có hàng trở lại',
+            $product->name . ' vừa được cập nhật có hàng. Có thể kiểm tra và tiếp nhận các yêu cầu báo có hàng.',
+            route('admin.products.show', $product),
+            'stock'
+        );
 
         $subscriptions = StockAlertSubscription::with('user')
             ->where('product_id', $product->id)

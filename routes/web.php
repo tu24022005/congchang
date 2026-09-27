@@ -94,6 +94,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/products/create', [ProductController::class, 'create'])->middleware('role:admin')->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->middleware('role:admin')->name('products.store');
     Route::get('/products/{product}', [ProductController::class, 'show'])->middleware('role:admin,manager,warehouse_staff')->name('products.show');
+    Route::patch('/product-reviews/{review}/visibility', [ProductController::class, 'toggleReviewVisibility'])->middleware('role:admin,manager')->name('product-reviews.visibility');
     Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->middleware('role:admin,manager')->name('products.edit');
     Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('role:admin,manager')->name('products.update');
     Route::patch('/products/{product}/stock', [ProductController::class, 'updateStock'])->middleware('role:admin,warehouse_staff')->name('products.stock');
@@ -118,9 +119,9 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::delete('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'destroy'])->middleware('role:admin')->name('staff.destroy');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->middleware('role:admin,manager')->name('activity-logs.index');
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->middleware('role:admin,manager,warehouse_staff')->name('inventory-logs.index');
-    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->middleware('role:admin,manager,warehouse_staff')->name('notifications.index');
-    Route::get('/notifications/{notification}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'read'])->middleware('role:admin,manager,warehouse_staff')->name('notifications.read');
-    Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'readAll'])->middleware('role:admin,manager,warehouse_staff')->name('notifications.read-all');
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->middleware('role:admin,manager,warehouse_staff,customer_service')->name('notifications.index');
+    Route::get('/notifications/{notification}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'read'])->middleware('role:admin,manager,warehouse_staff,customer_service')->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'readAll'])->middleware('role:admin,manager,warehouse_staff,customer_service')->name('notifications.read-all');
     
     // Đơn hàng (CHÍNH LÀ DÒNG ĐANG BỊ THIẾU GÂY LỖI)
     Route::get('/orders', [AdminOrderController::class, 'index'])->middleware('role:admin,manager,customer_service')->name('orders.index'); 

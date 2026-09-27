@@ -17,7 +17,7 @@ class OrderStatusNotificationService
         try {
             $order->user->notify(new OrderStatusChanged($order, $previousStatus));
         } catch (\Throwable $exception) {
-            Log::error('Order status email notification failed.', [
+            Log::error('Order status notification failed.', [
                 'order_id' => $order->id,
                 'user_id' => $order->user_id,
                 'message' => $exception->getMessage(),

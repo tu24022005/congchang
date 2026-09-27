@@ -23,4 +23,27 @@ return [
         'J&T Express' => 'J&T Express',
         'Shopee Express' => 'Shopee Express',
     ],
+    'shipping_provider_fees' => [
+        'inner_city' => [
+            'GHN' => 18000,
+            'GHTK' => 16000,
+            'Viettel Post' => 20000,
+            'J&T Express' => 17000,
+            'Shopee Express' => 15000,
+        ],
+        'other_city' => [
+            'GHN' => 28000,
+            'GHTK' => 26000,
+            'Viettel Post' => 30000,
+            'J&T Express' => 27000,
+            'Shopee Express' => 25000,
+        ],
+        'remote' => [
+            'GHN' => 40000,
+            'GHTK' => 38000,
+            'Viettel Post' => 42000,
+            'J&T Express' => 39000,
+            'Shopee Express' => 37000,
+        ],
+    ],
 ];

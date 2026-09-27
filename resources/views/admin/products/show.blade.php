@@ -85,17 +85,17 @@
     <div class="overview-panel p-4 mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div><h2 class="h5 fw-bold mb-1">Đánh giá sản phẩm</h2><small class="text-muted">Nhận xét và số sao từ khách hàng đã mua hàng.</small></div>
-            <span class="badge bg-warning-subtle text-warning-emphasis">{{ $product->reviews->count() }} đánh giá</span>
+            <span class="badge bg-warning-subtle text-warning-emphasis">{{ $product->allReviews->count() }} đánh giá</span>
         </div>
-        @if($product->reviews->isNotEmpty())
-            @php $averageRating = round($product->reviews->avg('rating'), 1); @endphp
+        @if($product->allReviews->isNotEmpty())
+            @php $averageRating = round($product->allReviews->where('is_visible', true)->avg('rating'), 1); @endphp
             <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light rounded-3">
                 <strong class="fs-3 text-danger">{{ number_format($averageRating, 1) }}/5</strong>
                 <span class="review-stars">{{ str_repeat('★', (int) round($averageRating)) }}<span class="text-muted">{{ str_repeat('★', 5 - (int) round($averageRating)) }}</span></span>
             </div>
             <div class="table-responsive"><table class="table align-middle mb-0"><thead class="table-light"><tr><th>Khách hàng</th><th>Đánh giá</th><th>Nội dung</th><th>Thời gian</th></tr></thead><tbody>
-                @foreach($product->reviews as $review)
-                    <tr><td class="fw-semibold">{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng' }}<small class="d-block text-success">Đã mua hàng</small></td><td><span class="review-stars">{{ str_repeat('★', $review->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $review->rating) }}</span></span><small class="d-block text-muted">{{ $review->rating }}/5</small></td><td>{{ $review->comment ?: 'Không có nhận xét.' }}@if($review->media_paths)<div class="d-flex gap-1 mt-2">@foreach($review->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" style="width:48px;height:48px;object-fit:cover;border-radius:6px">@endforeach</div>@endif</td><td class="text-muted">{{ $review->created_at?->format('d/m/Y H:i') }}</td></tr>
+                @foreach($product->allReviews as $review)
+                    <tr><td class="fw-semibold">{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng' }}<small class="d-block text-success">Đã mua hàng</small></td><td><span class="review-stars">{{ str_repeat('★', $review->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $review->rating) }}</span></span><small class="d-block text-muted">{{ $review->rating }}/5</small></td><td>{{ $review->comment ?: 'Không có nhận xét.' }}@if($review->media_paths)<div class="d-flex gap-1 mt-2">@foreach($review->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" style="width:48px;height:48px;object-fit:cover;border-radius:6px">@endforeach</div>@endif</td><td class="text-muted">{{ $review->created_at?->format('d/m/Y H:i') }}<form action="{{ route('admin.product-reviews.visibility', $review) }}" method="POST" class="mt-2">@csrf @method('PATCH')<button class="btn btn-sm {{ $review->is_visible ? 'btn-outline-warning' : 'btn-outline-success' }}">{{ $review->is_visible ? 'Ẩn đánh giá' : 'Hiện đánh giá' }}</button></form></td></tr>
                 @endforeach
             </tbody></table></div>
         @else

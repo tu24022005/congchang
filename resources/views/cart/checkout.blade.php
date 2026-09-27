@@ -44,7 +44,13 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Địa chỉ giao hàng chi tiết</label>
-                            <textarea name="customer_address" class="form-control" rows="3" minlength="10" maxlength="500" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>{{ old('customer_address') }}</textarea>
+                            <textarea name="customer_address" id="checkout-customer-address" class="form-control" rows="3" minlength="10" maxlength="500" placeholder="Số nhà, tên đường..." required>{{ old('customer_address') }}</textarea>
+                            <div class="row g-2 mt-2" data-vn-address>
+                                <div class="col-md-4"><select class="form-select" data-province><option value="">Tỉnh/Thành phố</option></select></div>
+                                <div class="col-md-4"><select class="form-select" data-district disabled><option value="">Quận/Huyện</option></select></div>
+                                <div class="col-md-4"><select class="form-select" data-ward disabled><option value="">Phường/Xã</option></select></div>
+                            </div>
+                            <small class="text-muted">Chọn tỉnh, huyện và xã để tự điền địa chỉ giao hàng.</small>
                         </div>
                         <div class="mb-3">
                             <label for="shipping-zone" class="form-label fw-bold">Khu vực giao hàng</label>
@@ -63,7 +69,7 @@
                             <select name="shipping_provider" id="shipping-provider" class="form-select" required>
                                 <option value="">-- Chọn đơn vị vận chuyển --</option>
                                 @foreach(config('shop.shipping_providers', []) as $key => $label)
-                                    <option value="{{ $key }}" @selected(old('shipping_provider') === $key)>{{ $label }}</option>
+                                    <option value="{{ $key }}" data-label="{{ $label }}" data-fees="{{ json_encode(collect(config('shop.shipping_provider_fees', []))->mapWithKeys(fn ($fees, $zone) => [$zone => $fees[$key] ?? null])) }}" @selected(old('shipping_provider') === $key)>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -137,14 +143,54 @@
         }
 
         const zone = document.getElementById('shipping-zone');
+        const provider = document.getElementById('shipping-provider');
         const fee = document.getElementById('shipping-fee');
         const formatMoney = value => new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+        const refreshProviderLabels = () => {
+            document.querySelectorAll('#shipping-provider option[data-fees]').forEach(option => {
+                const fees = JSON.parse(option.dataset.fees || '{}');
+                option.textContent = option.dataset.label + (fees[zone.value] ? ' - ' + formatMoney(fees[zone.value]) : '');
+            });
+        };
         const refreshShippingFee = () => {
-            const option = zone.options[zone.selectedIndex];
-            fee.textContent = option?.dataset.fee ? formatMoney(Number(option.dataset.fee)) : 'Chọn khu vực';
+            const zoneOption = zone.options[zone.selectedIndex];
+            const providerOption = provider.options[provider.selectedIndex];
+            const providerFees = providerOption?.dataset.fees ? JSON.parse(providerOption.dataset.fees) : {};
+            const amount = providerFees[zoneOption?.value] || zoneOption?.dataset.fee;
+            fee.textContent = amount ? formatMoney(Number(amount)) : 'Chọn khu vực và đơn vị';
+            refreshProviderLabels();
         };
         zone.addEventListener('change', refreshShippingFee);
+        provider.addEventListener('change', refreshShippingFee);
         refreshShippingFee();
+
+        const form = document.querySelector('form[action="{{ route('orders.store') }}"]');
+        const wrapper = document.querySelector('[data-vn-address]');
+        if (!form || !wrapper) return;
+        const province = wrapper.querySelector('[data-province]');
+        const district = wrapper.querySelector('[data-district]');
+        const ward = wrapper.querySelector('[data-ward]');
+        const detail = document.getElementById('checkout-customer-address');
+        const api = 'https://provinces.open-api.vn/api';
+        const fill = (select, items, placeholder) => {
+            select.innerHTML = `<option value="">${placeholder}</option>` + items.map(item => `<option value="${item.code}" data-name="${item.name}">${item.name}</option>`).join('');
+            select.disabled = false;
+        };
+        fetch(`${api}/p/`).then(response => response.json()).then(items => fill(province, items, 'Tỉnh/Thành phố')).catch(() => {});
+        province.addEventListener('change', function () {
+            district.innerHTML = '<option value="">Đang tải quận/huyện...</option>'; district.disabled = true;
+            ward.innerHTML = '<option value="">Phường/Xã</option>'; ward.disabled = true;
+            if (this.value) fetch(`${api}/p/${this.value}?depth=2`).then(response => response.json()).then(data => fill(district, data.districts, 'Quận/Huyện')).catch(() => {});
+        });
+        district.addEventListener('change', function () {
+            ward.innerHTML = '<option value="">Đang tải phường/xã...</option>'; ward.disabled = true;
+            if (this.value) fetch(`${api}/d/${this.value}?depth=2`).then(response => response.json()).then(data => fill(ward, data.wards, 'Phường/Xã')).catch(() => {});
+        });
+        form.addEventListener('submit', function () {
+            const names = [ward, district, province].map(select => select.options[select.selectedIndex]?.dataset.name).filter(Boolean);
+            const street = detail.value.split(',').map(part => part.trim()).filter(Boolean)[0] || detail.value.trim();
+            if (names.length === 3 && street) detail.value = [street, ...names].join(', ');
+        });
     });
 </script>
 @endpush

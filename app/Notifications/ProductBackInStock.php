@@ -14,7 +14,7 @@ class ProductBackInStock extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -26,5 +26,15 @@ class ProductBackInStock extends Notification
             ->line($this->product->name)
             ->action('Xem sản phẩm', route('products.show', ['product' => $this->product->slug]))
             ->line('Hãy ghé xem sớm để không bỏ lỡ sản phẩm.');
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        return [
+            'category' => 'stock',
+            'title' => $this->product->name . ' đã có hàng',
+            'message' => 'Sản phẩm bạn đăng ký báo có hàng hiện đã có thể đặt mua.',
+            'url' => route('products.show', ['product' => $this->product->slug]),
+        ];
     }
 }

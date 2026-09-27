@@ -43,6 +43,16 @@ $revenueStatuses = ['paid', 'completed'];
             ->take(5)
             ->get();
         $newCustomers = User::whereIn('role', ['customer', 'user'])->latest()->take(5)->get();
+        $actionAlerts = [
+            'new_orders' => Order::where('status', 'processing')->count(),
+            'refund_requests' => Order::where('status', 'refund_pending')
+                ->where('refund_status', 'requested')
+                ->count(),
+            'low_stock' => Product::where('quantity', '<=', 10)->count(),
+            'unread_messages' => \App\Models\Message::where('is_admin', false)
+                ->where('is_read', false)
+                ->count(),
+        ];
 
         // 3. Lấy dữ liệu năm cho bộ lọc biểu đồ mượt mà
         $years = Order::selectRaw('YEAR(created_at) as year')
@@ -60,6 +70,7 @@ $revenueStatuses = ['paid', 'completed'];
             'totalProducts', 'totalCategories', 'countProcessing', 'countPaid', 
             'countCancelled', 'countCompleted', 'years', 'todayRevenue', 'monthRevenue', 'todayOrders',
             'recentOrders', 'lowStockProducts', 'topProducts', 'newCustomers'
+            , 'actionAlerts'
         ));
     }
 

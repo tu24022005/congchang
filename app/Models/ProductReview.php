@@ -17,12 +17,14 @@ class ProductReview extends Model
         'is_verified_purchase',
         'has_media',
         'media_paths',
+        'is_visible',
     ];
 
     protected $casts = [
         'rating' => 'integer',
         'is_verified_purchase' => 'boolean',
         'has_media' => 'boolean',
+        'is_visible' => 'boolean',
         'media_paths' => 'array',
     ];
 

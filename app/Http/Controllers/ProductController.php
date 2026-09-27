@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Models\ProductReview;
 use App\Models\InventoryLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -85,8 +86,17 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         // Hàm show này đang dành cho Admin (hiển thị ở views admin.products.show)
-        $product->load(['category', 'brand', 'images', 'variations', 'reviews.user']);
+        $product->load(['category', 'brand', 'images', 'variations', 'allReviews.user']);
         return view('admin.products.show', compact('product'));
+    }
+
+    public function toggleReviewVisibility(ProductReview $review)
+    {
+        $review->update(['is_visible' => !$review->is_visible]);
+
+        return back()->with('success', $review->is_visible
+            ? 'Đã cho phép hiển thị đánh giá.'
+            : 'Đã ẩn đánh giá khỏi trang sản phẩm.');
     }
 
     public function edit(Product $product)
@@ -98,6 +108,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $previousQuantity = (int) $product->quantity;
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'product_code' => 'nullable|string|max:50|alpha_dash|unique:products,product_code,' . $product->id,
@@ -137,6 +148,12 @@ class ProductController extends Controller
         $product->update($validatedData);
         $this->syncVariations($product, $request->input('variations', []), $request->file('variations', []));
         $product->update(['quantity' => $product->variations()->sum('stock')]);
+        $product->refresh();
+        app(\App\Services\StockAlertService::class)->notifyIfRestocked(
+            $product,
+            $previousQuantity,
+            (int) $product->quantity
+        );
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $file) {
@@ -219,6 +236,7 @@ class ProductController extends Controller
     public function userIndex(Request $request)
     {
         $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:120'],
             'category' => ['nullable', 'integer', 'exists:categories,id'],
             'brand' => ['nullable', 'integer', 'exists:brands,id'],
             'min_price' => ['nullable', 'numeric', 'min:0'],
@@ -241,11 +259,14 @@ class ProductController extends Controller
             $query->where('brand_id', $validated['brand']);
         }
 
-        if ($request->filled('search')) {
-            $searchTerm = trim((string) $request->input('search'));
+        $searchTerm = trim((string) ($validated['search'] ?? ''));
+        if ($searchTerm !== '') {
             $query->where(function ($searchQuery) use ($searchTerm): void {
                 $searchQuery->where('name', 'LIKE', '%' . $searchTerm . '%')
-                    ->orWhere('description', 'LIKE', '%' . $searchTerm . '%');
+                    ->orWhere('description', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('product_code', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhereHas('brand', fn ($brandQuery) => $brandQuery->where('name', 'LIKE', '%' . $searchTerm . '%'))
+                    ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'LIKE', '%' . $searchTerm . '%'));
             });
         }
 
@@ -257,7 +278,7 @@ class ProductController extends Controller
             $query->whereRaw($priceExpression . ' <= ?', [$validated['max_price']]);
         }
         if (!empty($validated['rating'])) {
-            $query->whereRaw('(SELECT COALESCE(AVG(pr.rating), 0) FROM product_reviews pr WHERE pr.product_id = products.id) >= ?', [$validated['rating']]);
+            $query->whereRaw('(SELECT COALESCE(AVG(pr.rating), 0) FROM product_reviews pr WHERE pr.product_id = products.id AND pr.is_visible = 1) >= ?', [$validated['rating']]);
         }
         if (($validated['availability'] ?? null) === 'in_stock') {
             $query->where('quantity', '>', 0);

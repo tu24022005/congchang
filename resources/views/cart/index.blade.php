@@ -138,7 +138,13 @@
                             </div>
                             <div class="mb-0">
                                 <label class="form-label text-muted small">Địa chỉ nhận hàng chi tiết:</label>
-                                <textarea name="customer_address" id="customer-address" class="form-control rounded-3" rows="2" placeholder="Số nhà, Tên đường, Phường/Xã..." required>{{ old('customer_address', $addresses->firstWhere('is_default', true)?->address) }}</textarea>
+                                <textarea name="customer_address" id="customer-address" class="form-control rounded-3" rows="2" placeholder="Số nhà, tên đường..." required>{{ old('customer_address', $addresses->firstWhere('is_default', true)?->address) }}</textarea>
+                                <div class="row g-2 mt-2" data-vn-address>
+                                    <div class="col-md-4"><select class="form-select rounded-3" data-province><option value="">Tỉnh/Thành phố</option></select></div>
+                                    <div class="col-md-4"><select class="form-select rounded-3" data-district disabled><option value="">Quận/Huyện</option></select></div>
+                                    <div class="col-md-4"><select class="form-select rounded-3" data-ward disabled><option value="">Phường/Xã</option></select></div>
+                                </div>
+                                <small class="text-muted">Chọn tỉnh, huyện và xã để tự điền địa chỉ giao hàng.</small>
                                 <input type="hidden" name="latitude" id="delivery-latitude" value="{{ old('latitude') }}">
                                 <input type="hidden" name="longitude" id="delivery-longitude" value="{{ old('longitude') }}">
                             </div>
@@ -157,7 +163,7 @@
                                     <select name="shipping_provider" id="shipping-provider" class="form-select rounded-3" required>
                                         <option value="">-- Chọn đơn vị --</option>
                                         @foreach(config('shop.shipping_providers', []) as $key => $label)
-                                            <option value="{{ $key }}" @selected(old('shipping_provider') === $key)>{{ $label }}</option>
+                                            <option value="{{ $key }}" data-label="{{ $label }}" data-fees="{{ json_encode(collect(config('shop.shipping_provider_fees', []))->mapWithKeys(fn ($fees, $zone) => [$zone => $fees[$key] ?? null])) }}" @selected(old('shipping_provider') === $key)>{{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -395,6 +401,10 @@
             map.setView([latitude, longitude], 16);
             if (label) addressInput.value = label;
             updateShippingZone(address, label);
+            document.dispatchEvent(new CustomEvent('delivery:location-selected', {
+                detail: { address, label }
+            }));
+            window.syncDeliveryAddressSelectors?.(address, label);
             status.textContent = 'Đã chọn vị trí';
             status.className = 'small text-success ms-2';
         }
@@ -494,6 +504,14 @@
     const discountValue = Number(@json($discountVoucher['value'] ?? 0));
     const hasShippingVoucher = @json((bool) $shippingVoucher);
     const shippingZone = document.getElementById('shipping-zone');
+    const shippingProvider = document.getElementById('shipping-provider');
+    function refreshProviderLabels() {
+        const zone = shippingZone?.value;
+        shippingProvider?.querySelectorAll('option[data-fees]').forEach(function (option) {
+            const fees = JSON.parse(option.dataset.fees || '{}');
+            option.textContent = option.dataset.label + (fees[zone] ? ' - ' + money(fees[zone]) + ' đ' : '');
+        });
+    }
 
     function refreshCartTotals() {
         let subtotal = 0;
@@ -512,14 +530,17 @@
         if (discountType === 'percent') discount = subtotal * discountValue / 100;
         discount = Math.min(discount, subtotal);
         const selectedZone = shippingZone?.options[shippingZone.selectedIndex];
-        const shippingFee = hasShippingVoucher ? 0 : Number(selectedZone?.dataset.fee || 0);
+        const selectedProvider = shippingProvider?.options[shippingProvider.selectedIndex];
+        const providerFees = selectedProvider?.dataset.fees ? JSON.parse(selectedProvider.dataset.fees) : {};
+        const shippingFee = hasShippingVoucher ? 0 : Number(providerFees[selectedZone?.value] || selectedZone?.dataset.fee || 0);
         const total = subtotal - discount + shippingFee;
 
+        refreshProviderLabels();
         document.getElementById('cart-subtotal').textContent = money(subtotal) + ' đ';
         document.getElementById('cart-discount')?.replaceChildren(document.createTextNode(money(discount)));
         document.getElementById('cart-service-fee').textContent = hasShippingVoucher
             ? 'Miễn phí'
-            : shippingFee > 0 ? money(shippingFee) + ' đ' : 'Chọn khu vực';
+            : shippingFee > 0 ? money(shippingFee) + ' đ' : 'Chọn khu vực và đơn vị';
         document.getElementById('cart-final-total').textContent = money(total) + ' đ';
     }
     window.refreshCartTotals = refreshCartTotals;
@@ -532,7 +553,92 @@
         });
     });
     shippingZone?.addEventListener('change', refreshCartTotals);
+    shippingProvider?.addEventListener('change', refreshCartTotals);
     refreshCartTotals();
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('checkout-order-form');
+        const wrapper = document.querySelector('[data-vn-address]');
+        if (!form || !wrapper) return;
+        const province = wrapper.querySelector('[data-province]');
+        const district = wrapper.querySelector('[data-district]');
+        const ward = wrapper.querySelector('[data-ward]');
+        const detail = document.getElementById('customer-address');
+        const addressStatus = document.getElementById('map-status');
+        const api = 'https://provinces.open-api.vn/api';
+        const normalize = value => (value || '').toString().toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/^(tinh|thanh pho|quan|huyen|thi xa|phuong|xa|thi tran)\s+/i, '')
+            .trim();
+        const fill = (select, items, placeholder) => {
+            select.innerHTML = `<option value="">${placeholder}</option>` + items.map(item => `<option value="${item.code}" data-name="${item.name}">${item.name}</option>`).join('');
+            select.disabled = false;
+        };
+        const provinceRequest = fetch(`${api}/p/`, { headers: { Accept: 'application/json' } }).then(response => {
+            if (!response.ok) throw new Error('Không tải được danh sách tỉnh');
+            return response.json();
+        }).then(items => {
+            fill(province, items, 'Tỉnh/Thành phố');
+            return items;
+        });
+        const findOption = (select, value) => {
+            const target = normalize(value);
+            return Array.from(select.options).find(option => normalize(option.dataset.name) === target
+                || normalize(option.dataset.name).includes(target)
+                || target.includes(normalize(option.dataset.name)));
+        };
+        async function syncLocationSelects(address, label) {
+            const text = normalize(label);
+            const provinceName = address.city || address.province || address.state
+                || (text.includes('ha noi') || text.includes('hanoi') ? 'Hà Nội' : '');
+            const availableProvinces = await provinceRequest;
+            if (!availableProvinces.length) return;
+            const provinceOption = findOption(province, provinceName);
+            if (!provinceOption) return;
+            province.value = provinceOption.value;
+            const provinceResponse = await fetch(`${api}/p/${province.value}?depth=2`);
+            if (!provinceResponse.ok) return;
+            const provinceData = await provinceResponse.json();
+            fill(district, provinceData.districts || [], 'Quận/Huyện');
+            const districtName = address.city_district || address.county || address.district || address.municipality || '';
+            const districtOption = findOption(district, districtName) || Array.from(district.options).find(option => text.includes(normalize(option.dataset.name)));
+            if (!districtOption) return;
+            district.value = districtOption.value;
+            const districtResponse = await fetch(`${api}/d/${district.value}?depth=2`);
+            if (!districtResponse.ok) return;
+            const districtData = await districtResponse.json();
+            fill(ward, districtData.wards || [], 'Phường/Xã');
+            const wardName = address.quarter || address.suburb || address.village || address.town || address.municipality || '';
+            const wardOption = findOption(ward, wardName) || Array.from(ward.options).find(option => text.includes(normalize(option.dataset.name)));
+            if (wardOption) ward.value = wardOption.value;
+        }
+        window.syncDeliveryAddressSelectors = (address, label) => syncLocationSelects(address || {}, label || '').catch(() => {
+            if (addressStatus) {
+                addressStatus.textContent = 'Không tải được tỉnh/huyện/xã, vui lòng chọn thủ công.';
+                addressStatus.className = 'small text-warning ms-2';
+            }
+        });
+        document.addEventListener('delivery:location-selected', event => {
+            window.syncDeliveryAddressSelectors(event.detail.address, event.detail.label);
+        });
+        province.addEventListener('change', function () {
+            district.innerHTML = '<option value="">Đang tải quận/huyện...</option>';
+            district.disabled = true; ward.innerHTML = '<option value="">Phường/Xã</option>'; ward.disabled = true;
+            if (!this.value) return;
+            fetch(`${api}/p/${this.value}?depth=2`).then(response => response.json()).then(data => fill(district, data.districts, 'Quận/Huyện')).catch(() => {});
+        });
+        district.addEventListener('change', function () {
+            ward.innerHTML = '<option value="">Đang tải phường/xã...</option>'; ward.disabled = true;
+            if (!this.value) return;
+            fetch(`${api}/d/${this.value}?depth=2`).then(response => response.json()).then(data => fill(ward, data.wards, 'Phường/Xã')).catch(() => {});
+        });
+        form.addEventListener('submit', function () {
+            const names = [ward, district, province].map(select => select.options[select.selectedIndex]?.dataset.name).filter(Boolean);
+            const street = detail.value.split(',').map(part => part.trim()).filter(Boolean)[0] || detail.value.trim();
+            if (names.length === 3 && street) detail.value = [street, ...names].join(', ');
+        });
+    });
     </script>
 @endpush
 @endsection

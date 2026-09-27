@@ -93,9 +93,21 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     <div class="row g-3">
         @foreach($categories as $category)
+            @php
+                $categoryImages = [
+                    'cham-soc-ca-nhan' => 'personal-care.svg',
+                    'cham-soc-co-the' => 'body-care.svg',
+                    'cham-soc-da' => 'skin-care.svg',
+                    'cham-soc-toc' => 'hair-care.svg',
+                    'trang-diem' => 'makeup.svg',
+                ];
+                $categoryImage = $category->image
+                    ? asset('storage/' . $category->image)
+                    : asset('images/categories/' . ($categoryImages[\Illuminate\Support\Str::slug($category->name)] ?? 'personal-care.svg'));
+            @endphp
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card">
-                    <span class="category-card-icon"><i class="bi bi-bag-heart"></i></span>
+                    <span class="category-card-cover"><img src="{{ $categoryImage }}" alt="{{ $category->name }}"></span>
                     <span class="category-card-name">{{ $category->name }}</span>
                     <small>{{ $category->products_count }} sản phẩm</small>
                 </a>

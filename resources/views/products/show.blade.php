@@ -240,6 +240,7 @@
         $ratingAverage = $reviewCount ? round($product->reviews->avg('rating'), 1) : 0;
         $ratingCounts = collect(range(1, 5))->mapWithKeys(fn ($rating) => [$rating => $product->reviews->where('rating', $rating)->count()]);
         $mediaReviewCount = $product->reviews->filter(fn ($review) => !empty($review->media_paths))->count();
+        $commentReviewCount = $product->reviews->filter(fn ($review) => filled($review->comment))->count();
     @endphp
     <section class="product-reviews" aria-labelledby="product-reviews-title">
         <h2 id="product-reviews-title" class="product-information-title">Đánh giá sản phẩm</h2>
@@ -256,14 +257,14 @@
                 @for($rating = 5; $rating >= 1; $rating--)
                     <button type="button" class="review-filter" data-review-filter="{{ $rating }}">{{ $rating }} Sao ({{ $ratingCounts[$rating] }})</button>
                 @endfor
-                <button type="button" class="review-filter" data-review-filter="comment">Có Bình luận ({{ $reviewCount }})</button>
+                <button type="button" class="review-filter" data-review-filter="comment">Có Bình luận ({{ $commentReviewCount }})</button>
                 <button type="button" class="review-filter" data-review-filter="media">Có Hình ảnh / Video ({{ $mediaReviewCount }})</button>
             </div>
         </div>
 
         <div id="review-list">
             @forelse($product->reviews as $review)
-                <article class="review-item" data-review-rating="{{ $review->rating }}" data-review-media="{{ !empty($review->media_paths) ? '1' : '0' }}">
+                <article class="review-item" data-review-rating="{{ $review->rating }}" data-review-media="{{ !empty($review->media_paths) ? '1' : '0' }}" data-review-comment="{{ filled($review->comment) ? '1' : '0' }}">
                     <div class="review-avatar">{{ strtoupper(substr($review->reviewer_name ?: $review->user?->name ?: 'A', 0, 1)) }}</div>
                     <div class="flex-grow-1">
                         <strong>{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng BeatyCare' }}</strong>
@@ -387,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const selected = this.dataset.reviewFilter;
             document.querySelectorAll('[data-review-rating]').forEach(function (review) {
                 const visible = selected === 'all'
-                    || selected === 'comment'
+                    || (selected === 'comment' && review.dataset.reviewComment === '1')
                     || (selected === 'media' && review.dataset.reviewMedia === '1')
                     || review.dataset.reviewRating === selected;
                 review.classList.toggle('d-none', !visible);

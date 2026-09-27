@@ -133,16 +133,6 @@
                         <p class="mb-0"><strong>Phí vận chuyển:</strong> {{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }} đ</p>
                     </div>
 
-                    @if($order->payment_method !== 'COD' && in_array($order->status, ['processing', 'confirmed'], true))
-                        <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
-                        <form action="{{ route('orders.continue_payment', $order) }}" method="POST" class="d-grid">
-                            @csrf
-                            <button type="submit" class="btn btn-success fw-bold py-2 shadow-sm rounded-3">
-                                <i class="bi bi-credit-card me-2"></i> Tiếp tục thanh toán
-                            </button>
-                        </form>
-                    @endif
-
                     <div class="order-summary-box mt-3">
                         <div><span>Tạm tính sản phẩm</span><strong>{{ number_format($subtotal, 0, ',', '.') }} đ</strong></div>
                         <div><span>Phí vận chuyển</span><strong>{{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }} đ</strong></div>

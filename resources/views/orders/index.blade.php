@@ -148,14 +148,6 @@
                                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-info text-white rounded-pill shadow-sm fw-bold" title="Xem chi tiết đơn hàng">
                                             <i class="bi bi-eye"></i><span>Chi tiết</span>
                                         </a>
-                                        @if($order->payment_method !== 'COD' && in_array($order->status, ['processing', 'confirmed'], true))
-                                            <form action="{{ route('orders.continue_payment', $order) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-success rounded-pill fw-bold" title="Tiếp tục thanh toán PayOS">
-                                                    <i class="bi bi-credit-card"></i><span>Thanh toán</span>
-                                                </button>
-                                            </form>
-                                        @endif
                                         @if(in_array($order->status, ['processing', 'confirmed', 'paid'], true))
                                             @if($order->payment_method !== 'COD' && $order->status === 'paid')
                                                 <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Hủy và hoàn tiền tự động" data-bs-toggle="modal" data-bs-target="#cancelOnlineOrderModal" data-order-url="{{ route('orders.refund.request', $order) }}">

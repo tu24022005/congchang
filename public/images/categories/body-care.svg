@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe3d4"/><stop offset="1" stop-color="#f5c8b9"/></linearGradient></defs>
+<rect width="900" height="420" rx="36" fill="url(#bg)"/><circle cx="760" cy="100" r="125" fill="#fff" opacity=".35"/><circle cx="135" cy="300" r="105" fill="#fff" opacity=".28"/>
+<path d="M505 330c-15-75 3-163 62-220 62 57 77 143 44 220z" fill="#d78572"/><path d="M565 110c-1 82-8 150-4 215" stroke="#fff" stroke-width="9" opacity=".8"/><path d="M430 327c-23-48-19-105 13-145 42 36 50 92 31 145z" fill="#efaa8e"/><path d="M445 198c20 31 27 73 26 121" fill="none" stroke="#fff" stroke-width="7" opacity=".8"/><text x="70" y="85" fill="#7d3f44" font-family="Arial,sans-serif" font-size="30" font-weight="700">CHAM SOC CO THE</text>
+</svg>

@@ -140,6 +140,50 @@
         </div>
     @endif
 
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Cần xử lý ngay</h5>
+                    <p class="text-muted small mb-0">Các việc đang chờ nhân viên xử lý trên hệ thống.</p>
+                </div>
+                <span class="badge rounded-pill text-bg-light">{{ array_sum($actionAlerts) }} việc</span>
+            </div>
+            <div class="row g-3">
+                <div class="col-sm-6 col-xl-3">
+                    <a href="{{ route('admin.orders.index', ['status' => 'processing']) }}" class="dashboard-action-alert text-decoration-none border rounded-3 p-3 h-100 d-block">
+                        <span class="d-flex justify-content-between align-items-center"><i class="bi bi-receipt text-primary fs-4"></i><strong class="fs-4 text-dark">{{ $actionAlerts['new_orders'] }}</strong></span>
+                        <span class="d-block fw-semibold text-dark mt-2">Đơn mới chờ xử lý</span>
+                        <small class="text-muted">Mở danh sách đơn</small>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <a href="{{ route('admin.refunds.index') }}" class="dashboard-action-alert text-decoration-none border rounded-3 p-3 h-100 d-block">
+                        <span class="d-flex justify-content-between align-items-center"><i class="bi bi-cash-coin text-warning fs-4"></i><strong class="fs-4 text-dark">{{ $actionAlerts['refund_requests'] }}</strong></span>
+                        <span class="d-block fw-semibold text-dark mt-2">Yêu cầu hoàn tiền</span>
+                        <small class="text-muted">Kiểm tra và xử lý</small>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <a href="{{ route('admin.products.index') }}" class="dashboard-action-alert text-decoration-none border rounded-3 p-3 h-100 d-block">
+                        <span class="d-flex justify-content-between align-items-center"><i class="bi bi-box-seam text-danger fs-4"></i><strong class="fs-4 text-dark">{{ $actionAlerts['low_stock'] }}</strong></span>
+                        <span class="d-block fw-semibold text-dark mt-2">Sản phẩm sắp hết</span>
+                        <small class="text-muted">Tồn kho từ 10 trở xuống</small>
+                    </a>
+                </div>
+                @if(in_array(Auth::user()->role, ['admin', 'customer_service'], true))
+                    <div class="col-sm-6 col-xl-3">
+                        <a href="{{ route('admin.chat.index') }}" class="dashboard-action-alert text-decoration-none border rounded-3 p-3 h-100 d-block">
+                            <span class="d-flex justify-content-between align-items-center"><i class="bi bi-chat-dots text-info fs-4"></i><strong class="fs-4 text-dark">{{ $actionAlerts['unread_messages'] }}</strong></span>
+                            <span class="d-block fw-semibold text-dark mt-2">Tin nhắn chưa đọc</span>
+                            <small class="text-muted">Phản hồi khách hàng</small>
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
     <!-- Hàng 2: Trạng thái đơn hàng -->
     <div class="card border-0 shadow-sm rounded-3 mb-4">
         <div class="card-body p-4">

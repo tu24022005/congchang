@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8d6da"/><stop offset="1" stop-color="#e9e4f7"/></linearGradient></defs>
+<rect width="900" height="420" rx="36" fill="url(#bg)"/><circle cx="755" cy="95" r="130" fill="#fff" opacity=".4"/><path d="M495 332V160c0-22 18-40 40-40h54c22 0 40 18 40 40v172z" fill="#bf7198"/><rect x="515" y="111" width="94" height="35" rx="12" fill="#f1c5d7"/><path d="M522 222h80M522 247h80" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".8"/><circle cx="300" cy="220" r="74" fill="#fff" opacity=".58"/><path d="M300 168v104M248 220h104" stroke="#d98aa8" stroke-width="8" stroke-linecap="round"/><text x="70" y="85" fill="#703d63" font-family="Arial,sans-serif" font-size="30" font-weight="700">CHAM SOC DA</text>
+</svg>

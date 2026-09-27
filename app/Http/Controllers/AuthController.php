@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Models\Voucher;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash; 
 use Illuminate\Support\Facades\Log; 
 use Illuminate\Auth\Events\Registered;
@@ -193,6 +194,20 @@ class AuthController extends Controller
         $user = $request->user();
         $completedSpend = $user->orders()->where('status', 'completed')->sum('total');
         $membershipTier = User::membershipTierFor($completedSpend);
+        $membershipTiers = [
+            ['name' => 'Mới tham gia', 'threshold' => 0],
+            ['name' => 'Thành viên', 'threshold' => 1000000],
+            ['name' => 'Bạc', 'threshold' => 2000000],
+            ['name' => 'Vàng', 'threshold' => 5000000],
+            ['name' => 'Bạch kim', 'threshold' => 10000000],
+            ['name' => 'Kim cương', 'threshold' => 20000000],
+        ];
+        $nextTier = collect($membershipTiers)->first(fn (array $tier) => $completedSpend < $tier['threshold']);
+        $previousThreshold = collect($membershipTiers)
+            ->last(fn (array $tier) => $completedSpend >= $tier['threshold'])['threshold'];
+        $tierProgress = $nextTier
+            ? min(100, max(0, (($completedSpend - $previousThreshold) / max(1, $nextTier['threshold'] - $previousThreshold)) * 100))
+            : 100;
         $addresses = $user->addresses()->orderByDesc('is_default')->latest('id')->get();
         $orderStats = [
             'processing' => $user->orders()->whereIn('status', ['processing', 'confirmed', 'packing'])->count(),
@@ -209,7 +224,7 @@ class AuthController extends Controller
         $unreadNotificationCount = $user->unreadNotifications()->count();
 
         return view('account.index', compact(
-            'user', 'completedSpend', 'membershipTier', 'addresses', 'orderStats',
+            'user', 'completedSpend', 'membershipTier', 'nextTier', 'tierProgress', 'addresses', 'orderStats',
             'wishlistCount', 'voucherCount', 'unreadNotificationCount'
         ));
     }
@@ -258,7 +273,7 @@ class AuthController extends Controller
         $item = $request->user()->notifications()->whereKey($notification)->firstOrFail();
         $item->markAsRead();
 
-        return redirect()->route('account.notifications');
+        return redirect()->to($item->data['url'] ?? route('account.notifications'));
     }
 
     public function updateAccount(Request $request)
@@ -268,6 +283,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => [...self::VALID_EMAIL_RULES, 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'personal_phone' => ['nullable', 'regex:/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/', Rule::unique('users', 'phone')->ignore($user->id)],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
             'name.required' => 'Vui lòng nhập họ và tên.',
             'email.required' => 'Vui lòng nhập email.',
@@ -281,6 +297,13 @@ class AuthController extends Controller
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->phone = $validated['personal_phone'] ?? null;
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar_path) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+            $user->avatar_path = $request->file('avatar')->store('avatars', 'public');
+        }
 
         if ($emailChanged) {
             $user->email_verified_at = null;

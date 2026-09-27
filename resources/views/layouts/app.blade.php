@@ -61,9 +61,9 @@
                 <!-- THANH TÌM KIẾM TRUNG TÂM CO GỢI Ý (LIVE SEARCH) -->
                 <form action="{{ route('products.index') }}" method="GET" class="d-flex mx-lg-3 my-3 my-lg-0 flex-grow-1 justify-content-center position-relative live-search-form">
                     <div class="input-group live-search-group">
-                        <span class="input-group-text bg-transparent border-0 text-dark ps-3 pe-2">
+                        <button type="submit" class="input-group-text bg-transparent border-0 text-dark ps-3 pe-2" aria-label="Tìm kiếm">
                             <i class="bi bi-search fw-bold search-icon"></i>
-                        </span>
+                        </button>
                         <input type="text" name="search" id="live-search-input" class="form-control border-0 shadow-none bg-transparent px-2 live-search-input" placeholder="Tìm kiếm mỹ phẩm, chăm sóc da..." value="{{ request('search') }}" autocomplete="off">
                     </div>
                     
@@ -120,53 +120,60 @@
                             </li>
                         @endif
 
-                        @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
-                            @php
-                                $unreadStaffNotifications = Auth::user()->unreadNotifications()->latest()->limit(5)->get();
-                            @endphp
-                            <li class="nav-item dropdown me-3">
-                                <a class="nav-link position-relative fw-semibold" href="{{ route('admin.notifications.index') }}"
-                                   data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo từ khách hàng">
-                                    <i class="bi bi-bell-fill fs-5 text-warning"></i>
-                                    @if(Auth::user()->unreadNotifications()->exists())
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                            {{ Auth::user()->unreadNotifications()->count() > 99 ? '99+' : Auth::user()->unreadNotifications()->count() }}
-                                        </span>
-                                    @endif
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" style="min-width: 300px;">
-                                    <li><h6 class="dropdown-header">Thông báo từ khách hàng</h6></li>
-                                    @forelse($unreadStaffNotifications as $notification)
-                                        <li>
-                                            <a class="dropdown-item py-2" href="{{ route('admin.notifications.read', $notification->id) }}">
-                                                <strong class="d-block small">{{ $notification->data['title'] ?? 'Thông báo mới' }}</strong>
-                                                <span class="text-muted small">{{ \Illuminate\Support\Str::limit($notification->data['message'] ?? '', 70) }}</span>
-                                            </a>
-                                        </li>
-                                    @empty
-                                        <li><span class="dropdown-item-text small text-muted">Chưa có thông báo mới.</span></li>
-                                    @endforelse
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-center small" href="{{ route('admin.notifications.index') }}">Xem tất cả thông báo</a></li>
-                                </ul>
-                            </li>
-                        @endif
-
-                        <!-- GIỎ HÀNG CHUNG -->
-                        <li class="nav-item me-4">
-                            <a class="nav-link text-nowrap position-relative fw-semibold" href="{{ route('cart.index') }}">
-                                <i class="bi bi-cart3 fs-5 me-1"></i> Giỏ hàng
-                                @php $cartCount = Auth::user()->cartItems()->sum('quantity'); @endphp
-                                @if($cartCount > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count-badge">{{ $cartCount }}</span>
+                        @php
+                            $isStaffAccount = in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff', 'customer_service'], true);
+                            $unreadAccountNotifications = Auth::user()->unreadNotifications()->latest()->limit(5)->get();
+                            $notificationIndexRoute = $isStaffAccount ? route('admin.notifications.index') : route('account.notifications');
+                        @endphp
+                        <li class="nav-item dropdown me-3">
+                            <a class="nav-link position-relative fw-semibold" href="{{ $notificationIndexRoute }}"
+                               data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
+                                <i class="bi bi-bell-fill fs-5 text-warning"></i>
+                                @if(Auth::user()->unreadNotifications()->exists())
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ Auth::user()->unreadNotifications()->count() > 99 ? '99+' : Auth::user()->unreadNotifications()->count() }}
+                                    </span>
                                 @endif
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" style="min-width: 300px;">
+                                <li><h6 class="dropdown-header">{{ $isStaffAccount ? 'Thông báo quản trị' : 'Thông báo của bạn' }}</h6></li>
+                                @forelse($unreadAccountNotifications as $notification)
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ $isStaffAccount ? route('admin.notifications.read', $notification->id) : route('account.notifications.read', $notification->id) }}">
+                                            <strong class="d-block small">{{ $notification->data['title'] ?? 'Thông báo mới' }}</strong>
+                                            <span class="text-muted small">{{ \Illuminate\Support\Str::limit($notification->data['message'] ?? '', 70) }}</span>
+                                        </a>
+                                    </li>
+                                @empty
+                                    <li><span class="dropdown-item-text small text-muted">Chưa có thông báo mới.</span></li>
+                                @endforelse
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center small" href="{{ $notificationIndexRoute }}">Xem tất cả thông báo</a></li>
+                            </ul>
                         </li>
+
+                        <!-- GIỎ HÀNG CHUNG: không hiển thị trong khu vực quản trị -->
+                        @if(!in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff', 'customer_service'], true))
+                            <li class="nav-item me-4">
+                                <a class="nav-link text-nowrap position-relative fw-semibold" href="{{ route('cart.index') }}">
+                                    <i class="bi bi-cart3 fs-5 me-1"></i> Giỏ hàng
+                                    @php $cartCount = Auth::user()->cartItems()->sum('quantity'); @endphp
+                                    @if($cartCount > 0)
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count-badge">{{ $cartCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endif
 
                         <!-- USER PROFILE -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle active text-nowrap fw-bold" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle fs-5 me-1 text-primary"></i> {{ Auth::user()->name }}
+                                @if(Auth::user()->avatar_path)
+                                    <img src="{{ Storage::url(Auth::user()->avatar_path) }}" alt="Ảnh đại diện" class="rounded-circle me-1" style="width:32px;height:32px;object-fit:cover;">
+                                @else
+                                    <i class="bi bi-person-circle fs-5 me-1 text-primary"></i>
+                                @endif
+                                {{ Auth::user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('account') }}"><i class="bi bi-person-vcard text-primary me-2"></i> Tài khoản của tôi</a></li>

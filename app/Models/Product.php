@@ -60,6 +60,11 @@ class Product extends Model
 
     public function reviews()
     {
+        return $this->hasMany(ProductReview::class)->where('is_visible', true)->latest();
+    }
+
+    public function allReviews()
+    {
         return $this->hasMany(ProductReview::class)->latest();
     }
 // Liên kết 1 - Nhiều: 1 Sản phẩm có nhiều ảnh trong gallery

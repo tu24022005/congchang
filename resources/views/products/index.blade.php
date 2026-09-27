@@ -16,9 +16,21 @@
     </div>
     <div class="row g-3">
         @foreach($categories as $category)
+            @php
+                $categoryImages = [
+                    'cham-soc-ca-nhan' => 'personal-care.svg',
+                    'cham-soc-co-the' => 'body-care.svg',
+                    'cham-soc-da' => 'skin-care.svg',
+                    'cham-soc-toc' => 'hair-care.svg',
+                    'trang-diem' => 'makeup.svg',
+                ];
+                $categoryImage = $category->image
+                    ? asset('storage/' . $category->image)
+                    : asset('images/categories/' . ($categoryImages[\Illuminate\Support\Str::slug($category->name)] ?? 'personal-care.svg'));
+            @endphp
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card {{ (string) request('category') === (string) $category->id ? 'active' : '' }}">
-                    <span class="category-card-icon"><i class="bi bi-bag-heart"></i></span>
+                    <span class="category-card-cover"><img src="{{ $categoryImage }}" alt="{{ $category->name }}"></span>
                     <span class="category-card-name">{{ $category->name }}</span>
                     <small>{{ $category->products_count }} sản phẩm</small>
                 </a>
@@ -36,6 +48,13 @@
 
 <form method="GET" action="{{ route('products.index') }}" class="card border-0 shadow-sm p-3 mb-4">
     <div class="row g-2 align-items-end">
+        <div class="col-12">
+            <label class="form-label small fw-bold">Tìm kiếm sản phẩm</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                <input type="search" name="search" class="form-control" value="{{ request('search') }}" maxlength="120" placeholder="Tên sản phẩm, mã sản phẩm, thương hiệu hoặc danh mục...">
+            </div>
+        </div>
         <div class="col-md-3">
             <label class="form-label small fw-bold">Danh mục</label>
             <select name="category" class="form-select">
@@ -89,7 +108,6 @@
             </select>
         </div>
         <div class="col-12 d-flex gap-2">
-            <input type="hidden" name="search" value="{{ request('search') }}">
             <button class="btn btn-primary rounded-pill px-4"><i class="bi bi-funnel me-1"></i>Áp dụng</button>
             <a href="{{ route('products.index') }}" class="btn btn-outline-secondary rounded-pill px-4">Xóa lọc</a>
         </div>

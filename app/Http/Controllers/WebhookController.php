@@ -42,9 +42,10 @@ class WebhookController extends Controller
             && $order->payment_method === 'PAYOS'
             && $amount >= (int) $order->total
         ) {
+            $previousStatus = $order->status;
             $order->status = 'paid';
             $order->save();
-            app(\App\Services\OrderStatusNotificationService::class)->notify($order, 'processing');
+            app(\App\Services\OrderStatusNotificationService::class)->notify($order, $previousStatus);
             Log::info("PayOS Đã tự động cập nhật đơn #{$orderId}");
         }
 

@@ -165,7 +165,10 @@ class OrderController extends Controller
             }
             $shippingFee = session()->has('voucher_shipping')
                 ? 0
-                : (int) config('shop.shipping_zones.' . $validated['shipping_zone'] . '.fee', config('shop.service_fee', 3000));
+                : (int) config(
+                    'shop.shipping_provider_fees.' . $validated['shipping_zone'] . '.' . $validated['shipping_provider'],
+                    config('shop.shipping_zones.' . $validated['shipping_zone'] . '.fee', config('shop.service_fee', 3000))
+                );
             $finalTotal = $total - $discount + $shippingFee;
 
             // 3. Tạo đơn hàng và lưu tổng tiền đã giảm
@@ -578,9 +581,10 @@ class OrderController extends Controller
                 $paymentStatus = strtoupper((string) ($paymentData['status'] ?? ''));
                 $paymentAmount = (int) ($paymentData['amount'] ?? 0);
 
-                if ($paymentStatus === 'PAID' && $paymentAmount >= (int) $order->total) {
+                if ($paymentStatus === 'PAID' && $paymentAmount >= (int) $order->total && $order->status !== 'paid') {
+                    $previousStatus = $order->status;
                     $order->update(['status' => 'paid']);
-                    app(\App\Services\OrderStatusNotificationService::class)->notify($order, 'processing');
+                    app(\App\Services\OrderStatusNotificationService::class)->notify($order, $previousStatus);
                     $order->refresh();
                 }
             } catch (\Throwable $exception) {

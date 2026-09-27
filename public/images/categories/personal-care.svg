@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8f3ef"/><stop offset="1" stop-color="#fbe4dc"/></linearGradient><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#168c91"/><stop offset="1" stop-color="#78c9bb"/></linearGradient></defs>
+<rect width="900" height="420" rx="36" fill="url(#bg)"/><circle cx="720" cy="90" r="130" fill="#fff" opacity=".36"/><circle cx="160" cy="355" r="150" fill="#fff" opacity=".3"/>
+<path d="M490 335c-48-105-34-207 43-255 78 57 91 158 43 255z" fill="url(#b)" opacity=".9"/><path d="M533 95c-4 84-9 163-1 237M534 170c-35-31-67-39-99-37M534 214c37-32 70-41 107-36" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".8"/>
+<circle cx="275" cy="150" r="42" fill="#f28e8c" opacity=".85"/><path d="M275 105v90M230 150h90" stroke="#fff" stroke-width="8" stroke-linecap="round"/><text x="70" y="85" fill="#155d66" font-family="Arial,sans-serif" font-size="30" font-weight="700">CHAM SOC CA NHAN</text>
+</svg>

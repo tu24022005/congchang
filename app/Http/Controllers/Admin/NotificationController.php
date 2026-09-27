@@ -11,12 +11,20 @@ class NotificationController extends Controller
 {
     public function index(Request $request): View
     {
-        $notifications = $request->user()
-            ->notifications()
-            ->latest()
-            ->paginate(20);
+        $category = $request->string('category')->toString();
+        $notifications = $request->user()->notifications()->latest()->get();
+        $notifications = $category === ''
+            ? $notifications
+            : $notifications->filter(fn ($notification) => ($notification->data['category'] ?? 'general') === $category);
+        $notifications = new \Illuminate\Pagination\LengthAwarePaginator(
+            $notifications->forPage(\Illuminate\Pagination\Paginator::resolveCurrentPage(), 20)->values(),
+            $notifications->count(),
+            20,
+            \Illuminate\Pagination\Paginator::resolveCurrentPage(),
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
-        return view('admin.notifications.index', compact('notifications'));
+        return view('admin.notifications.index', compact('notifications', 'category'));
     }
 
     public function read(Request $request, string $notification): RedirectResponse

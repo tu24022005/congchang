@@ -342,7 +342,7 @@ body.auth-page .auth-register-submit {
 /* ==========================================
     STOREFRONT: GIO HANG, DON HANG VA THANH TOAN
     ========================================== */
-.storefront-title { color: #2c3e50; }
+.storefront-title { color: #2c3e50; font-size: clamp(1.5rem, 2vw, 2.15rem); }
 .storefront-panel-card, .order-panel-card { background: rgba(255, 255, 255, 0.9); }
 .storefront-thumb-placeholder, .storefront-thumb-image { width: 60px; height: 60px; }
 .storefront-thumb-image { object-fit: cover; }
@@ -1980,4 +1980,13 @@ h1, h2, h3, h4, h5, h6,
         width: 100%;
         max-width: none;
     }
+}
+/* Phóng to chữ trên thanh điều hướng chính */
+.navbar-nav .nav-link {
+    font-size: 17px !important; /* M thay số 18 bằng số m muốn (vd: 16px, 18px, 20px) */
+}
+
+/* Phóng to chữ trong cái Menu xổ xuống (Dropdown) cho đồng bộ */
+.dropdown-menu .dropdown-item {
+    font-size: 15px !important; 
 }

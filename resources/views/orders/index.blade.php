@@ -148,10 +148,18 @@
                                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-info text-white rounded-pill shadow-sm fw-bold" title="Xem chi tiết đơn hàng">
                                             <i class="bi bi-eye"></i><span>Chi tiết</span>
                                         </a>
+                                        @if($order->payment_method !== 'COD' && in_array($order->status, ['processing', 'confirmed'], true))
+                                            <form action="{{ route('orders.continue_payment', $order) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success rounded-pill fw-bold" title="Tiếp tục thanh toán PayOS">
+                                                    <i class="bi bi-credit-card"></i><span>Thanh toán</span>
+                                                </button>
+                                            </form>
+                                        @endif
                                         @if(in_array($order->status, ['processing', 'confirmed', 'paid'], true))
                                             @if($order->payment_method !== 'COD' && $order->status === 'paid')
-                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Hủy và yêu cầu hoàn tiền" data-bs-toggle="modal" data-bs-target="#cancelOnlineOrderModal" data-order-url="{{ route('orders.cancel', $order) }}">
-                                                    <i class="bi bi-x-circle"></i><span>Hủy</span>
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" title="Hủy và hoàn tiền tự động" data-bs-toggle="modal" data-bs-target="#cancelOnlineOrderModal" data-order-url="{{ route('orders.refund.request', $order) }}">
+                                                    <i class="bi bi-cash-coin"></i><span>Hủy & hoàn tiền</span>
                                                 </button>
                                             @else
                                             <form action="{{ route('orders.cancel', $order) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
@@ -191,12 +199,13 @@
             <form id="cancelOnlineOrderForm" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="cancelOnlineOrderTitle"><i class="bi bi-arrow-counterclockwise text-danger me-2"></i>Hủy đơn và yêu cầu hoàn tiền</h5>
+                    <h5 class="modal-title fw-bold" id="cancelOnlineOrderTitle"><i class="bi bi-cash-coin text-danger me-2"></i>Yêu cầu hoàn tiền</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="small text-muted">Đơn online đã thanh toán sẽ chuyển sang chờ hoàn tiền. Vui lòng nhập thông tin tài khoản nhận tiền.</p>
-                    <div class="mb-3"><label class="form-label">Tên ngân hàng</label><input type="text" name="refund_bank_name" class="form-control" placeholder="Ví dụ: Vietcombank" required></div>
+                    <p class="small text-muted">Đơn online đã thanh toán sẽ được hủy và PayOS tự động chuyển tiền về tài khoản này.</p>
+                    <div class="mb-3"><label class="form-label">Ngân hàng</label><select name="refund_bank_name" id="refundModalBankSelect" class="form-select" required><option value="">-- Chọn ngân hàng --</option><option data-bin="970436" value="Vietcombank">Vietcombank</option><option data-bin="970415" value="VietinBank">VietinBank</option><option data-bin="970418" value="BIDV">BIDV</option><option data-bin="970405" value="Agribank">Agribank</option><option data-bin="970422" value="MB Bank">MB Bank</option><option data-bin="970407" value="Techcombank">Techcombank</option><option data-bin="970416" value="ACB">ACB</option><option data-bin="970432" value="VPBank">VPBank</option><option data-bin="970403" value="Sacombank">Sacombank</option><option data-bin="970423" value="TPBank">TPBank</option></select></div>
+                    <div class="mb-3"><label class="form-label">Mã BIN ngân hàng</label><input type="text" name="refund_bank_bin" id="refundModalBankBin" class="form-control bg-light" readonly required><small class="text-muted">Mã BIN sẽ tự hiện khi chọn ngân hàng; không phải mã PIN/OTP.</small></div>
                     <div class="mb-3"><label class="form-label">Số tài khoản</label><input type="text" name="refund_account_number" class="form-control" required></div>
                     <div class="mb-0"><label class="form-label">Tên chủ tài khoản</label><input type="text" name="refund_account_holder" class="form-control" required></div>
                 </div>
@@ -214,6 +223,11 @@
             form.action = event.relatedTarget.dataset.orderUrl;
         });
         if (modal.parentElement !== document.body) document.body.appendChild(modal);
+        const bank = document.getElementById('refundModalBankSelect');
+        const bin = document.getElementById('refundModalBankBin');
+        bank.addEventListener('change', function () {
+            bin.value = this.options[this.selectedIndex].dataset.bin || '';
+        });
     });
 </script>
 @endsection

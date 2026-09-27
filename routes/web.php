@@ -208,8 +208,10 @@ Route::get('/search-suggestions', [App\Http\Controllers\ProductController::class
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/continue-payment', [OrderController::class, 'continuePayment'])->name('orders.continue_payment');
     Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('orders.confirm_received');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{order}/refund-request', [OrderController::class, 'requestRefund'])->name('orders.refund.request');
     Route::post('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update_status');
 
     Route::post('/reviews', [App\Http\Controllers\ProductController::class, 'storeReview'])->name('reviews.store');

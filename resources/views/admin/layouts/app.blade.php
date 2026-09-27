@@ -91,6 +91,11 @@
                                     @forelse(Auth::user()->unreadNotifications()->latest()->limit(5)->get() as $notification)
                                         <li>
                                             <a class="dropdown-item small py-2" href="{{ route('admin.notifications.read', $notification->id) }}">
+                                                @php
+                                                    $notificationLabels = ['order' => 'Khách đặt đơn', 'cancelled' => 'Khách huỷ đơn', 'refund' => 'Tiền hoàn', 'review' => 'Đánh giá', 'stock' => 'Báo có hàng'];
+                                                    $notificationCategory = $notification->data['category'] ?? 'general';
+                                                @endphp
+                                                <span class="badge bg-light text-primary border mb-1">{{ $notificationLabels[$notificationCategory] ?? 'Khác' }}</span>
                                                 <strong class="d-block">{{ $notification->data['title'] ?? 'Thông báo mới' }}</strong>
                                                 <span class="text-muted">{{ \Illuminate\Support\Str::limit($notification->data['message'] ?? '', 60) }}</span>
                                             </a>

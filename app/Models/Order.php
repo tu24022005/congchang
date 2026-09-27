@@ -28,6 +28,7 @@ class Order extends Model
         'latitude',
         'longitude',
         'refund_bank_name',
+        'refund_bank_bin',
         'refund_account_number',
         'refund_account_holder',
         'refund_reference',

@@ -133,6 +133,16 @@
                         <p class="mb-0"><strong>Phí vận chuyển:</strong> {{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }} đ</p>
                     </div>
 
+                    @if($order->payment_method !== 'COD' && in_array($order->status, ['processing', 'confirmed'], true))
+                        <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
+                        <form action="{{ route('orders.continue_payment', $order) }}" method="POST" class="d-grid">
+                            @csrf
+                            <button type="submit" class="btn btn-success fw-bold py-2 shadow-sm rounded-3">
+                                <i class="bi bi-credit-card me-2"></i> Tiếp tục thanh toán
+                            </button>
+                        </form>
+                    @endif
+
                     <div class="order-summary-box mt-3">
                         <div><span>Tạm tính sản phẩm</span><strong>{{ number_format($subtotal, 0, ',', '.') }} đ</strong></div>
                         <div><span>Phí vận chuyển</span><strong>{{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }} đ</strong></div>
@@ -141,7 +151,7 @@
 
                     @if(!in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true) && in_array($order->status, ['processing', 'confirmed', 'paid'], true))
                         <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
-                        <form action="{{ route('orders.cancel', $order) }}" method="POST" class="d-grid">
+                        <form action="{{ $order->payment_method !== 'COD' && $order->status === 'paid' ? route('orders.refund.request', $order) : route('orders.cancel', $order) }}" method="POST" class="d-grid">
                             @csrf
                             @if($order->payment_method !== 'COD' && $order->status === 'paid')
                                 <div class="text-start p-3 rounded-3 bg-light border mb-3">
@@ -149,7 +159,23 @@
                                     <div class="row g-2">
                                         <div class="col-md-4">
                                             <label class="form-label small mb-1">Ngân hàng</label>
-                                            <input type="text" name="refund_bank_name" class="form-control form-control-sm" required placeholder="VD: Vietcombank">
+                                            <select name="refund_bank_name" id="refundBankSelect" class="form-select form-select-sm" required>
+                                                <option value="">-- Chọn ngân hàng --</option>
+                                                <option data-bin="970436" value="Vietcombank">Vietcombank</option>
+                                                <option data-bin="970415" value="VietinBank">VietinBank</option>
+                                                <option data-bin="970418" value="BIDV">BIDV</option>
+                                                <option data-bin="970405" value="Agribank">Agribank</option>
+                                                <option data-bin="970422" value="MB Bank">MB Bank</option>
+                                                <option data-bin="970407" value="Techcombank">Techcombank</option>
+                                                <option data-bin="970416" value="ACB">ACB</option>
+                                                <option data-bin="970432" value="VPBank">VPBank</option>
+                                                <option data-bin="970403" value="Sacombank">Sacombank</option>
+                                                <option data-bin="970423" value="TPBank">TPBank</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small mb-1">Mã BIN ngân hàng</label>
+                                            <input type="text" name="refund_bank_bin" id="refundBankBin" class="form-control form-control-sm bg-light" required readonly>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label small mb-1">Số tài khoản</label>
@@ -160,13 +186,13 @@
                                             <input type="text" name="refund_account_holder" class="form-control form-control-sm text-uppercase" required>
                                         </div>
                                     </div>
-                                    <small class="text-muted d-block mt-2">Shop sẽ chuyển {{ number_format($order->total, 0, ',', '.') }} đ vào thông tin trên sau khi duyệt.</small>
+                                    <small class="text-muted d-block mt-2">Mã BIN được tự động điền theo ngân hàng. BIN là mã định danh ngân hàng, không phải mã PIN/OTP. Shop sẽ chuyển {{ number_format($order->total, 0, ',', '.') }} đ vào thông tin trên.</small>
                                 </div>
                             @endif
-                            <button type="submit" class="btn btn-outline-danger fw-bold py-2" onclick="return confirm('Bạn chắc chắn muốn hủy đơn hàng này? Chỉ nên hủy trước khi shop bắt đầu đóng gói.')">
-                                <i class="bi bi-x-circle me-2"></i> HỦY ĐƠN HÀNG
+                            <button type="submit" class="btn btn-outline-danger fw-bold py-2" onclick="return confirm('{{ $order->payment_method !== 'COD' && $order->status === 'paid' ? 'Bạn chắc chắn muốn hủy đơn và hoàn tiền tự động cho đơn hàng này?' : 'Bạn chắc chắn muốn hủy đơn hàng này? Chỉ nên hủy trước khi shop bắt đầu đóng gói.' }}')">
+                                <i class="bi bi-{{ $order->payment_method !== 'COD' && $order->status === 'paid' ? 'cash-coin' : 'x-circle' }} me-2"></i> {{ $order->payment_method !== 'COD' && $order->status === 'paid' ? 'HỦY & HOÀN TIỀN TỰ ĐỘNG' : 'HỦY ĐƠN HÀNG' }}
                             </button>
-                            <small class="text-muted text-center mt-2">{{ $order->status === 'paid' ? 'Sau khi hủy, shop sẽ chuyển khoản hoàn tiền cho bạn.' : 'Chỉ hủy được trước trạng thái “Đang đóng gói”.' }}</small>
+                            <small class="text-muted text-center mt-2">{{ $order->status === 'paid' ? 'PayOS sẽ tự động chuyển tiền về tài khoản bạn cung cấp.' : 'Chỉ hủy được trước trạng thái “Đang đóng gói”.' }}</small>
                         </form>
                     @endif
 
@@ -182,6 +208,17 @@
                         </form>
                     @endif
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const bank = document.getElementById('refundBankSelect');
+                        const bin = document.getElementById('refundBankBin');
+                        if (bank && bin) {
+                            bank.addEventListener('change', function () {
+                                bin.value = this.options[this.selectedIndex].dataset.bin || '';
+                            });
+                        }
+                    });
+                </script>
             </div>
         </div>
 

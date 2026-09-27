@@ -54,7 +54,8 @@ class ProductReviewController extends Controller
         app(\App\Services\StaffNotificationService::class)->notify(
             'Khách gửi đánh giá mới',
             $request->user()->name . ' vừa đánh giá ' . $product->name . ' ' . $validated['rating'] . '/5.',
-            route('admin.products.show', $product)
+            route('admin.products.show', $product),
+            'review'
         );
 
         return back()->with('review_success', 'Cảm ơn bạn đã đánh giá sản phẩm.');

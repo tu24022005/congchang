@@ -240,30 +240,19 @@ class OrderController extends Controller
             app(\App\Services\StaffNotificationService::class)->notify(
                 'Khách đặt đơn hàng mới',
                 $order->customer_name . ' vừa đặt đơn #' . $order->id . ' với tổng tiền ' . number_format($order->total, 0, ',', '.') . 'đ.',
-                route('admin.orders.index', ['search' => $order->id])
+                route('admin.orders.index', ['search' => $order->id]),
+                'order'
             );
             
             // 6. KIỂM TRA PAYOS ĐỂ ĐẨY SANG TRANG QUÉT MÃ QR
             if ($order->payment_method === 'PAYOS') {
-                $payOS = new \PayOS\PayOS(
-                    env('PAYOS_CLIENT_ID'),
-                    env('PAYOS_API_KEY'),
-                    env('PAYOS_CHECKSUM_KEY')
-                );
+                $checkoutUrl = $this->createPayosCheckoutUrl($order);
 
-                $data = [
-                    "orderCode" => intval($order->id), 
-                    "amount" => intval($order->total), 
-                    "description" => "Thanh toan don " . $order->id,
-                    // Các URL này chỉ hiển thị kết quả; trạng thái thanh toán do webhook xác thực cập nhật.
-                    "returnUrl" => route('orders.index'),
-                    "cancelUrl" => route('orders.index')
-                ];
+                if (empty($checkoutUrl)) {
+                    return redirect()->route('orders.show', $order->id)->with('error', 'Không thể tạo liên kết thanh toán PayOS cho đơn hàng này.');
+                }
 
-                $response = $payOS->createPaymentLink($data);
-                
-                // Dừng luồng xử lý và chuyển thẳng sang cổng PayOS
-                return redirect($response['checkoutUrl']);
+                return redirect()->away($checkoutUrl);
             }
 
             // 7. Nếu là COD thì về thẳng trang Chi tiết
@@ -354,6 +343,10 @@ class OrderController extends Controller
             abort(403, 'Bạn không có quyền hủy đơn hàng này.');
         }
 
+        if ($order->payment_method !== 'COD' && $order->status === 'paid') {
+            return $this->requestRefund($request, $order);
+        }
+
         if (!in_array($order->status, ['processing', 'confirmed', 'paid'], true)) {
             return back()->with('error', 'Đơn hàng chỉ có thể hủy trước khi shop bắt đầu đóng gói.');
         }
@@ -363,10 +356,13 @@ class OrderController extends Controller
         if ($order->payment_method !== 'COD' && $order->status === 'paid') {
             $refundDetails = $request->validate([
                 'refund_bank_name' => 'required|string|max:120',
+                'refund_bank_bin' => 'required|string|max:20|regex:/^[0-9]+$/',
                 'refund_account_number' => 'required|string|max:40',
                 'refund_account_holder' => 'required|string|max:120',
             ], [
                 'refund_bank_name.required' => 'Vui lòng nhập tên ngân hàng nhận hoàn tiền.',
+                'refund_bank_bin.required' => 'Vui lòng nhập mã BIN ngân hàng.',
+                'refund_bank_bin.regex' => 'Mã BIN ngân hàng chỉ được chứa chữ số.',
                 'refund_account_number.required' => 'Vui lòng nhập số tài khoản nhận hoàn tiền.',
                 'refund_account_holder.required' => 'Vui lòng nhập tên chủ tài khoản.',
             ]);
@@ -391,6 +387,7 @@ class OrderController extends Controller
                 ]));
                 $order->status = $nextStatus;
             });
+
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         } catch (\Throwable $exception) {
@@ -413,9 +410,76 @@ class OrderController extends Controller
                 $order->status === 'refund_pending'
                     ? route('admin.refunds.index')
                     : route('admin.orders.index', ['search' => $order->id])
+                ,
+                $order->status === 'refund_pending' ? 'refund' : 'cancelled'
             );
         }
         return redirect()->route('orders.show', $order)->with('success', $message);
+    }
+
+    public function requestRefund(Request $request, Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền yêu cầu hoàn tiền cho đơn hàng này.');
+        }
+
+        if ($order->payment_method === 'COD') {
+            return back()->with('error', 'Đơn COD không có khoản thanh toán online cần hoàn.');
+        }
+
+        $refundDetails = $request->validate([
+            'refund_bank_name' => 'required|string|max:120',
+            'refund_bank_bin' => 'required|string|max:20|regex:/^[0-9]+$/',
+            'refund_account_number' => 'required|string|max:40',
+            'refund_account_holder' => 'required|string|max:120',
+        ], [
+            'refund_bank_name.required' => 'Vui lòng nhập tên ngân hàng nhận hoàn tiền.',
+            'refund_bank_bin.required' => 'Vui lòng nhập mã BIN ngân hàng.',
+            'refund_bank_bin.regex' => 'Mã BIN ngân hàng chỉ được chứa chữ số.',
+            'refund_account_number.required' => 'Vui lòng nhập số tài khoản nhận hoàn tiền.',
+            'refund_account_holder.required' => 'Vui lòng nhập tên chủ tài khoản.',
+        ]);
+
+        try {
+            DB::transaction(function () use ($order, $refundDetails) {
+                $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+                if ($lockedOrder->payment_method === 'COD' || $lockedOrder->status !== 'paid') {
+                    throw new \RuntimeException('Chỉ có thể yêu cầu hoàn tiền cho đơn online đã thanh toán.');
+                }
+
+                $this->restoreOrderStock($lockedOrder);
+                app(\App\Services\OrderCancellationService::class)->releaseVouchers($lockedOrder);
+                $lockedOrder->update(array_merge($refundDetails, [
+                    'status' => 'refund_pending',
+                    'refund_status' => 'requested',
+                ]));
+            });
+
+            $refundReference = app(\App\Services\PayosRefundService::class)->refund($order->fresh());
+            $order->update([
+                'status' => 'refunded',
+                'refund_status' => 'completed',
+                'refund_reference' => $refundReference,
+                'refunded_at' => now(),
+            ]);
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            report($exception);
+            return back()->with('error', 'Không thể gửi yêu cầu hoàn tiền lúc này. Vui lòng thử lại.');
+        }
+
+        $order->refresh();
+        app(\App\Services\OrderStatusNotificationService::class)->notify($order, 'paid');
+        app(\App\Services\StaffNotificationService::class)->notify(
+            'Đã hoàn tiền tự động',
+            $order->customer_name . ' đã được hoàn tiền cho đơn #' . $order->id . '.',
+            route('admin.refunds.index'),
+            'refund'
+        );
+
+        return redirect()->route('orders.show', $order)
+            ->with('success', 'Đã hủy đơn và hoàn tiền tự động qua PayOS.');
     }
 
     private function cancelOrder(Order $order): void
@@ -438,11 +502,93 @@ class OrderController extends Controller
     // ==================================================
     // XEM CHI TIẾT ĐƠN HÀNG
     // ==================================================
-    public function show(Order $order)
+    public function continuePayment(Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'BẠN KHÔNG CÓ QUYỀN THỰC HIỆN THANH TOÁN CHO ĐƠN HÀNG NÀY.');
+        }
+
+        if ($order->payment_method !== 'PAYOS') {
+            return back()->with('error', 'Đơn hàng này không sử dụng phương thức thanh toán online qua PayOS.');
+        }
+
+        if (!in_array($order->status, ['processing', 'confirmed'], true)) {
+            return back()->with('error', 'Đơn hàng này không còn ở trạng thái cần thanh toán tiếp.');
+        }
+
+        try {
+            $checkoutUrl = $this->createPayosCheckoutUrl($order);
+
+            if (empty($checkoutUrl)) {
+                return back()->with('error', 'Không thể tạo liên kết thanh toán cho đơn hàng này. Vui lòng thử lại sau.');
+            }
+
+            return redirect()->away($checkoutUrl);
+        } catch (\Throwable $exception) {
+            Log::error('PayOS continue payment failed.', [
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'message' => $exception->getMessage(),
+            ]);
+
+            return back()->with('error', 'Không thể kết nối đến cổng thanh toán PayOS lúc này. Vui lòng thử lại sau.');
+        }
+    }
+
+    private function createPayosCheckoutUrl(Order $order): ?string
+    {
+        $payOS = new \PayOS\PayOS(
+            env('PAYOS_CLIENT_ID'),
+            env('PAYOS_API_KEY'),
+            env('PAYOS_CHECKSUM_KEY')
+        );
+
+        $response = $payOS->createPaymentLink([
+            'orderCode' => (int) $order->id,
+            'amount' => (int) $order->total,
+            'description' => 'Thanh toan don ' . $order->id,
+            'returnUrl' => route('orders.show', ['order' => $order->id]),
+            'cancelUrl' => route('orders.show', ['order' => $order->id]),
+        ]);
+
+        return $response['checkoutUrl'] ?? null;
+    }
+
+    public function show(Request $request, Order $order)
     {
         $isOrderManager = in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true);
         if ($order->user_id !== Auth::id() && !$isOrderManager) {
             abort(403, 'BẠN KHÔNG CÓ QUYỀN TRUY CẬP ĐƠN HÀNG NÀY.');
+        }
+
+        if (
+            $request->query('status') === 'PAID'
+            && $request->integer('orderCode') === $order->id
+            && $order->payment_method === 'PAYOS'
+            && $order->status === 'processing'
+        ) {
+            try {
+                $payOS = new \PayOS\PayOS(
+                    env('PAYOS_CLIENT_ID'),
+                    env('PAYOS_API_KEY'),
+                    env('PAYOS_CHECKSUM_KEY')
+                );
+                $payment = $payOS->paymentRequests->get($order->id, ['asArray' => true]);
+                $paymentData = $payment['data'] ?? $payment;
+                $paymentStatus = strtoupper((string) ($paymentData['status'] ?? ''));
+                $paymentAmount = (int) ($paymentData['amount'] ?? 0);
+
+                if ($paymentStatus === 'PAID' && $paymentAmount >= (int) $order->total) {
+                    $order->update(['status' => 'paid']);
+                    app(\App\Services\OrderStatusNotificationService::class)->notify($order, 'processing');
+                    $order->refresh();
+                }
+            } catch (\Throwable $exception) {
+                Log::warning('PayOS payment return verification failed.', [
+                    'order_id' => $order->id,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
         }
 
         $order->load('items.product', 'items.variation');

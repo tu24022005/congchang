@@ -22,7 +22,8 @@ class StockAlertController extends Controller
         app(\App\Services\StaffNotificationService::class)->notify(
             'Khách đăng ký báo khi có hàng',
             $request->user()->name . ' muốn được báo khi sản phẩm "' . $product->name . '" có hàng trở lại.',
-            route('admin.products.edit', $product)
+            route('admin.products.edit', $product),
+            'stock'
         );
 
         return back()->with('success', 'Đã đăng ký báo khi sản phẩm có hàng.');

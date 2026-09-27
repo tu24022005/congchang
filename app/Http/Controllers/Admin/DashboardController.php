@@ -15,7 +15,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-..        $revenueStatuses = ['paid', 'completed'];
+$revenueStatuses = ['paid', 'completed'];   
         $totalRevenue = Order::whereIn('status', $revenueStatuses)->sum('total');
         $totalOrders = Order::count();
         $pendingOrders = Order::whereIn('status', ['processing', 'confirmed', 'packing'])->count();

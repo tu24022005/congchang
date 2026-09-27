@@ -14,6 +14,7 @@ class StaffCustomerActivity extends Notification
         private readonly string $title,
         private readonly string $message,
         private readonly ?string $url = null,
+        private readonly string $category = 'general',
     ) {
     }
 
@@ -28,6 +29,7 @@ class StaffCustomerActivity extends Notification
             'title' => $this->title,
             'message' => $this->message,
             'url' => $this->url,
+            'category' => $this->category,
         ]);
     }
 }

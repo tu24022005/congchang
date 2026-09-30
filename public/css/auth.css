@@ -6,6 +6,11 @@ body.auth-page {
         linear-gradient(180deg, rgba(0, 139, 190, .36), rgba(5, 72, 105, .48)),
         url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=85') center / cover fixed !important;
 }
+body.dark-mode.auth-page {
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, .85), rgba(30, 41, 59, .95)),
+        url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=85') center / cover fixed !important;
+}
 
 body.auth-page::before {
     content: '';
@@ -34,6 +39,9 @@ body.auth-page::after {
     border-radius: 50% 50% 0 0 / 45% 45% 0 0;
     box-shadow: 0 -18px 0 rgba(255,255,255,.55), 0 -35px 0 rgba(163,235,247,.32);
     animation: sea-swell 7s ease-in-out infinite alternate;
+}
+body.dark-mode.auth-page::after {
+    display: none;
 }
 
 body.auth-page .glass-navbar,

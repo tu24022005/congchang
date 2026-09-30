@@ -13,16 +13,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     @stack('head')
-    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/style.css') }}?v={{ time() }}" rel="stylesheet">
     @stack('styles')
-
+    <script>
+        if (localStorage.getItem('beatycare-theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
 </head>
 <body class="{{ request()->routeIs('login', 'register', 'password.request', 'password.reset', 'verification.notice') ? 'auth-page' : '' }}">
+    <div id="top-progress-bar"></div>
 
     <!-- THANH ĐIỀU HƯỚNG GỌN GÀNG -->
     <nav class="navbar navbar-expand-lg glass-navbar shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url('/') }}">
+            <a class="navbar-brand fw-bold logo-hover" href="{{ url('/') }}">
                 <i class="bi bi-flower1"></i> BeatyCare 🌸
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -128,9 +133,9 @@
                         <li class="nav-item dropdown me-3">
                             <a class="nav-link position-relative fw-semibold" href="{{ $notificationIndexRoute }}"
                                data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
-                                <i class="bi bi-bell-fill fs-5 text-warning"></i>
+                                <i class="bi bi-bell-fill fs-5 text-warning {{ Auth::user()->unreadNotifications()->exists() ? 'bell-ring' : '' }}"></i>
                                 @if(Auth::user()->unreadNotifications()->exists())
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-pulse">
                                         {{ Auth::user()->unreadNotifications()->count() > 99 ? '99+' : Auth::user()->unreadNotifications()->count() }}
                                     </span>
                                 @endif
@@ -154,14 +159,37 @@
 
                         <!-- GIỎ HÀNG CHUNG: không hiển thị trong khu vực quản trị -->
                         @if(!in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff', 'customer_service'], true))
-                            <li class="nav-item me-4">
+                            <li class="nav-item me-4 dropdown cart-dropdown">
                                 <a class="nav-link text-nowrap position-relative fw-semibold" href="{{ route('cart.index') }}">
                                     <i class="bi bi-cart3 fs-5 me-1"></i> Giỏ hàng
-                                    @php $cartCount = Auth::user()->cartItems()->sum('quantity'); @endphp
+                                    @php
+                                        $cartCount = Auth::user()->cartItems()->sum('quantity');
+                                        $cartItems = Auth::user()->cartItems()->with('product')->latest()->take(3)->get();
+                                    @endphp
                                     @if($cartCount > 0)
                                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count-badge">{{ $cartCount }}</span>
                                     @endif
                                 </a>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm p-3 mini-cart-dropdown" style="min-width: 320px;">
+                                    <li><h6 class="dropdown-header px-0 text-dark fw-bold">Giỏ hàng của bạn</h6></li>
+                                    @if($cartCount > 0)
+                                        @foreach($cartItems as $item)
+                                            <li class="d-flex align-items-center mb-3">
+                                                <img src="{{ asset('storage/' . ($item->product->image ?? '')) }}" class="rounded me-3 object-fit-cover" width="50" height="50" alt="" onerror="this.src=''">
+                                                <div class="flex-grow-1">
+                                                    <div class="small fw-semibold text-truncate" style="max-width: 180px;">{{ $item->product->name ?? 'Sản phẩm' }}</div>
+                                                    <div class="small text-muted">{{ number_format($item->price, 0, ',', '.') }} đ x {{ $item->quantity }}</div>
+                                                </div>
+                                            </li>
+                                        @endforeach
+                                        @if($cartCount > 3)
+                                            <li class="text-center small text-muted mb-2">Và {{ $cartCount - 3 }} sản phẩm khác...</li>
+                                        @endif
+                                        <li><a href="{{ route('cart.index') }}" class="btn btn-primary w-100 btn-sm btn-nhan-ngay">Xem giỏ hàng</a></li>
+                                    @else
+                                        <li><span class="small text-muted">Chưa có sản phẩm nào.</span></li>
+                                    @endif
+                                </ul>
                             </li>
                         @endif
 
@@ -194,6 +222,13 @@
                             </ul>
                         </li>
                     @endguest
+
+                    <!-- THEME TOGGLE (NAVBAR) -->
+                    <li class="nav-item ms-2 d-flex align-items-center">
+                        <button type="button" id="global-theme-toggle" class="btn rounded-circle shadow-sm" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(150,150,150,0.3); font-size: 1.1rem; background: rgba(255,255,255,0.8); color: #333; transition: all 0.3s;" aria-label="Sáng/Tối" title="Chuyển chế độ Sáng / Tối">
+                            ☀️
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -238,7 +273,7 @@
                 <div class="footer-promise"><i class="bi bi-headset"></i><div><strong>Tư vấn tận tâm</strong><small>Hỗ trợ 08:00 - 22:00</small></div></div>
             </div>
 
-            <div class="row gy-5 footer-main-row">
+            <div class="row gy-5 footer-main-row reveal-up">
                 <div class="col-xl-4 col-lg-5 col-md-6">
                     <div class="footer-brand-lockup"><span class="footer-brand-mark"><i class="bi bi-flower1"></i></span><div><strong>Aloha Beauty</strong><small>Beauty made personal</small></div></div>
                     <p class="footer-about">Mỹ phẩm và sản phẩm chăm sóc cá nhân được chọn lọc để bạn tự tin xây dựng khoảnh khắc self-care của riêng mình.</p>
@@ -278,9 +313,9 @@
                         <h6>Đừng bỏ lỡ những ưu đãi xinh xắn</h6>
                         <p>Follow Aloha Beauty để cập nhật sản phẩm mới và tips chăm sóc bản thân.</p>
                         <div class="d-flex flex-wrap gap-2 mb-4">
-                            <a href="https://www.facebook.com/aimachan205/" target="_blank" class="footer-social footer-social-facebook" title="Facebook"><i class="bi bi-facebook"></i><span>Facebook</span></a>
-                            <a href="https://www.youtube.com/@VanTu-vp6yn" target="_blank" class="footer-social footer-social-youtube" title="YouTube"><i class="bi bi-youtube"></i><span>YouTube</span></a>
-                            <a href="https://twitter.com/" target="_blank" class="footer-social footer-social-x" title="X"><i class="bi bi-twitter-x"></i><span>X</span></a>
+                            <a href="https://www.facebook.com/aimachan205/" target="_blank" class="footer-social footer-social-facebook" title="Facebook"><i class="bi bi-facebook social-icon-spin"></i><span>Facebook</span></a>
+                            <a href="https://www.youtube.com/@VanTu-vp6yn" target="_blank" class="footer-social footer-social-youtube" title="YouTube"><i class="bi bi-youtube social-icon-spin"></i><span>YouTube</span></a>
+                            <a href="https://twitter.com/" target="_blank" class="footer-social footer-social-x" title="X"><i class="bi bi-twitter-x social-icon-spin"></i><span>X</span></a>
                         </div>
                         <div class="footer-payment-line"><span>Thanh toán an toàn</span><div><i class="bi bi-credit-card-2-front"></i><i class="bi bi-cash-coin"></i><i class="bi bi-qr-code-scan"></i></div></div>
                     </div>
@@ -634,6 +669,115 @@
                 container.appendChild(button);
                 window.addEventListener('resize', positionToggle);
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Sticky Header
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                });
+                // Check on initial load
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                }
+            }
+
+            // 2. Ripple Effect for Buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    let ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+                    
+                    let rect = this.getBoundingClientRect();
+                    let x = e.clientX - rect.left;
+                    let y = e.clientY - rect.top;
+                    
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // 3. Scroll Reveal for Product Cards
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+            
+            const observer = new IntersectionObserver((entries, observer) => {
+                let delay = 0;
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('in-view');
+                        }, delay);
+                        delay += 80; // Stagger by 80ms
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+    
+    <!-- GLOBAL UI ELEMENTS -->
+    <button id="back-to-top" class="btn btn-primary" aria-label="Lên đầu trang"><i class="bi bi-arrow-up"></i></button>
+    <div id="toast-container"></div>
+    
+    <script src="{{ asset('js/animations.js') }}"></script>
+    
+    <!-- Toggles moved to navbar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('global-theme-toggle');
+            const body = document.body;
+            
+            // Khôi phục trạng thái
+            const savedTheme = localStorage.getItem('beatycare-theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+                document.documentElement.classList.add('dark-mode');
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '🌙';
+                    toggleBtn.style.background = 'rgba(30, 30, 30, 0.9)';
+                    toggleBtn.style.color = 'white';
+                }
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    body.classList.toggle('dark-mode');
+                    document.documentElement.classList.toggle('dark-mode');
+                    const isDark = body.classList.contains('dark-mode');
+                    toggleBtn.innerHTML = isDark ? '🌙' : '☀️';
+                    localStorage.setItem('beatycare-theme', isDark ? 'dark' : 'light');
+                    
+                    if (isDark) {
+                        toggleBtn.style.background = 'rgba(30, 30, 30, 0.9)';
+                        toggleBtn.style.color = 'white';
+                    } else {
+                        toggleBtn.style.background = 'rgba(255, 255, 255, 0.8)';
+                        toggleBtn.style.color = '#333';
+                    }
+                });
+            }
         });
     </script>
 </body>

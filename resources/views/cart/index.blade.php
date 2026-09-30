@@ -90,10 +90,10 @@
                                                     <div class="quantity-control"><button type="button" class="quantity-step" data-step="-1">−</button><input type="number" name="quantity" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center quantity-input" min="1"><button type="button" class="quantity-step" data-step="1">+</button></div><button type="submit" class="btn btn-sm btn-outline-primary ms-2" title="Cập nhật số lượng"><i class="bi bi-check2"></i></button>
                                                 </form>
                                             </td>
-                                            <td class="text-danger fw-bold line-total">{{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }} đ</td>
+                                            <td class="text-danger fw-bold line-total flash-highlight">{{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }} đ</td>
                                             <td>
                                                 <!-- Đã cập nhật thành cart.destroy để sửa lỗi route -->
-                                                <form action="{{ route('cart.destroy', $id) }}" method="POST">
+                                                <form action="{{ route('cart.destroy', $id) }}" method="POST" class="cart-remove-form">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">Xoá</button>
@@ -637,6 +637,22 @@
             const names = [ward, district, province].map(select => select.options[select.selectedIndex]?.dataset.name).filter(Boolean);
             const street = detail.value.split(',').map(part => part.trim()).filter(Boolean)[0] || detail.value.trim();
             if (names.length === 3 && street) detail.value = [street, ...names].join(', ');
+        });
+    });
+
+    // Animate removing cart item
+    document.querySelectorAll('.cart-remove-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const tr = this.closest('tr');
+            if (tr) {
+                tr.classList.add('slide-out-right');
+                setTimeout(() => {
+                    HTMLFormElement.prototype.submit.call(this);
+                }, 400); // Wait for animation
+            } else {
+                HTMLFormElement.prototype.submit.call(this);
+            }
         });
     });
     </script>

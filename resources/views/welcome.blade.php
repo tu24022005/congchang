@@ -40,8 +40,8 @@
 
     <div class="carousel-inner">
         @foreach($banners as $index => $banner)
-        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-            <img src="{{ $banner->image_source }}" alt="{{ $banner->alt_text ?: $banner->title }}">
+        <div class="carousel-item {{ $index === 0 ? 'active' : '' }} overflow-hidden">
+            <img src="{{ $banner->image_source }}" class="ken-burns-bg w-100 h-100" style="object-fit: cover;" alt="{{ $banner->alt_text ?: $banner->title }}">
             <div class="carousel-caption">
                 @if($banner->badge)<span class="badge bg-warning text-dark mb-2 px-3 py-2 fs-6 rounded-pill">{{ $banner->badge }}</span>@endif
                 <h1>{{ $banner->title }}</h1>
@@ -86,28 +86,20 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 
 <!-- DANH MỤC SẢN PHẨM -->
-<section class="product-categories mb-5" aria-labelledby="home-categories-title">
+<section class="product-categories mb-5 reveal-up" aria-labelledby="home-categories-title">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 id="home-categories-title" class="fw-bold mb-0 storefront-title">Khám phá theo danh mục</h4>
         <a href="{{ route('products.index') }}" class="small text-decoration-none category-view-all">Xem tất cả</a>
     </div>
     <div class="row g-3">
         @foreach($categories as $category)
-            @php
-                $categoryImages = [
-                    'cham-soc-ca-nhan' => 'personal-care.svg',
-                    'cham-soc-co-the' => 'body-care.svg',
-                    'cham-soc-da' => 'skin-care.svg',
-                    'cham-soc-toc' => 'hair-care.svg',
-                    'trang-diem' => 'makeup.svg',
-                ];
-                $categoryImage = $category->image
-                    ? asset('storage/' . $category->image)
-                    : asset('images/categories/' . ($categoryImages[\Illuminate\Support\Str::slug($category->name)] ?? 'personal-care.svg'));
-            @endphp
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card">
-                    <span class="category-card-cover"><img src="{{ $categoryImage }}" alt="{{ $category->name }}"></span>
+                    @if($category->image)
+                        <span class="category-card-cover"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"></span>
+                    @else
+                        <span class="category-card-icon"><i class="bi bi-bag-heart"></i></span>
+                    @endif
                     <span class="category-card-name">{{ $category->name }}</span>
                     <small>{{ $category->products_count }} sản phẩm</small>
                 </a>
@@ -118,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- FLASH SALE -->
 @if($flashSaleProducts->isNotEmpty())
-<section class="flash-sale-section mb-5" aria-labelledby="flash-sale-title">
+<section class="flash-sale-section mb-5 reveal-up" aria-labelledby="flash-sale-title">
     <div class="flash-sale-heading">
         <div>
             <span class="flash-sale-kicker"><i class="bi bi-lightning-charge-fill me-1"></i> ƯU ĐÃI CÓ HẠN</span>
@@ -167,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
 @endif
 
 <!-- SAN PHAM HOT -->
-<section class="hot-products-section mb-5" aria-labelledby="hot-products-title">
+<section class="hot-products-section mb-5 reveal-up" aria-labelledby="hot-products-title">
     <div class="d-flex justify-content-between align-items-end mb-3">
         <div><span class="hot-products-kicker"><i class="bi bi-lightning-charge-fill me-1"></i> FLASH SALE & ĐANG ĐƯỢC QUAN TÂM</span><h3 id="hot-products-title" class="fw-bold mb-0 storefront-title">Ưu đãi nổi bật hôm nay</h3></div>
         <div class="d-flex gap-2"><button type="button" class="btn btn-light border rounded-circle hot-scroll-button" data-direction="-1" aria-label="Xem sản phẩm trước"><i class="bi bi-arrow-left"></i></button><button type="button" class="btn btn-light border rounded-circle hot-scroll-button" data-direction="1" aria-label="Xem sản phẩm tiếp theo"><i class="bi bi-arrow-right"></i></button></div>

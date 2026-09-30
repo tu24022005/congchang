@@ -16,21 +16,13 @@
     </div>
     <div class="row g-3">
         @foreach($categories as $category)
-            @php
-                $categoryImages = [
-                    'cham-soc-ca-nhan' => 'personal-care.svg',
-                    'cham-soc-co-the' => 'body-care.svg',
-                    'cham-soc-da' => 'skin-care.svg',
-                    'cham-soc-toc' => 'hair-care.svg',
-                    'trang-diem' => 'makeup.svg',
-                ];
-                $categoryImage = $category->image
-                    ? asset('storage/' . $category->image)
-                    : asset('images/categories/' . ($categoryImages[\Illuminate\Support\Str::slug($category->name)] ?? 'personal-care.svg'));
-            @endphp
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card {{ (string) request('category') === (string) $category->id ? 'active' : '' }}">
-                    <span class="category-card-cover"><img src="{{ $categoryImage }}" alt="{{ $category->name }}"></span>
+                    @if($category->image)
+                        <span class="category-card-cover"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"></span>
+                    @else
+                        <span class="category-card-icon"><i class="bi bi-bag-heart"></i></span>
+                    @endif
                     <span class="category-card-name">{{ $category->name }}</span>
                     <small>{{ $category->products_count }} sản phẩm</small>
                 </a>
@@ -137,7 +129,7 @@
                 </div>
                 
                 <div class="d-flex justify-content-center gap-2 flex-wrap mb-2">
-                    <span class="badge text-primary rounded-pill product-category-badge">{{ $product->category->name ?? 'Mỹ phẩm chăm sóc da' }}</span>
+                    <span class="badge text-primary rounded-pill product-category-badge badge-shine">{{ $product->category->name ?? 'Mỹ phẩm chăm sóc da' }}</span>
                     @if($product->brand)<span class="badge bg-light text-dark rounded-pill">{{ $product->brand->name }}</span>@endif
                 </div>
 

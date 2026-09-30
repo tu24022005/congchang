@@ -99,11 +99,13 @@
         <div class="row g-4 g-lg-5">
             <div class="col-lg-6">
                 <div class="detail-gallery">
-                    @if($product->image)
-                        <img id="detail-main-image" src="{{ asset('storage/' . $product->image) }}" class="detail-main-image" alt="{{ $product->name }}">
-                    @else
-                        <div id="detail-main-image" class="detail-main-image d-grid place-items-center text-muted"><i class="bi bi-image fs-1"></i></div>
-                    @endif
+                    <div class="product-image-zoom">
+                        @if($product->image)
+                            <img id="detail-main-image" src="{{ asset('storage/' . $product->image) }}" class="detail-main-image" alt="{{ $product->name }}">
+                        @else
+                            <div id="detail-main-image" class="detail-main-image d-grid place-items-center text-muted"><i class="bi bi-image fs-1"></i></div>
+                        @endif
+                    </div>
                     @php
                         $shownGalleryImages = $product->image ? [$product->image] : [];
                     @endphp
@@ -439,6 +441,26 @@ document.addEventListener('DOMContentLoaded', function () {
         this.innerHTML = '<i class="bi bi-check2 me-1"></i>Đã sao chép liên kết';
         setTimeout(() => this.innerHTML = original, 1800);
     });
+
+    const cartForm = document.getElementById('detail-cart-form');
+    if (cartForm) {
+        cartForm.addEventListener('submit', function(e) {
+            const submitter = e.submitter;
+            if (submitter && submitter.name === 'buy_now') {
+                return; // Let buy now submit normally
+            }
+            e.preventDefault();
+            const mainImg = document.getElementById('detail-main-image');
+            if (window.flyToCart && mainImg) {
+                window.flyToCart(mainImg);
+                setTimeout(() => {
+                    HTMLFormElement.prototype.submit.call(cartForm);
+                }, 800);
+            } else {
+                HTMLFormElement.prototype.submit.call(cartForm);
+            }
+        });
+    }
 });
 </script>
 @endsection

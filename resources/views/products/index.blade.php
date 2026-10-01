@@ -14,7 +14,7 @@
         <h4 id="product-categories-title" class="fw-bold mb-0 storefront-title">Danh mục sản phẩm</h4>
         <a href="{{ route('products.index') }}" class="small text-decoration-none category-view-all">Xem tất cả</a>
     </div>
-    <div class="row g-3">
+    <div class="row g-3 reveal-stagger">
         @foreach($categories as $category)
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card {{ (string) request('category') === (string) $category->id ? 'active' : '' }}">
@@ -107,7 +107,7 @@
 </form>
 
 <!-- DANH SÁCH SẢN PHẨM -->
-<div class="row g-4">
+<div class="row g-4 reveal-stagger">
     @forelse($products as $product)
     <div class="col-lg-3 col-md-4 col-sm-6">
         @php
@@ -118,7 +118,7 @@
         <div class="card product-card text-center h-100 shadow-sm">
             <div class="card-body p-4 d-flex flex-column">
                 
-                <div class="mb-3">
+                <div class="mb-3 shine-sweep rounded-3">
                     @if($product->image)
                         <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image">
                     @else
@@ -138,7 +138,7 @@
                     @auth
                         <form action="{{ route('wishlist.toggle', $product) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-sm {{ $wishlistProductIds->contains($product->id) ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle" title="{{ $wishlistProductIds->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ $wishlistProductIds->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}"><i class="bi bi-heart{{ $wishlistProductIds->contains($product->id) ? '-fill' : '' }}"></i></button>
+                            <button type="submit" class="btn btn-sm wishlist-toggle-btn {{ $wishlistProductIds->contains($product->id) ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle" title="{{ $wishlistProductIds->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ $wishlistProductIds->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}"><i class="bi bi-heart{{ $wishlistProductIds->contains($product->id) ? '-fill' : '' }}"></i></button>
                         </form>
                     @endauth
                 </div>

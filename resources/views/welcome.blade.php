@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <h4 id="home-categories-title" class="fw-bold mb-0 storefront-title">Khám phá theo danh mục</h4>
         <a href="{{ route('products.index') }}" class="small text-decoration-none category-view-all">Xem tất cả</a>
     </div>
-    <div class="row g-3">
+    <div class="row g-3 reveal-stagger">
         @foreach($categories as $category)
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card">
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <span class="flash-sale-note">Săn deal đẹp, giá siêu hời mỗi ngày</span>
     </div>
-    <div class="flash-sale-track">
+    <div class="flash-sale-track reveal-stagger">
         @foreach($flashSaleProducts as $flashProduct)
             @php
                 $flashPrice = $flashProduct->effectivePrice();
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div><span class="hot-products-kicker"><i class="bi bi-lightning-charge-fill me-1"></i> FLASH SALE & ĐANG ĐƯỢC QUAN TÂM</span><h3 id="hot-products-title" class="fw-bold mb-0 storefront-title">Ưu đãi nổi bật hôm nay</h3></div>
         <div class="d-flex gap-2"><button type="button" class="btn btn-light border rounded-circle hot-scroll-button" data-direction="-1" aria-label="Xem sản phẩm trước"><i class="bi bi-arrow-left"></i></button><button type="button" class="btn btn-light border rounded-circle hot-scroll-button" data-direction="1" aria-label="Xem sản phẩm tiếp theo"><i class="bi bi-arrow-right"></i></button></div>
     </div>
-    <div id="hot-products-track" class="hot-products-track">
+    <div id="hot-products-track" class="hot-products-track reveal-stagger">
         @foreach($hotProducts as $hotProduct)
             @php
                 $hotPrices = $hotProduct->variations->map(fn ($variation) => $hotProduct->effectivePrice($variation));
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </section>
 
 <!-- DANH SÁCH SẢN PHẨM -->
-<div class="row g-4 justify-content-center">
+<div class="row g-4 justify-content-center reveal-stagger">
     @foreach($products as $product)
     @php
         $productPrices = $product->variations->pluck('price')->map(fn ($price) => (float) $price);
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="card product-card text-center h-100 shadow-sm">
             <div class="card-body p-4 d-flex flex-column">
                 
-                <div class="mb-3">
+                <div class="mb-3 shine-sweep rounded-3">
                     @if($product->image)
                         <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image">
                     @else

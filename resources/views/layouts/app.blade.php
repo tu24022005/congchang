@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     @stack('head')
     <link href="{{ asset('css/style.css') }}?v={{ time() }}" rel="stylesheet">
+    <link href="{{ asset('css/animations.css') }}?v={{ time() }}" rel="stylesheet">
     @stack('styles')
     <script>
         if (localStorage.getItem('beatycare-theme') === 'dark') {
@@ -22,6 +23,24 @@
     </script>
 </head>
 <body class="{{ request()->routeIs('login', 'register', 'password.request', 'password.reset', 'verification.notice') ? 'auth-page' : '' }}">
+    <!-- PRELOADER MỞ WEB (BRAND ENTRANCE) -->
+    <div id="app-preloader" class="app-preloader" aria-hidden="true">
+        <div class="preloader-card">
+            <div class="preloader-bloom-wrap">
+                <div class="preloader-bloom-aura"></div>
+                <div class="preloader-bloom-icon">
+                    <i class="bi bi-flower1"></i>
+                </div>
+            </div>
+            <div class="preloader-brand-title">BeatyCare <span class="preloader-sparkle">🌸</span></div>
+            <p class="preloader-tagline">Vẻ đẹp rạng ngời &bull; Chăm sóc tự nhiên</p>
+            <div class="preloader-progress-track">
+                <div class="preloader-progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DUAL PROGRESS & SCROLL BAR -->
     <div id="top-progress-bar"></div>
 
     <!-- THANH ĐIỀU HƯỚNG GỌN GÀNG -->
@@ -260,7 +279,7 @@
     @endif
 
     <!-- NỘI DUNG CHÍNH -->
-    <main class="container py-4 flex-grow-1">
+    <main class="container py-4 flex-grow-1" id="main-content">
         @yield('content')
     </main>
 
@@ -671,77 +690,24 @@
             });
         });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // 1. Sticky Header
-            const navbar = document.querySelector('.navbar');
-            if (navbar) {
-                window.addEventListener('scroll', () => {
-                    if (window.scrollY > 50) {
-                        navbar.classList.add('scrolled');
-                    } else {
-                        navbar.classList.remove('scrolled');
-                    }
-                });
-                // Check on initial load
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                }
-            }
-
-            // 2. Ripple Effect for Buttons
-            const buttons = document.querySelectorAll('.btn');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    let ripple = document.createElement('span');
-                    ripple.classList.add('ripple');
-                    this.appendChild(ripple);
-                    
-                    let rect = this.getBoundingClientRect();
-                    let x = e.clientX - rect.left;
-                    let y = e.clientY - rect.top;
-                    
-                    ripple.style.left = `${x}px`;
-                    ripple.style.top = `${y}px`;
-                    
-                    setTimeout(() => {
-                        ripple.remove();
-                    }, 600);
-                });
-            });
-
-            // 3. Scroll Reveal for Product Cards
-            const observerOptions = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.1
-            };
-            
-            const observer = new IntersectionObserver((entries, observer) => {
-                let delay = 0;
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        setTimeout(() => {
-                            entry.target.classList.add('in-view');
-                        }, delay);
-                        delay += 80; // Stagger by 80ms
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-
-            const productCards = document.querySelectorAll('.product-card');
-            productCards.forEach(card => {
-                observer.observe(card);
-            });
-        });
-    </script>
-    
-    <!-- GLOBAL UI ELEMENTS -->
-    <button id="back-to-top" class="btn btn-primary" aria-label="Lên đầu trang"><i class="bi bi-arrow-up"></i></button>
+    <!-- GLOBAL UI ELEMENTS: CIRCULAR PROGRESS BACK TO TOP & TOAST -->
+    <button id="back-to-top" class="back-to-top-btn" aria-label="Lên đầu trang">
+        <svg class="progress-ring" width="48" height="48" viewBox="0 0 48 48">
+            <circle class="progress-ring-bg" stroke="rgba(255, 107, 129, 0.2)" stroke-width="3" fill="transparent" r="20" cx="24" cy="24" />
+            <circle id="scroll-progress-circle" class="progress-ring-circle" stroke="url(#progress-ring-gradient)" stroke-width="3" stroke-linecap="round" fill="transparent" r="20" cx="24" cy="24" />
+            <defs>
+                <linearGradient id="progress-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff6b81" />
+                    <stop offset="100%" stop-color="#a18cd1" />
+                </linearGradient>
+            </defs>
+        </svg>
+        <i class="bi bi-arrow-up"></i>
+    </button>
     <div id="toast-container"></div>
     
     <script src="{{ asset('js/animations.js') }}"></script>
+    <script src="{{ asset('js/interactions.js') }}"></script>
     
     <!-- Toggles moved to navbar -->
     <script>

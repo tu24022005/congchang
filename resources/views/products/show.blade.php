@@ -447,10 +447,14 @@ document.addEventListener('DOMContentLoaded', function () {
         cartForm.addEventListener('submit', function(e) {
             const submitter = e.submitter;
             if (submitter && submitter.name === 'buy_now') {
+                if (window.setButtonLoading) window.setButtonLoading(submitter, 'Đang xử lý...');
                 return; // Let buy now submit normally
             }
             e.preventDefault();
             const mainImg = document.getElementById('detail-main-image');
+            if (submitter && window.setButtonLoading) {
+                window.setButtonLoading(submitter, 'Đang thêm...');
+            }
             if (window.flyToCart && mainImg) {
                 window.flyToCart(mainImg);
                 setTimeout(() => {

@@ -58,8 +58,7 @@ Route::middleware('guest')->group(function () {
 // ==================================================
 // 3. ĐĂNG XUẤT
 // ==================================================
-Route::post('logout', [AuthController::class, 'logout'])
-    ->middleware('auth')
+Route::match(['get', 'post'], 'logout', [AuthController::class, 'logout'])
     ->name('logout');
 
 // ==================================================

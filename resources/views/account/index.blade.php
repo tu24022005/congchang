@@ -28,7 +28,7 @@
             <div><span class="account-kicker">TÀI KHOẢN</span><h2 id="account-hub-title">Không gian quản lý của bạn</h2></div>
             @if($unreadNotificationCount > 0)<a href="{{ route('account.notifications') }}" class="account-notification-pill"><i class="bi bi-bell-fill me-1"></i>{{ $unreadNotificationCount }} thông báo mới</a>@endif
         </div>
-        <div class="account-hub-grid">
+        <div class="account-hub-grid reveal-stagger">
             <a href="#personal-info" class="account-hub-card card account-hub-card-featured reveal-up"><span class="account-hub-icon"><i class="bi bi-person-fill"></i></span><span><strong>Thông tin cá nhân</strong><small>{{ $user->name }}</small></span></a>
             <a href="{{ route('orders.index') }}" class="account-hub-card card reveal-up"><span class="account-hub-icon"><i class="bi bi-box-seam"></i></span><span><strong>Đơn hàng</strong><small><span class="count-up" data-target="{{ $orderStats['processing'] + $orderStats['shipping'] }}">0</span> đơn đang xử lý</small></span>@if($orderStats['processing'] + $orderStats['shipping'] > 0)<em class="badge-pulse">{{ $orderStats['processing'] + $orderStats['shipping'] }}</em>@endif</a>
             <a href="{{ route('orders.index', ['status' => 'processing']) }}" class="account-hub-subcard card reveal-up"><i class="bi bi-hourglass-split"></i><span>Chờ xác nhận</span><strong class="count-up" data-target="{{ $orderStats['processing'] }}">0</strong></a>

@@ -1,16 +1,16 @@
 @extends('layouts.app') 
 @section('title', 'BeatyCare 🌸 - Đăng nhập') 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}?v={{ time() }}">
     <style>
-        /* DARK OVERLAY */
+        /* DARK OVERLAY - LỚP PHỦ ĐEN KHI BẬT DARK MODE (VỪA ĐỦ ĐỂ THẤY BÃI BIỂN) */
         .dark-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.5s ease;
-            z-index: 1; /* above body background, below form container */
+            z-index: 1; /* trên ảnh nền bãi biển, dưới form đăng nhập */
             pointer-events: none;
         }
         body.dark-mode .dark-overlay {

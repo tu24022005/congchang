@@ -8,7 +8,7 @@ body.auth-page {
 }
 body.dark-mode.auth-page {
     background:
-        linear-gradient(180deg, rgba(15, 23, 42, .85), rgba(30, 41, 59, .95)),
+        linear-gradient(180deg, rgba(0, 139, 190, .36), rgba(5, 72, 105, .48)),
         url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=85') center / cover fixed !important;
 }
 
@@ -41,7 +41,8 @@ body.auth-page::after {
     animation: sea-swell 7s ease-in-out infinite alternate;
 }
 body.dark-mode.auth-page::after {
-    display: none;
+    display: block;
+    opacity: .75;
 }
 
 body.auth-page .glass-navbar,

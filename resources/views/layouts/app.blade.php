@@ -6,15 +6,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'BeatyCare 🌸')</title>
 
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     @stack('head')
-    <link href="{{ asset('css/style.css') }}?v={{ time() }}" rel="stylesheet">
-    <link href="{{ asset('css/animations.css') }}?v={{ time() }}" rel="stylesheet">
+    <link href="{{ asset_v('css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset_v('css/animations.css') }}" rel="stylesheet">
     @stack('styles')
     <script>
         if (localStorage.getItem('beatycare-theme') === 'dark') {
@@ -83,16 +85,16 @@
                 </ul>
 
                 <!-- THANH TÌM KIẾM TRUNG TÂM CO GỢI Ý (LIVE SEARCH) -->
-                <form action="{{ route('products.index') }}" method="GET" class="d-flex mx-lg-3 my-3 my-lg-0 flex-grow-1 justify-content-center position-relative live-search-form">
+                <form action="{{ route('products.index') }}" method="GET" class="d-flex mx-lg-3 my-3 my-lg-0 flex-grow-1 justify-content-center position-relative live-search-form" role="search">
                     <div class="input-group live-search-group">
                         <button type="submit" class="input-group-text bg-transparent border-0 text-dark ps-3 pe-2" aria-label="Tìm kiếm">
                             <i class="bi bi-search fw-bold search-icon"></i>
                         </button>
-                        <input type="text" name="search" id="live-search-input" class="form-control border-0 shadow-none bg-transparent px-2 live-search-input" placeholder="Tìm kiếm mỹ phẩm, chăm sóc da..." value="{{ request('search') }}" autocomplete="off">
+                        <input type="text" name="search" id="live-search-input" class="form-control border-0 shadow-none bg-transparent px-2 live-search-input" placeholder="Tìm kiếm mỹ phẩm, chăm sóc da..." value="{{ request('search') }}" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-suggestions" aria-haspopup="listbox">
                     </div>
                     
                     <!-- Khung Dropdown chứa kết quả gợi ý -->
-                    <div id="search-suggestions" class="position-absolute w-100 bg-white shadow-lg rounded-4 d-none search-suggestions">
+                    <div id="search-suggestions" class="position-absolute w-100 bg-white shadow-lg rounded-4 d-none search-suggestions" role="listbox" aria-label="Gợi ý tìm kiếm">
                         <!-- Kết quả JS sẽ đổ vào đây -->
                     </div>
                 </form>
@@ -233,10 +235,12 @@
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('password.change') }}"><i class="bi bi-key text-warning me-2"></i> Đổi mật khẩu</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger fw-bold py-2" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+                                    <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger fw-bold py-2 border-0 bg-transparent w-100 text-start">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                        </button>
+                                    </form>
                                 </li>
                             </ul>
                         </li>
@@ -385,73 +389,226 @@
         const searchInput = document.getElementById('live-search-input');
         const suggestionsBox = document.getElementById('search-suggestions');
 
-        if(searchInput && suggestionsBox) {
-            // Ẩn hộp gợi ý khi click chuột ra ngoài
-            document.addEventListener('click', function(e) {
-                if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                    suggestionsBox.classList.add('d-none');
+        if (!searchInput || !suggestionsBox) return;
+
+        let debounceTimer = null;
+        let abortController = null;
+        let selectedIndex = -1;
+
+        // Hàm escape HTML an toàn chống XSS
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Lấy danh sách tất cả các item có thể tương tác bằng bàn phím
+        function getFocusableItems() {
+            return Array.from(suggestionsBox.querySelectorAll('.search-nav-item'));
+        }
+
+        function setAriaExpanded(expanded) {
+            searchInput.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            if (!expanded) {
+                searchInput.removeAttribute('aria-activedescendant');
+            }
+        }
+
+        function hideSuggestions() {
+            if (abortController) {
+                abortController.abort();
+                abortController = null;
+            }
+            clearTimeout(debounceTimer);
+            suggestionsBox.classList.add('d-none');
+            setAriaExpanded(false);
+            selectedIndex = -1;
+            removeActiveState();
+        }
+
+        function removeActiveState() {
+            const items = getFocusableItems();
+            items.forEach(el => el.classList.remove('active'));
+        }
+
+        function updateActiveItem(index) {
+            const items = getFocusableItems();
+            if (items.length === 0) return;
+
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ block: 'nearest' });
+                    if (item.id) {
+                        searchInput.setAttribute('aria-activedescendant', item.id);
+                    }
+                } else {
+                    item.classList.remove('active');
                 }
             });
+        }
 
-            // Bắt sự kiện khi người dùng gõ phím
-            searchInput.addEventListener('input', function() {
-                let query = this.value.trim();
-                
-                if (query.length < 1) {
-                    suggestionsBox.classList.add('d-none');
-                    return;
+        // Đóng gợi ý khi click ra ngoài
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                hideSuggestions();
+            }
+        });
+
+        // Mở lại gợi ý nếu input có sẵn nội dung và focus vào
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 1 && suggestionsBox.innerHTML.trim() !== '') {
+                suggestionsBox.classList.remove('d-none');
+                setAriaExpanded(true);
+            }
+        });
+
+        // Bắt sự kiện phím điều hướng (ArrowDown, ArrowUp, Enter, Escape)
+        searchInput.addEventListener('keydown', function(e) {
+            const items = getFocusableItems();
+            const isOpen = !suggestionsBox.classList.contains('d-none') && items.length > 0;
+
+            if (e.key === 'Escape') {
+                if (!suggestionsBox.classList.contains('d-none')) {
+                    e.preventDefault();
+                    hideSuggestions();
                 }
+                return;
+            }
 
-                // Gọi ngầm xuống Backend lấy dữ liệu
-                fetch(`/search-suggestions?query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        suggestionsBox.innerHTML = ''; 
-                        
-                        if (data.products.length > 0 || data.categories.length > 0 || data.keywords.length > 0) {
-                            let html = '';
-                            if (data.products.length > 0) {
-                                html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Sản phẩm</div><ul class="list-unstyled mb-0">';
-                            }
+            if (!isOpen) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) >= items.length ? 0 : (selectedIndex + 1);
+                updateActiveItem(selectedIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1) < 0 ? (items.length - 1) : (selectedIndex - 1);
+                updateActiveItem(selectedIndex);
+            } else if (e.key === 'Enter') {
+                if (selectedIndex >= 0 && items[selectedIndex]) {
+                    e.preventDefault();
+                    items[selectedIndex].click();
+                }
+            }
+        });
+
+        // Xử lý tìm kiếm với Debounce 250ms & AbortController
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+
+            if (query.length < 1) {
+                hideSuggestions();
+                suggestionsBox.innerHTML = '';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                if (abortController) {
+                    abortController.abort();
+                }
+                abortController = new AbortController();
+
+                fetch(`/search-suggestions?query=${encodeURIComponent(query)}`, {
+                    signal: abortController.signal,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    selectedIndex = -1;
+                    const hasProducts = Array.isArray(data.products) && data.products.length > 0;
+                    const hasCategories = Array.isArray(data.categories) && data.categories.length > 0;
+                    const hasKeywords = Array.isArray(data.keywords) && data.keywords.length > 0;
+
+                    if (hasProducts || hasCategories || hasKeywords) {
+                        let html = '';
+                        let itemIndex = 0;
+
+                        if (hasProducts) {
+                            html += '<div class="search-suggestion-group" role="group" aria-label="Sản phẩm"><div class="search-suggestion-title">Sản phẩm</div><ul class="list-unstyled mb-0">';
                             data.products.forEach(item => {
-                                let imgHtml = item.image_url 
-                                    ? `<img src="${item.image_url}" class="me-3 rounded search-result-image">`
+                                const itemId = `search-item-${itemIndex++}`;
+                                const safeName = escapeHtml(item.name);
+                                const safePrice = escapeHtml(item.formatted_price);
+                                const safeUrl = escapeHtml(item.detail_url);
+                                const imgHtml = item.image_url 
+                                    ? `<img src="${escapeHtml(item.image_url)}" class="me-3 rounded search-result-image" alt="${safeName}">`
                                     : `<div class="d-flex align-items-center justify-content-center bg-light rounded me-3 search-result-image"><i class="bi bi-box text-muted"></i></div>`;
                                 
                                 html += `
                                 <li>
-                                    <a href="${item.detail_url}" class="d-flex align-items-center px-3 py-2 text-decoration-none text-dark search-item-hover">
+                                    <a href="${safeUrl}" id="${itemId}" role="option" class="d-flex align-items-center px-3 py-2 text-decoration-none text-dark search-item-hover search-nav-item">
                                         ${imgHtml}
                                         <div>
-                                            <div class="fw-bold fs-6 text-truncate search-result-name">${item.name}</div>
-                                            <div class="text-danger small fw-semibold">${item.formatted_price}</div>
+                                            <div class="fw-bold fs-6 text-truncate search-result-name">${safeName}</div>
+                                            <div class="text-danger small fw-semibold">${safePrice}</div>
                                         </div>
                                     </a>
                                 </li>`;
                             });
-                            if (data.products.length > 0) html += '</ul></div>';
-                            if (data.categories.length > 0) {
-                                html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Danh mục</div><ul class="list-unstyled mb-0">';
-                                data.categories.forEach(item => {
-                                    html += `<li><a href="${item.url}" class="search-related-link"><i class="bi bi-grid-3x3-gap me-2"></i><span>${item.name}</span><small>${item.count} sản phẩm</small></a></li>`;
-                                });
-                                html += '</ul></div>';
-                            }
-                            html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Từ khóa liên quan</div><div class="search-related-keywords">';
+                            html += '</ul></div>';
+                        }
+
+                        if (hasCategories) {
+                            html += '<div class="search-suggestion-group" role="group" aria-label="Danh mục"><div class="search-suggestion-title">Danh mục</div><ul class="list-unstyled mb-0">';
+                            data.categories.forEach(item => {
+                                const itemId = `search-item-${itemIndex++}`;
+                                const safeName = escapeHtml(item.name);
+                                const safeUrl = escapeHtml(item.url);
+                                const count = Number(item.count) || 0;
+                                html += `<li><a href="${safeUrl}" id="${itemId}" role="option" class="search-related-link search-nav-item"><i class="bi bi-grid-3x3-gap me-2"></i><span>${safeName}</span><small>${count} sản phẩm</small></a></li>`;
+                            });
+                            html += '</ul></div>';
+                        }
+
+                        if (hasKeywords) {
+                            html += '<div class="search-suggestion-group" role="group" aria-label="Từ khóa liên quan"><div class="search-suggestion-title">Từ khóa liên quan</div><div class="search-related-keywords">';
                             data.keywords.forEach(keyword => {
-                                html += `<a href="/products?search=${encodeURIComponent(keyword)}" class="search-keyword-chip">${keyword}</a>`;
+                                const itemId = `search-item-${itemIndex++}`;
+                                const safeKeyword = escapeHtml(keyword);
+                                const searchParam = encodeURIComponent(keyword);
+                                html += `<a href="/products?search=${searchParam}" id="${itemId}" role="option" class="search-keyword-chip search-nav-item">${safeKeyword}</a>`;
                             });
                             html += '</div></div>';
-                            suggestionsBox.innerHTML = html;
-                            suggestionsBox.classList.remove('d-none');
-                        } else {
-                            suggestionsBox.innerHTML = '<div class="p-3 text-center text-muted small"><i class="bi bi-emoji-frown me-1"></i> Không tìm thấy sản phẩm</div>';
-                            suggestionsBox.classList.remove('d-none');
                         }
-                    })
-                    .catch(error => console.error("Lỗi tìm kiếm:", error));
-            });
-        }
+
+                        suggestionsBox.innerHTML = html;
+                        suggestionsBox.classList.remove('d-none');
+                        setAriaExpanded(true);
+
+                        // Đồng bộ chuột hover với selectedIndex
+                        getFocusableItems().forEach((el, idx) => {
+                            el.addEventListener('mouseenter', () => {
+                                selectedIndex = idx;
+                                updateActiveItem(selectedIndex);
+                            });
+                        });
+                    } else {
+                        suggestionsBox.innerHTML = '<div class="p-3 text-center text-muted small" role="status"><i class="bi bi-emoji-frown me-1"></i> Không tìm thấy sản phẩm</div>';
+                        suggestionsBox.classList.remove('d-none');
+                        setAriaExpanded(true);
+                    }
+                })
+                .catch(error => {
+                    if (error.name === 'AbortError') return;
+                    suggestionsBox.innerHTML = '<div class="p-3 text-center text-danger small" role="alert"><i class="bi bi-exclamation-circle me-1"></i> Không thể tìm kiếm, thử lại sau</div>';
+                    suggestionsBox.classList.remove('d-none');
+                    setAriaExpanded(true);
+                });
+            }, 250);
+        });
     });
     </script>
 
@@ -712,8 +869,8 @@
     </button>
     <div id="toast-container"></div>
     
-    <script src="{{ asset('js/animations.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('js/interactions.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset_v('js/animations.js') }}" defer></script>
+    <script src="{{ asset_v('js/interactions.js') }}" defer></script>
     
     <!-- Toggles moved to navbar -->
     <script>

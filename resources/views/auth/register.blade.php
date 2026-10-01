@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Đăng ký tài khoản')
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/auth.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset_v('css/auth.css') }}">
     <style>
         /* DARK OVERLAY - LỚP PHỦ ĐEN KHI BẬT DARK MODE (VỪA ĐỦ ĐỂ THẤY BÃI BIỂN) */
         .dark-overlay {

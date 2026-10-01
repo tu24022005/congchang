@@ -33,6 +33,7 @@ Route::get('/contact', [PageController::class, 'contact'])->name('pages.contact'
 Route::get('/policies', [PageController::class, 'policies'])->name('pages.policies');
 Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
 Route::post('/product-advisor/recommend', [\App\Http\Controllers\ProductAdvisorController::class, 'recommend'])->name('product-advisor.recommend');
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
 // ==================================================
 // ĐĂNG NHẬP GOOGLE (ĐỂ NGOÀI CÙNG ĐỂ AI CŨNG BẤM ĐƯỢC)
@@ -58,7 +59,7 @@ Route::middleware('guest')->group(function () {
 // ==================================================
 // 3. ĐĂNG XUẤT
 // ==================================================
-Route::match(['get', 'post'], 'logout', [AuthController::class, 'logout'])
+Route::post('logout', [AuthController::class, 'logout'])
     ->name('logout');
 
 // ==================================================
@@ -106,15 +107,23 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('members.update');
     Route::delete('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('members.destroy');
     Route::get('/customers', [\App\Http\Controllers\Admin\MemberController::class, 'index'])->middleware('role:admin,manager')->name('customers.index');
+    Route::get('/customers/export', [\App\Http\Controllers\Admin\MemberController::class, 'export'])->middleware('role:admin,manager')->name('customers.export');
     Route::get('/customers/create', [\App\Http\Controllers\Admin\MemberController::class, 'create'])->middleware('role:admin,manager')->name('customers.create');
     Route::post('/customers', [\App\Http\Controllers\Admin\MemberController::class, 'store'])->middleware('role:admin,manager')->name('customers.store');
     Route::get('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'show'])->middleware('role:admin,manager')->name('customers.show');
     Route::get('/customers/{user}/edit', [\App\Http\Controllers\Admin\MemberController::class, 'edit'])->middleware('role:admin,manager')->name('customers.edit');
     Route::put('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('customers.update');
+    Route::patch('/customers/{user}/toggle-lock', [\App\Http\Controllers\Admin\MemberController::class, 'toggleLock'])->middleware('role:admin,manager')->name('customers.toggle-lock');
+    Route::patch('/customers/{user}/reset-password', [\App\Http\Controllers\Admin\MemberController::class, 'resetPassword'])->middleware('role:admin,manager')->name('customers.reset-password');
+    Route::post('/customers/{user}/adjust-points', [\App\Http\Controllers\Admin\MemberController::class, 'adjustPoints'])->middleware('role:admin,manager')->name('customers.adjust-points');
+    Route::post('/customers/{user}/give-voucher', [\App\Http\Controllers\Admin\MemberController::class, 'giveVoucher'])->middleware('role:admin,manager')->name('customers.give-voucher');
+    Route::post('/customers/{user}/avatar', [\App\Http\Controllers\Admin\MemberController::class, 'updateAvatar'])->middleware('role:admin,manager')->name('customers.avatar');
     Route::delete('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('customers.destroy');
     Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->middleware('role:admin')->name('staff.index');
     Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->middleware('role:admin')->name('staff.store');
-    Route::patch('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->middleware('role:admin')->name('staff.update');
+    Route::match(['patch', 'put'], '/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->middleware('role:admin')->name('staff.update');
+    Route::patch('/staff/{user}/reset-password', [\App\Http\Controllers\Admin\StaffController::class, 'resetPassword'])->middleware('role:admin')->name('staff.reset-password');
+    Route::patch('/staff/{user}/toggle-lock', [\App\Http\Controllers\Admin\StaffController::class, 'toggleLock'])->middleware('role:admin')->name('staff.toggle-lock');
     Route::delete('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'destroy'])->middleware('role:admin')->name('staff.destroy');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->middleware('role:admin,manager')->name('activity-logs.index');
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->middleware('role:admin,manager,warehouse_staff')->name('inventory-logs.index');
@@ -153,6 +162,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 // Các trang catalog có thể xem công khai để hỗ trợ SEO và khách vãng lai.
 Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class, 'show_normal'])->name('products.show');
+Route::get('/search-suggestions', [ProductController::class, 'suggestions'])->name('products.suggestions')->middleware('throttle:60,1');
 Route::get('/categories', [CategoryController::class, 'indexNormal'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'showNormal'])->name('categories.show');
 
@@ -177,6 +187,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/products/{product}/stock-alert', [StockAlertController::class, 'store'])->name('products.stock-alert.store');
     Route::delete('/products/{product}/stock-alert', [StockAlertController::class, 'destroy'])->name('products.stock-alert.destroy');
     Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::post('/change-password/send-otp', [AuthController::class, 'sendChangePasswordOtp'])->middleware('throttle:5,1')->name('password.send-otp');
     Route::put('/change-password', [AuthController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
     
     // Đánh giá sản phẩm yêu cầu đăng nhập và xác thực email.
@@ -203,7 +214,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/chat/heartbeat', [App\Http\Controllers\ChatController::class, 'heartbeat']);
     Route::get('/chat/presence', [App\Http\Controllers\ChatController::class, 'presence']);
 
-Route::get('/search-suggestions', [App\Http\Controllers\ProductController::class, 'suggestions'])->name('products.suggestions');
     // Đơn hàng của người dùng
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');

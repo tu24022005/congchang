@@ -5,6 +5,10 @@
  * Micro-interactions, Tactile Steppers & Modern Toasts.
  */
 
+// Biến dùng chung kiểm tra prefers-reduced-motion trên toàn trang
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+window.prefersReducedMotion = prefersReducedMotion;
+
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
 
@@ -15,6 +19,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const preloaderFill = document.querySelector('.preloader-progress-fill');
     
     if (preloader) {
+        if (prefersReducedMotion.matches) {
+            preloader.style.display = 'none';
+            return;
+        }
+
         let progress = 15;
         if (preloaderFill) preloaderFill.style.width = '15%';
 
@@ -185,6 +194,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const cartIcon = document.querySelector(cartIconSelector);
         if (!cartIcon) return;
 
+        // Nếu bật reduced-motion: chỉ cập nhật/pulse badge, không bay hình ảnh
+        if (prefersReducedMotion.matches) {
+            const cartContainer = cartIcon.closest('.nav-item') || cartIcon.parentElement;
+            const badge = cartContainer?.querySelector('.badge');
+            if (badge) {
+                badge.classList.remove('badge-pulse');
+                void badge.offsetWidth;
+                badge.classList.add('badge-pulse');
+                setTimeout(() => badge.classList.remove('badge-pulse'), 350);
+            }
+            return;
+        }
+
         const imgRect = imgElement.getBoundingClientRect();
         const cartRect = cartIcon.getBoundingClientRect();
 
@@ -328,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const btn = form.querySelector('button');
         if (btn) {
             btn.addEventListener('click', function () {
+                if (prefersReducedMotion.matches) return;
                 this.classList.add('heart-burst');
                 setTimeout(() => this.classList.remove('heart-burst'), 650);
             });
@@ -368,6 +391,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     const el = entry.target;
                     const target = parseInt(el.getAttribute('data-target'), 10);
                     if (isNaN(target)) return;
+
+                    // Nếu bật reduced-motion: hiển thị số cuối ngay lập tức
+                    if (prefersReducedMotion.matches) {
+                        el.innerText = target;
+                        observer.unobserve(el);
+                        return;
+                    }
 
                     const duration = 1800;
                     const startTime = performance.now();

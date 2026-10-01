@@ -113,6 +113,12 @@
                     return;
                 }
 
+                // Nếu bật prefers-reduced-motion: điều hướng ngay, bỏ delay 200ms
+                if (window.prefersReducedMotion?.matches) {
+                    window.location.href = targetUrl.href;
+                    return;
+                }
+
                 e.preventDefault();
                 this.isNavigating = true;
 
@@ -301,6 +307,10 @@
 
         animateCount(element, start, end, duration = 400) {
             if (isNaN(start)) start = 0;
+            if (window.prefersReducedMotion?.matches) {
+                element.textContent = end;
+                return;
+            }
             const startTime = performance.now();
 
             const step = (currentTime) => {
@@ -343,6 +353,7 @@
         },
 
         spawnParticles(element) {
+            if (window.prefersReducedMotion?.matches) return;
             const rect = element.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;

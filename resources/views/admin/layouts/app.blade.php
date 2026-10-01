@@ -116,12 +116,11 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm admin-user-menu">
                                 <li>
-                                    <a class="dropdown-item text-danger fw-bold py-2" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
                                         @csrf
+                                        <button type="submit" class="dropdown-item text-danger fw-bold py-2 border-0 bg-transparent w-100 text-start">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                        </button>
                                     </form>
                                 </li>
                             </ul>

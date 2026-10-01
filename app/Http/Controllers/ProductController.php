@@ -403,9 +403,12 @@ class ProductController extends Controller
     }
 
     // HÀM TÌM KIẾM TRỰC TIẾP (LIVE SEARCH API)
+    // HÀM TÌM KIẾM TRỰC TIẾP (LIVE SEARCH API)
     public function suggestions(Request $request)
     {
-        $search = trim((string) $request->get('query', ''));
+        $search = trim(strip_tags((string) $request->get('query', '')));
+        $search = mb_substr($search, 0, 120);
+
         if ($search === '') {
             return response()->json([
                 'products' => [],
@@ -414,29 +417,33 @@ class ProductController extends Controller
             ]);
         }
 
-        $products = Product::with('category')
+        $products = Product::query()
+            ->select(['id', 'name', 'slug', 'price', 'flash_sale_price', 'flash_sale_starts_at', 'flash_sale_ends_at', 'image', 'category_id'])
+            ->with(['category:id,name'])
             ->where(function ($query) use ($search): void {
                 $query->where('name', 'LIKE', '%' . $search . '%')
                     ->orWhere('description', 'LIKE', '%' . $search . '%')
                     ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'LIKE', '%' . $search . '%'));
             })
-            ->latest()
+            ->latest('id')
             ->take(5)
             ->get()
             ->map(fn (Product $product): array => [
-                'name' => $product->name,
+                'name' => (string) $product->name,
                 'image_url' => $product->image ? asset('storage/' . $product->image) : null,
                 'formatted_price' => number_format($product->effectivePrice(), 0, ',', '.') . ' ₫',
                 'detail_url' => route('products.show', ['product' => $product->slug]),
             ]);
 
-        $categories = Category::withCount('products')
+        $categories = Category::query()
+            ->select(['id', 'name'])
+            ->withCount('products')
             ->where('name', 'LIKE', '%' . $search . '%')
             ->take(4)
             ->get()
             ->map(fn (Category $category): array => [
-                'name' => $category->name,
-                'count' => $category->products_count,
+                'name' => (string) $category->name,
+                'count' => (int) $category->products_count,
                 'url' => route('products.index', ['category' => $category->id, 'search' => $search]),
             ]);
 

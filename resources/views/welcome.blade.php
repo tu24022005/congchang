@@ -60,20 +60,61 @@
     <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
         <span class="carousel-control-next-icon welcome-carousel-icon" aria-hidden="true"></span>
     </button>
+    <button type="button" id="hero-carousel-toggle" class="btn btn-sm btn-light bg-white bg-opacity-75 border rounded-circle hero-carousel-toggle shadow-sm" aria-label="Tạm dừng trình chiếu banner" title="Tạm dừng banner">
+        <i class="bi bi-pause-fill"></i>
+    </button>
 </div>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const hero = document.getElementById('heroCarousel');
+    const heroToggle = document.getElementById('hero-carousel-toggle');
     if (hero && window.bootstrap?.Carousel) {
-        bootstrap.Carousel.getOrCreateInstance(hero, {
+        const bsCarousel = bootstrap.Carousel.getOrCreateInstance(hero, {
             interval: 4000,
             ride: 'carousel',
             wrap: true,
-            pause: false,
+            pause: 'hover',
             touch: true
-        }).cycle();
+        });
+
+        let isHeroPaused = false;
+        if (window.prefersReducedMotion?.matches) {
+            bsCarousel.pause();
+            isHeroPaused = true;
+            if (heroToggle) heroToggle.innerHTML = '<i class="bi bi-play-fill"></i>';
+        } else {
+            bsCarousel.cycle();
+        }
+
+        if (heroToggle) {
+            heroToggle.addEventListener('click', function () {
+                if (isHeroPaused) {
+                    bsCarousel.cycle();
+                    isHeroPaused = false;
+                    this.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                    this.setAttribute('aria-label', 'Tạm dừng trình chiếu banner');
+                    this.setAttribute('title', 'Tạm dừng banner');
+                } else {
+                    bsCarousel.pause();
+                    isHeroPaused = true;
+                    this.innerHTML = '<i class="bi bi-play-fill"></i>';
+                    this.setAttribute('aria-label', 'Phát trình chiếu banner');
+                    this.setAttribute('title', 'Phát banner');
+                }
+            });
+        }
+
+        if (window.prefersReducedMotion) {
+            window.prefersReducedMotion.addEventListener('change', (e) => {
+                if (e.matches) {
+                    bsCarousel.pause();
+                    isHeroPaused = true;
+                    if (heroToggle) heroToggle.innerHTML = '<i class="bi bi-play-fill"></i>';
+                }
+            });
+        }
     }
 });
 </script>
@@ -263,10 +304,74 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const track = document.getElementById('hot-products-track');
-    document.querySelectorAll('.hot-scroll-button').forEach(button => button.addEventListener('click', function () {
-        track.scrollBy({left: Number(this.dataset.direction) * 300, behavior: 'smooth'});
-    }));
-    if (track) setInterval(() => track.scrollBy({left: track.clientWidth * .75, behavior: 'smooth'}), 5000);
+    if (track) {
+        document.querySelectorAll('.hot-scroll-button').forEach(button => {
+            button.addEventListener('click', function () {
+                track.scrollBy({ left: Number(this.dataset.direction) * 300, behavior: 'smooth' });
+            });
+        });
+
+        let hotScrollInterval = null;
+        let isUserInteracting = false;
+
+        const scrollStep = () => {
+            if (isUserInteracting || document.hidden || window.prefersReducedMotion?.matches) return;
+            const maxScroll = track.scrollWidth - track.clientWidth;
+            if (track.scrollLeft >= maxScroll - 20) {
+                track.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                track.scrollBy({ left: track.clientWidth * 0.75, behavior: 'smooth' });
+            }
+        };
+
+        const startAutoScroll = () => {
+            if (hotScrollInterval || window.prefersReducedMotion?.matches) return;
+            hotScrollInterval = setInterval(scrollStep, 5000);
+        };
+
+        const stopAutoScroll = () => {
+            if (hotScrollInterval) {
+                clearInterval(hotScrollInterval);
+                hotScrollInterval = null;
+            }
+        };
+
+        // Pause on mouse hover, focus, touch
+        track.addEventListener('mouseenter', () => { isUserInteracting = true; stopAutoScroll(); });
+        track.addEventListener('focusin', () => { isUserInteracting = true; stopAutoScroll(); });
+        track.addEventListener('touchstart', () => { isUserInteracting = true; stopAutoScroll(); }, { passive: true });
+
+        // Resume on mouse leave, focus out, touch end
+        track.addEventListener('mouseleave', () => { isUserInteracting = false; startAutoScroll(); });
+        track.addEventListener('focusout', () => { isUserInteracting = false; startAutoScroll(); });
+        track.addEventListener('touchend', () => { isUserInteracting = false; startAutoScroll(); }, { passive: true });
+
+        // Dừng khi tab bị ẩn
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoScroll();
+            } else if (!isUserInteracting) {
+                startAutoScroll();
+            }
+        });
+
+        // Lắng nghe reduced-motion thay đổi
+        if (window.prefersReducedMotion) {
+            window.prefersReducedMotion.addEventListener('change', (e) => {
+                if (e.matches) {
+                    stopAutoScroll();
+                } else if (!isUserInteracting) {
+                    startAutoScroll();
+                }
+            });
+        }
+
+        // Dọn dẹp interval khi rời trang
+        window.addEventListener('pagehide', stopAutoScroll);
+        window.addEventListener('beforeunload', stopAutoScroll);
+
+        startAutoScroll();
+    }
 });
 </script>
 @endsection

@@ -46,4 +46,11 @@ return [
             'Shopee Express' => 37000,
         ],
     ],
+    'free_shipping_threshold' => 299000,
+    'seo' => [
+        'site_name' => 'Aloha Beauty - BeatyCare',
+        'default_title' => 'BeatyCare 🌸 Mỹ phẩm & Chăm sóc sắc đẹp chính hãng',
+        'default_description' => 'Khám phá thế giới mỹ phẩm, dưỡng da, chăm sóc cá nhân chính hãng tại BeatyCare (Aloha Beauty). Đảm bảo chất lượng, nhiều khuyến mãi và giao hàng nhanh toàn quốc.',
+        'default_og_image' => 'images/og-default.svg',
+    ],
 ];

@@ -1,5 +1,122 @@
 @extends('layouts.app')
-@section('title', $product->name)
+@section('title', $product->name . ' - BeatyCare')
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeatyCare')), 155))
+@section('og_title', $product->name)
+@section('og_description', \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeatyCare')), 155))
+@section('og_image', $product->image ? asset('storage/' . $product->image) : asset('images/placeholder.svg'))
+@section('og_type', 'product')
+@section('canonical', route('products.show', ['product' => $product->slug]))
+
+@section('structured_data')
+@php
+    $galleryUrls = [];
+    if ($product->image) {
+        $galleryUrls[] = asset('storage/' . $product->image);
+    }
+    foreach ($product->images as $img) {
+        if ($img->image_path) {
+            $galleryUrls[] = asset('storage/' . $img->image_path);
+        }
+    }
+    if (empty($galleryUrls)) {
+        $galleryUrls[] = asset('images/placeholder.svg');
+    }
+
+    $productSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $product->name,
+        'image' => array_values(array_unique($galleryUrls)),
+        'description' => \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeatyCare')), 200),
+        'sku' => $product->product_code ?: ($product->sku ?? ('BC-' . $product->id)),
+        'mpn' => 'BC-' . $product->id,
+        'brand' => [
+            '@type' => 'Brand',
+            'name' => $product->brand?->name ?? 'Aloha Beauty',
+        ],
+        'offers' => [
+            '@type' => 'Offer',
+            'url' => url()->current(),
+            'priceCurrency' => 'VND',
+            'price' => (float)$product->effectivePrice(),
+            'priceValidUntil' => $product->flash_sale_ends_at ? $product->flash_sale_ends_at->toIso8601String() : now()->addMonths(3)->toIso8601String(),
+            'availability' => $product->quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            'itemCondition' => 'https://schema.org/NewCondition',
+        ],
+    ];
+
+    if ($product->reviews->isNotEmpty()) {
+        $reviewCount = $product->reviews->count();
+        $ratingAvg = round($product->reviews->avg('rating'), 1);
+        $productSchema['aggregateRating'] = [
+            '@type' => 'AggregateRating',
+            'ratingValue' => (string)$ratingAvg,
+            'reviewCount' => (string)$reviewCount,
+            'bestRating' => '5',
+            'worstRating' => '1',
+        ];
+
+        $latestReviews = [];
+        foreach ($product->reviews->take(5) as $rev) {
+            $latestReviews[] = [
+                '@type' => 'Review',
+                'author' => [
+                    '@type' => 'Person',
+                    'name' => $rev->reviewer_name ?: ($rev->user?->name ?: 'Khách hàng BeatyCare'),
+                ],
+                'datePublished' => $rev->created_at->toDateString(),
+                'reviewBody' => $rev->comment ?: ('Đánh giá ' . $rev->rating . ' sao'),
+                'reviewRating' => [
+                    '@type' => 'Rating',
+                    'ratingValue' => (string)$rev->rating,
+                    'bestRating' => '5',
+                    'worstRating' => '1',
+                ],
+            ];
+        }
+        $productSchema['review'] = $latestReviews;
+    }
+
+    $breadcrumbElements = [
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Trang chủ',
+            'item' => url('/'),
+        ],
+        [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'Sản phẩm',
+            'item' => route('products.index'),
+        ],
+    ];
+    $pos = 3;
+    if ($product->category) {
+        $breadcrumbElements[] = [
+            '@type' => 'ListItem',
+            'position' => $pos++,
+            'name' => $product->category->name,
+            'item' => route('products.index', ['category' => $product->category->id]),
+        ];
+    }
+    $breadcrumbElements[] = [
+        '@type' => 'ListItem',
+        'position' => $pos,
+        'name' => $product->name,
+        'item' => url()->current(),
+    ];
+
+    $breadcrumbSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => $breadcrumbElements,
+    ];
+@endphp
+<script type="application/ld+json">
+@json([$productSchema, $breadcrumbSchema], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+</script>
+@endsection
 
 @section('content')
 <style>
@@ -101,7 +218,7 @@
                 <div class="detail-gallery">
                     <div class="product-image-zoom">
                         @if($product->image)
-                            <img id="detail-main-image" src="{{ asset('storage/' . $product->image) }}" class="detail-main-image" alt="{{ $product->name }}">
+                            <img id="detail-main-image" src="{{ asset('storage/' . $product->image) }}" class="detail-main-image" alt="{{ $product->name }}" fetchpriority="high" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                         @else
                             <div id="detail-main-image" class="detail-main-image d-grid place-items-center text-muted"><i class="bi bi-image fs-1"></i></div>
                         @endif
@@ -110,10 +227,10 @@
                         $shownGalleryImages = $product->image ? [$product->image] : [];
                     @endphp
                     <div class="d-flex flex-wrap gap-2 mt-3">
-                        @if($product->image)<img class="detail-thumb active" src="{{ asset('storage/' . $product->image) }}" data-image="{{ asset('storage/' . $product->image) }}" alt="Ảnh chính">@endif
+                        @if($product->image)<img class="detail-thumb active" src="{{ asset('storage/' . $product->image) }}" data-image="{{ asset('storage/' . $product->image) }}" alt="Ảnh chính" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">@endif
                         @foreach($product->images as $image)
                             @if($image->image_path && !in_array($image->image_path, $shownGalleryImages, true))
-                                <img class="detail-thumb" src="{{ asset('storage/' . $image->image_path) }}" data-image="{{ asset('storage/' . $image->image_path) }}" alt="Ảnh sản phẩm">
+                                <img class="detail-thumb" src="{{ asset('storage/' . $image->image_path) }}" data-image="{{ asset('storage/' . $image->image_path) }}" alt="Ảnh sản phẩm" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                 @php
                                     $shownGalleryImages[] = $image->image_path;
                                 @endphp
@@ -121,7 +238,7 @@
                         @endforeach
                         @foreach($product->variations as $variation)
                             @if($variation->image && !in_array($variation->image, $shownGalleryImages, true))
-                                <img class="detail-thumb" src="{{ asset('storage/' . $variation->image) }}" data-image="{{ asset('storage/' . $variation->image) }}" data-variation="{{ $variation->id }}" alt="Ảnh {{ $variation->sku ?: 'biến thể' }}">
+                                <img class="detail-thumb" src="{{ asset('storage/' . $variation->image) }}" data-image="{{ asset('storage/' . $variation->image) }}" data-variation="{{ $variation->id }}" alt="Ảnh {{ $variation->sku ?: 'biến thể' }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                 @php
                                     $shownGalleryImages[] = $variation->image;
                                 @endphp

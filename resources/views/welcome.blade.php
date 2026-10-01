@@ -1,5 +1,54 @@
 @extends('layouts.app')
-@section('title', 'Trang chủ - BeatyCare 🌸')
+@section('title', 'BeatyCare 🌸 - Mỹ phẩm & Chăm sóc sắc đẹp chính hãng Aloha Beauty')
+@section('canonical', route('welcome'))
+
+@section('structured_data')
+<script type="application/ld+json">
+@json([
+    '@context' => 'https://schema.org',
+    '@graph' => [
+        [
+            '@type' => 'Organization',
+            '@id' => url('/#organization'),
+            'name' => config('shop.seo.site_name', 'Aloha Beauty'),
+            'url' => url('/'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => asset(config('shop.seo.default_og_image', 'images/og-default.svg')),
+            ],
+            'contactPoint' => [
+                [
+                    '@type' => 'ContactPoint',
+                    'telephone' => '+84-900-000-000',
+                    'contactType' => 'customer service',
+                    'areaServed' => 'VN',
+                    'availableLanguage' => 'Vietnamese',
+                ],
+            ],
+        ],
+        [
+            '@type' => 'WebSite',
+            '@id' => url('/#website'),
+            'url' => url('/'),
+            'name' => 'BeatyCare',
+            'description' => config('shop.seo.default_description'),
+            'publisher' => [
+                '@id' => url('/#organization'),
+            ],
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => [
+                    '@type' => 'EntryPoint',
+                    'urlTemplate' => url('/products') . '?search={search_term_string}',
+                ],
+                'query-input' => 'required name=search_term_string',
+            ],
+            'inLanguage' => 'vi',
+        ],
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+</script>
+@endsection
 
 @section('content')
 @auth
@@ -41,7 +90,7 @@
     <div class="carousel-inner">
         @foreach($banners as $index => $banner)
         <div class="carousel-item {{ $index === 0 ? 'active' : '' }} overflow-hidden">
-            <img src="{{ $banner->image_source }}" class="ken-burns-bg w-100 h-100" style="object-fit: cover;" alt="{{ $banner->alt_text ?: $banner->title }}">
+            <img src="{{ $banner->image_source }}" class="ken-burns-bg w-100 h-100" style="object-fit: cover;" alt="{{ $banner->alt_text ?: $banner->title }}" {!! $index === 0 ? 'fetchpriority="high"' : 'loading="lazy" decoding="async"' !!} onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
             <div class="carousel-caption">
                 @if($banner->badge)<span class="badge bg-warning text-dark mb-2 px-3 py-2 fs-6 rounded-pill">{{ $banner->badge }}</span>@endif
                 <h1>{{ $banner->title }}</h1>
@@ -137,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card">
                     @if($category->image)
-                        <span class="category-card-cover"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"></span>
+                        <span class="category-card-cover"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';"></span>
                     @else
                         <span class="category-card-icon"><i class="bi bi-bag-heart"></i></span>
                     @endif
@@ -170,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <a href="{{ route('products.show', ['product' => $flashProduct->slug]) }}" class="flash-sale-card">
                 <div class="flash-sale-image">
                     @if($flashProduct->image)
-                        <img src="{{ asset('storage/' . $flashProduct->image) }}" alt="{{ $flashProduct->name }}">
+                        <img src="{{ asset('storage/' . $flashProduct->image) }}" alt="{{ $flashProduct->name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                     @else
                         <i class="bi bi-bag-heart"></i>
                     @endif
@@ -213,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 $hotMaxPrice = $hotPrices->isNotEmpty() ? $hotPrices->max() : $hotProduct->effectivePrice();
             @endphp
             <a href="{{ route('products.show', ['product' => $hotProduct->slug]) }}" class="hot-product-card">
-                <div class="hot-product-image">@if($hotProduct->image)<img src="{{ asset('storage/' . $hotProduct->image) }}" alt="{{ $hotProduct->name }}">@else<i class="bi bi-bag-heart"></i>@endif</div>
+                <div class="hot-product-image">@if($hotProduct->image)<img src="{{ asset('storage/' . $hotProduct->image) }}" alt="{{ $hotProduct->name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">@else<i class="bi bi-bag-heart"></i>@endif</div>
                 <div class="p-3">
                     @if($hotProduct->isFlashSaleActive())
                         <span class="badge bg-danger rounded-pill mb-2"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span>
@@ -243,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 <div class="mb-3 shine-sweep rounded-3">
                     @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image">
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                     @else
                         <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-2 product-icon-placeholder">
                             <i class="bi bi-bag-heart text-primary fs-3"></i>

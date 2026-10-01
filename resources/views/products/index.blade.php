@@ -1,5 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Mỹ phẩm & chăm sóc cá nhân - BeatyCare 🌸')
+@section('title', 'Tất cả sản phẩm - BeatyCare 🌸')
+@section('canonical', route('products.index'))
+@if(request()->filled('search') || request()->has('page'))
+    @push('head')
+        <meta name="robots" content="noindex,follow">
+    @endpush
+@endif
 
 @section('content')
 <!-- LỜI CHÀO -->
@@ -19,7 +25,7 @@
             <div class="col-6 col-md-3">
                 <a href="{{ route('products.index', ['category' => $category->id]) }}" class="category-card {{ (string) request('category') === (string) $category->id ? 'active' : '' }}">
                     @if($category->image)
-                        <span class="category-card-cover"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"></span>
+                        <span class="category-card-cover"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';"></span>
                     @else
                         <span class="category-card-icon"><i class="bi bi-bag-heart"></i></span>
                     @endif
@@ -120,7 +126,7 @@
                 
                 <div class="mb-3 shine-sweep rounded-3">
                     @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image">
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                     @else
                         <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-2 product-icon-placeholder">
                             <i class="bi bi-bag-heart text-primary fs-3"></i>

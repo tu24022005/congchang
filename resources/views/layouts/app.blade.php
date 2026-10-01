@@ -4,7 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'BeatyCare 🌸')</title>
+    <title>@yield('title', config('shop.seo.default_title'))</title>
+    <meta name="description" content="@yield('meta_description', config('shop.seo.default_description'))">
+    <meta name="theme-color" content="#f88379" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="canonical" href="@yield('canonical', url()->current())">
+
+    <!-- Open Graph / Facebook / Zalo -->
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="@yield('canonical', url()->current())">
+    <meta property="og:title" content="@yield('og_title', View::getSection('title') ? View::getSection('title') : config('shop.seo.default_title'))">
+    <meta property="og:description" content="@yield('og_description', View::getSection('meta_description') ? View::getSection('meta_description') : config('shop.seo.default_description'))">
+    <meta property="og:image" content="@yield('og_image', asset(config('shop.seo.default_og_image')))">
+    <meta property="og:site_name" content="{{ config('shop.seo.site_name') }}">
+    <meta property="og:locale" content="vi_VN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('og_title', View::getSection('title') ? View::getSection('title') : config('shop.seo.default_title'))">
+    <meta name="twitter:description" content="@yield('og_description', View::getSection('meta_description') ? View::getSection('meta_description') : config('shop.seo.default_description'))">
+    <meta name="twitter:image" content="@yield('og_image', asset(config('shop.seo.default_og_image')))">
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -18,6 +38,8 @@
     <link href="{{ asset_v('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset_v('css/animations.css') }}" rel="stylesheet">
     @stack('styles')
+    @yield('structured_data')
+    @stack('schema')
     <script>
         if (localStorage.getItem('beatycare-theme') === 'dark') {
             document.documentElement.classList.add('dark-mode');
@@ -196,7 +218,7 @@
                                     @if($cartCount > 0)
                                         @foreach($cartItems as $item)
                                             <li class="d-flex align-items-center mb-3">
-                                                <img src="{{ asset('storage/' . ($item->product->image ?? '')) }}" class="rounded me-3 object-fit-cover" width="50" height="50" alt="" onerror="this.src=''">
+                                                <img src="{{ asset('storage/' . ($item->product->image ?? '')) }}" class="rounded me-3 object-fit-cover" width="50" height="50" alt="{{ $item->product->name ?? 'Sản phẩm' }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                                 <div class="flex-grow-1">
                                                     <div class="small fw-semibold text-truncate" style="max-width: 180px;">{{ $item->product->name ?? 'Sản phẩm' }}</div>
                                                     <div class="small text-muted">{{ number_format($item->price, 0, ',', '.') }} đ x {{ $item->quantity }}</div>

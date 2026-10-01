@@ -18,7 +18,7 @@
                 <div class="card-body p-4 d-flex flex-column">
                     <div class="mb-3">
                         @if($product->image)
-                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image">
+                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded product-list-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                         @else
                             <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-2 product-icon-placeholder"><i class="bi bi-bag-heart text-primary fs-3"></i></div>
                         @endif

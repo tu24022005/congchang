@@ -99,7 +99,7 @@
                                                 <div class="d-flex align-items-center cart-product-cell">
                                                     <input type="checkbox" class="form-check-input cart-checkbox-input cart-product-select me-3" aria-label="Chọn {{ $details['name'] }}" checked>
                                                     @if(isset($details['image']) && $details['image'])
-                                                        <img src="{{ asset('storage/' . $details['image']) }}" width="68" height="68" class="img-thumbnail rounded-3 shadow-sm me-3 cart-product-image object-fit-cover" alt="{{ $details['name'] }}">
+                                                        <img src="{{ asset('storage/' . $details['image']) }}" width="68" height="68" class="img-thumbnail rounded-3 shadow-sm me-3 cart-product-image object-fit-cover" alt="{{ $details['name'] }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                                     @else
                                                         <div class="bg-light rounded-3 border me-3 storefront-thumb-placeholder cart-product-image d-flex align-items-center justify-content-center" style="width: 68px; height: 68px;">
                                                             <i class="bi bi-flower1 text-muted fs-3"></i>

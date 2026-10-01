@@ -103,7 +103,7 @@
                                     <td class="text-start">
                                         @if($orderItems->isNotEmpty())
                                             @php $firstItem = $orderItems->first(); @endphp
-                                            <div class="order-product-preview"><img src="{{ $firstItem->product->image ? asset('storage/' . $firstItem->product->image) : asset('images/placeholder.jpg') }}" alt="{{ $firstItem->product->name }}"><div><strong>{{ $firstItem->product->name }}</strong><small>{{ $firstItem->quantity }} sản phẩm{{ $orderItems->count() > 1 ? ' · +' . ($orderItems->count() - 1) . ' sản phẩm khác' : '' }}</small></div></div>
+                                            <div class="order-product-preview"><img src="{{ $firstItem->product && $firstItem->product->image ? asset('storage/' . $firstItem->product->image) : asset('images/placeholder.svg') }}" alt="{{ $firstItem->product->name ?? 'Sản phẩm' }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';"><div><strong>{{ $firstItem->product->name ?? 'Sản phẩm' }}</strong><small>{{ $firstItem->quantity }} sản phẩm{{ $orderItems->count() > 1 ? ' · +' . ($orderItems->count() - 1) . ' sản phẩm khác' : '' }}</small></div></div>
                                         @else
                                             <span class="text-muted small">Sản phẩm không còn tồn tại</span>
                                         @endif

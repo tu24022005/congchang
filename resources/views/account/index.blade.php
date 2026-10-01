@@ -49,7 +49,7 @@
             <div class="account-sidebar h-100">
                 <div class="account-avatar">
                     @if($user->avatar_path)
-                        <img src="{{ Storage::url($user->avatar_path) }}" alt="Ảnh đại diện của {{ $user->name }}">
+                        <img src="{{ Storage::url($user->avatar_path) }}" alt="Ảnh đại diện của {{ $user->name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                     @else
                         <i class="bi bi-person"></i>
                     @endif
@@ -81,9 +81,14 @@
                     </div>
                     <small class="d-block mt-2">
                         @if($nextTier)
-                            Còn {{ number_format(max(0, $nextTier['threshold'] - $completedSpend), 0, ',', '.') }} đ để lên hạng {{ $nextTier['name'] }}.
+                            @php
+                                $val = $effectiveValue ?? $completedSpend;
+                                $remainingSpend = max(0, $nextTier['threshold'] - $val);
+                                $remainingPoints = (int) ceil($remainingSpend / 10000);
+                            @endphp
+                            Còn {{ number_format($remainingSpend, 0, ',', '.') }} đ (hoặc {{ number_format($remainingPoints) }} điểm) để lên hạng {{ $nextTier['name'] }}.
                         @else
-                            Bạn đang ở hạng thành viên cao nhất.
+                            <i class="bi bi-patch-check-fill text-warning me-1"></i>Bạn đang sở hữu hạng thành viên cao nhất ({{ $membershipTier['name'] }}).
                         @endif
                     </small>
                     <a href="{{ route('loyalty.index') }}" class="btn btn-light btn-sm rounded-pill w-100 mt-3">Xem lịch sử điểm</a>

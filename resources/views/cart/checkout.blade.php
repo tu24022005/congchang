@@ -125,7 +125,7 @@
                             <div class="d-flex align-items-center justify-content-between p-3 border-bottom checkout-product-row">
                                 <div class="d-flex align-items-center gap-3">
                                     @if(isset($details['image']) && $details['image'])
-                                        <img src="{{ asset('storage/' . $details['image']) }}" alt="{{ $details['name'] }}" width="64" height="64" class="rounded-3 border object-fit-cover shadow-sm">
+                                        <img src="{{ asset('storage/' . $details['image']) }}" alt="{{ $details['name'] }}" width="64" height="64" class="rounded-3 border object-fit-cover shadow-sm" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                     @else
                                         <div class="bg-light rounded-3 border d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
                                             <i class="bi bi-flower1 text-muted fs-3"></i>

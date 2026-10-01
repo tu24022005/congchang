@@ -2559,6 +2559,22 @@ span.ripple {
 /* ==========================================
     BƯỚC D: TRANG CHỦ (Home)
     ========================================== */
+.hero-carousel {
+    border-radius: var(--radius-lg, 16px);
+    overflow: hidden;
+}
+.hero-carousel .carousel-item {
+    aspect-ratio: 16 / 6;
+    min-height: 280px;
+    max-height: 520px;
+    background-color: #f1f5f9;
+}
+@media (max-width: 768px) {
+    .hero-carousel .carousel-item {
+        aspect-ratio: 16 / 9;
+        min-height: 220px;
+    }
+}
 .ken-burns-bg {
     animation: kenBurns 15s infinite alternate linear;
     transform-origin: center;
@@ -2566,6 +2582,19 @@ span.ripple {
 @keyframes kenBurns {
     0% { transform: scale(1); }
     100% { transform: scale(1.15); }
+}
+
+/* Chống Layout Shift (CLS = 0) cho hình ảnh */
+.product-card .product-list-image,
+.detail-main-image,
+.detail-thumb,
+.recommendation-image,
+.flash-sale-image img,
+.hot-product-image img,
+.category-card-cover img,
+.storefront-thumb-image {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
 }
 
 /* ==========================================

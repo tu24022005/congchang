@@ -244,7 +244,7 @@
                             <tr>
                                 <td class="ps-4">
                                     @if($item->product && $item->product->image)
-                                        <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}" class="img-thumbnail rounded-3 shadow-sm storefront-thumb-image">
+                                        <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}" class="img-thumbnail rounded-3 shadow-sm storefront-thumb-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                     @else
                                         <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-muted border shadow-sm storefront-thumb-placeholder">
                                             <i class="bi bi-image"></i>

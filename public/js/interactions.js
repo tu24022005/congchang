@@ -107,29 +107,11 @@
                     return;
                 }
 
-                // Guard against double clicks during navigation
-                if (this.isNavigating) {
-                    e.preventDefault();
-                    return;
-                }
-
-                e.preventDefault();
-                this.isNavigating = true;
-
-                // Show exit transition
-                document.body.classList.add('page-exit');
-
-                // Trigger top progress line
+                // Show instant top progress indicator without blocking navigation or breaking bfcache
                 if (this.progressBar) {
                     this.progressBar.style.opacity = '1';
                     this.progressBar.classList.add('is-loading');
                 }
-
-                // 200ms smooth delay then navigate
-                setTimeout(() => {
-                    window.location.href = targetUrl.href;
-                }, 200);
-
             } catch (err) {
                 // If invalid URL, fallback to default behavior
             }
@@ -301,6 +283,10 @@
 
         animateCount(element, start, end, duration = 400) {
             if (isNaN(start)) start = 0;
+            if (window.prefersReducedMotion?.matches) {
+                element.textContent = end;
+                return;
+            }
             const startTime = performance.now();
 
             const step = (currentTime) => {
@@ -343,6 +329,7 @@
         },
 
         spawnParticles(element) {
+            if (window.prefersReducedMotion?.matches) return;
             const rect = element.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;

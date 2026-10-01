@@ -121,11 +121,5 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.modal').forEach(function (modal) {
-            document.body.appendChild(modal);
-        });
-    });
-</script>
+<script src="{{ asset_v('js/views/admin-products-index-blade-php.js') }}" defer></script>
 @endsection

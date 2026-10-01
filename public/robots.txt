@@ -1,2 +1,18 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /orders
+Disallow: /wishlist
+Disallow: /chat
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
+Disallow: /email
+Disallow: /auth
+Disallow: /loyalty-points
+Disallow: /refunds
+Disallow: /search-suggestions
+
+Sitemap: http://127.0.0.1:8000/sitemap.xml

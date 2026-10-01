@@ -14,6 +14,11 @@ class Product extends Model
         'product_code',
         'slug',
         'description',
+        'ingredients',
+        'usage_instructions',
+        'skin_types',
+        'expiry_info',
+        'origin',
         'quantity',
         'price',
         'flash_sale_price',
@@ -29,7 +34,18 @@ class Product extends Model
         'flash_sale_price' => 'decimal:2',
         'flash_sale_starts_at' => 'datetime',
         'flash_sale_ends_at' => 'datetime',
+        'skin_types' => 'array',
     ];
+
+    public function questions()
+    {
+        return $this->hasMany(ProductQuestion::class)->where('is_visible', true)->latest();
+    }
+
+    public function allQuestions()
+    {
+        return $this->hasMany(ProductQuestion::class)->latest();
+    }
 
     public function isFlashSaleActive(): bool
     {
@@ -46,6 +62,14 @@ class Product extends Model
         return $this->isFlashSaleActive()
             ? min($basePrice, (float) $this->flash_sale_price)
             : $basePrice;
+    }
+
+    public function getAvailableStockAttribute(): int
+    {
+        if ($this->relationLoaded('variations') && $this->variations->isNotEmpty()) {
+            return (int) $this->variations->sum('stock');
+        }
+        return (int) $this->quantity;
     }
 
     public function getRouteKeyName(): string

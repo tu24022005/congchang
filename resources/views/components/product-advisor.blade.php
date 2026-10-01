@@ -27,5 +27,5 @@
         </form>
     </section>
 </div>
-<link rel="stylesheet" href="{{ asset('css/product-advisor.css') }}?v={{ time() }}">
-<script src="{{ asset('js/product-advisor.js') }}?v={{ time() }}"></script>
+<link rel="stylesheet" href="{{ asset_v('css/product-advisor.css') }}">
+<script src="{{ asset_v('js/product-advisor.js') }}" defer></script>

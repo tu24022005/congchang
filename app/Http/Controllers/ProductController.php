@@ -40,6 +40,12 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'product_code' => 'nullable|string|max:50|alpha_dash|unique:products,product_code',
             'description' => 'nullable|string',
+            'ingredients' => 'nullable|string',
+            'usage_instructions' => 'nullable|string',
+            'skin_types' => 'nullable|array',
+            'skin_types.*' => 'string|max:50',
+            'expiry_info' => 'nullable|string|max:255',
+            'origin' => 'nullable|string|max:100',
             'quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
@@ -113,6 +119,12 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'product_code' => 'nullable|string|max:50|alpha_dash|unique:products,product_code,' . $product->id,
             'description' => 'nullable|string',
+            'ingredients' => 'nullable|string',
+            'usage_instructions' => 'nullable|string',
+            'skin_types' => 'nullable|array',
+            'skin_types.*' => 'string|max:50',
+            'expiry_info' => 'nullable|string|max:255',
+            'origin' => 'nullable|string|max:100',
             'quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
@@ -298,13 +310,30 @@ class ProductController extends Controller
             ? $request->user()->wishlistProducts()->pluck('products.id')
             : collect();
 
+        if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'html' => view('products._grid', compact('products', 'wishlistProductIds'))->render(),
+                'pagination_html' => $products->hasPages() ? $products->links('pagination::bootstrap-5')->render() : '',
+                'total' => $products->total(),
+                'has_more' => $products->hasMorePages(),
+                'next_page_url' => $products->nextPageUrl(),
+            ]);
+        }
+
         return view('products.index', compact('products', 'categories', 'brands', 'wishlistProductIds'));
     }
 
     // ĐÃ TÍCH HỢP AI GỢI Ý VÀO HÀM NÀY CHO NGƯỜI DÙNG XEM
     public function show_normal(Request $request, Product $product)
     {
-        $product->load(['category', 'brand', 'images', 'variations', 'reviews.user']);
+        $product->load([
+            'category',
+            'brand',
+            'images',
+            'variations',
+            'reviews' => fn($q) => $q->where('is_visible', true)->with(['user', 'helpfulVotes'])->latest(),
+            'questions' => fn($q) => $q->where('is_visible', true)->with(['user', 'answerer'])->latest(),
+        ]);
         $isWishlisted = $request->user()
             ? $request->user()->wishlistProducts()->whereKey($product->id)->exists()
             : false;
@@ -344,6 +373,69 @@ class ProductController extends Controller
         }
 
         return view('products.show', compact('product', 'recommendations', 'isWishlisted', 'isStockAlertSubscribed'));
+    }
+
+    public function quickView(Product $product)
+    {
+        $product->load(['category', 'brand', 'images', 'variations']);
+
+        $gallery = [];
+        if ($product->image) {
+            $gallery[] = asset('storage/' . $product->image);
+        }
+        foreach ($product->images as $img) {
+            if ($img->image_path) {
+                $gallery[] = asset('storage/' . $img->image_path);
+            }
+        }
+        if (empty($gallery)) {
+            $gallery[] = asset('images/placeholder.svg');
+        }
+
+        $variations = $product->variations->map(function ($v) use ($product) {
+            $label = collect([
+                $v->color,
+                $v->size_value ? rtrim(rtrim($v->size_value, '0'), '.') . $v->size_unit : null,
+                $v->storage,
+            ])->filter()->implode(' · ');
+
+            return [
+                'id' => $v->id,
+                'sku' => $v->sku ?: 'Mặc định',
+                'label' => $label ?: 'Mặc định',
+                'price' => (float) $product->effectivePrice($v),
+                'formatted_price' => number_format($product->effectivePrice($v), 0, ',', '.') . ' ₫',
+                'original_price' => (float) $v->price,
+                'formatted_original_price' => number_format($v->price, 0, ',', '.') . ' ₫',
+                'stock' => (int) $v->stock,
+                'image' => $v->image ? asset('storage/' . $v->image) : null,
+            ];
+        });
+
+        $effectivePrice = $product->effectivePrice();
+        $isFlashSale = $product->isFlashSaleActive();
+
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'category_name' => $product->category?->name ?? 'BeatyCare 🌸',
+            'brand_name' => $product->brand?->name ?? '',
+            'description' => \Illuminate\Support\Str::limit(strip_tags($product->description ?: 'Sản phẩm chăm sóc da và cơ thể chính hãng Aloha Beauty.'), 180),
+            'price' => (float) $effectivePrice,
+            'formatted_price' => number_format($effectivePrice, 0, ',', '.') . ' ₫',
+            'original_price' => (float) $product->price,
+            'formatted_original_price' => number_format($product->price, 0, ',', '.') . ' ₫',
+            'is_flash_sale' => $isFlashSale,
+            'flash_sale_end' => $isFlashSale && $product->flash_sale_ends_at ? $product->flash_sale_ends_at->format('d/m H:i') : null,
+            'stock' => $product->variations->isNotEmpty() ? (int) $product->variations->sum('stock') : (int) $product->quantity,
+            'main_image' => $gallery[0],
+            'gallery' => array_values(array_unique($gallery)),
+            'has_variations' => $variations->isNotEmpty(),
+            'variations' => $variations,
+            'detail_url' => route('products.show', ['product' => $product->slug]),
+            'add_cart_url' => route('cart.add', ['product' => $product->id]),
+        ]);
     }
 
     private function syncVariations(Product $product, array $variations, array $variationFiles = []): void
@@ -403,9 +495,12 @@ class ProductController extends Controller
     }
 
     // HÀM TÌM KIẾM TRỰC TIẾP (LIVE SEARCH API)
+    // HÀM TÌM KIẾM TRỰC TIẾP (LIVE SEARCH API)
     public function suggestions(Request $request)
     {
-        $search = trim((string) $request->get('query', ''));
+        $search = trim(strip_tags((string) $request->get('query', '')));
+        $search = mb_substr($search, 0, 120);
+
         if ($search === '') {
             return response()->json([
                 'products' => [],
@@ -414,29 +509,33 @@ class ProductController extends Controller
             ]);
         }
 
-        $products = Product::with('category')
+        $products = Product::query()
+            ->select(['id', 'name', 'slug', 'price', 'flash_sale_price', 'flash_sale_starts_at', 'flash_sale_ends_at', 'image', 'category_id'])
+            ->with(['category:id,name'])
             ->where(function ($query) use ($search): void {
                 $query->where('name', 'LIKE', '%' . $search . '%')
                     ->orWhere('description', 'LIKE', '%' . $search . '%')
                     ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'LIKE', '%' . $search . '%'));
             })
-            ->latest()
+            ->latest('id')
             ->take(5)
             ->get()
             ->map(fn (Product $product): array => [
-                'name' => $product->name,
+                'name' => (string) $product->name,
                 'image_url' => $product->image ? asset('storage/' . $product->image) : null,
                 'formatted_price' => number_format($product->effectivePrice(), 0, ',', '.') . ' ₫',
                 'detail_url' => route('products.show', ['product' => $product->slug]),
             ]);
 
-        $categories = Category::withCount('products')
+        $categories = Category::query()
+            ->select(['id', 'name'])
+            ->withCount('products')
             ->where('name', 'LIKE', '%' . $search . '%')
             ->take(4)
             ->get()
             ->map(fn (Category $category): array => [
-                'name' => $category->name,
-                'count' => $category->products_count,
+                'name' => (string) $category->name,
+                'count' => (int) $category->products_count,
                 'url' => route('products.index', ['category' => $category->id, 'search' => $search]),
             ]);
 

@@ -8,10 +8,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash; 
 use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
 use App\Services\CartService;
+use App\Services\ActivityLogService;
+use App\Notifications\ChangePasswordOtpNotification;
 
 class AuthController extends Controller 
 { 
@@ -181,32 +184,40 @@ class AuthController extends Controller
             'email' => $message,
         ])->onlyInput('email');
     } 
-// Hiển thị form đổi mật khẩu
-    public function showChangePasswordForm()
+    // Hiển thị form đổi mật khẩu
+    public function showChangePasswordForm(Request $request)
     {
+        $user = $request->user() ?? Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
         return view('auth.change-password', [
             'authenticatedWithGoogle' => session('authenticated_with_google', false),
+            'user' => $user,
+            'maskedEmail' => $this->maskEmail($user->email ?? ''),
         ]);
     }
 
     public function account(Request $request)
     {
         $user = $request->user();
-        $completedSpend = $user->orders()->where('status', 'completed')->sum('total');
-        $membershipTier = User::membershipTierFor($completedSpend);
+        $completedSpend = (float) $user->orders()->whereIn('status', ['paid', 'completed'])->sum('total');
+        $effectiveValue = max($completedSpend, (float) ($user->loyalty_points * 10000));
+        $membershipTier = User::membershipTierFor($completedSpend, (int) $user->loyalty_points);
         $membershipTiers = [
-            ['name' => 'Mới tham gia', 'threshold' => 0],
-            ['name' => 'Thành viên', 'threshold' => 1000000],
-            ['name' => 'Bạc', 'threshold' => 2000000],
-            ['name' => 'Vàng', 'threshold' => 5000000],
-            ['name' => 'Bạch kim', 'threshold' => 10000000],
-            ['name' => 'Kim cương', 'threshold' => 20000000],
+            ['name' => 'Mới tham gia', 'threshold' => 0, 'points' => 0],
+            ['name' => 'Thành viên', 'threshold' => 1000000, 'points' => 100],
+            ['name' => 'Bạc', 'threshold' => 2000000, 'points' => 200],
+            ['name' => 'Vàng', 'threshold' => 5000000, 'points' => 500],
+            ['name' => 'Bạch kim', 'threshold' => 10000000, 'points' => 1000],
+            ['name' => 'Kim cương', 'threshold' => 20000000, 'points' => 2000],
         ];
-        $nextTier = collect($membershipTiers)->first(fn (array $tier) => $completedSpend < $tier['threshold']);
+        $nextTier = collect($membershipTiers)->first(fn (array $tier) => $effectiveValue < $tier['threshold']);
         $previousThreshold = collect($membershipTiers)
-            ->last(fn (array $tier) => $completedSpend >= $tier['threshold'])['threshold'];
+            ->last(fn (array $tier) => $effectiveValue >= $tier['threshold'])['threshold'] ?? 0;
         $tierProgress = $nextTier
-            ? min(100, max(0, (($completedSpend - $previousThreshold) / max(1, $nextTier['threshold'] - $previousThreshold)) * 100))
+            ? min(100, max(0, (($effectiveValue - $previousThreshold) / max(1, $nextTier['threshold'] - $previousThreshold)) * 100))
             : 100;
         $addresses = $user->addresses()->orderByDesc('is_default')->latest('id')->get();
         $orderStats = [
@@ -224,7 +235,7 @@ class AuthController extends Controller
         $unreadNotificationCount = $user->unreadNotifications()->count();
 
         return view('account.index', compact(
-            'user', 'completedSpend', 'membershipTier', 'nextTier', 'tierProgress', 'addresses', 'orderStats',
+            'user', 'completedSpend', 'effectiveValue', 'membershipTier', 'nextTier', 'tierProgress', 'addresses', 'orderStats',
             'wishlistCount', 'voucherCount', 'unreadNotificationCount'
         ));
     }
@@ -320,25 +331,100 @@ class AuthController extends Controller
         return back()->with('success', 'Thông tin tài khoản đã được cập nhật.');
     }
 
-    // Xử lý logic đổi mật khẩu
+    // Gửi mã OTP xác thực đổi mật khẩu qua email
+    public function sendChangePasswordOtp(Request $request)
+    {
+        $user = $request->user() ?? Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Vui lòng đăng nhập lại để tiếp tục.'], 401);
+        }
+
+        // Chống spam: Giới hạn gửi lại sau tối thiểu 60 giây
+        $lastSent = session('change_password_otp_last_sent');
+        if ($lastSent && now()->diffInSeconds($lastSent) < 60) {
+            $remaining = 60 - now()->diffInSeconds($lastSent);
+            return response()->json([
+                'success' => false,
+                'message' => 'Vui lòng đợi ' . $remaining . ' giây trước khi yêu cầu gửi lại mã OTP.'
+            ], 429);
+        }
+
+        // Tạo mã OTP 6 chữ số ngẫu nhiên
+        $otp = (string) random_int(100000, 999999);
+        $expiresMinutes = 10;
+
+        session([
+            'change_password_otp' => $otp,
+            'change_password_otp_expires_at' => now()->addMinutes($expiresMinutes)->timestamp,
+            'change_password_otp_last_sent' => now(),
+        ]);
+
+        Cache::put('change_password_otp_' . $user->id, [
+            'code' => $otp,
+            'expires_at' => now()->addMinutes($expiresMinutes)->timestamp,
+        ], now()->addMinutes($expiresMinutes));
+
+        try {
+            $user->notifyNow(new ChangePasswordOtpNotification($otp, $expiresMinutes));
+        } catch (\Throwable $e) {
+            Log::error('Lỗi gửi email OTP đổi mật khẩu: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể gửi email OTP lúc này. Vui lòng kiểm tra lại cấu hình thư.'
+            ], 500);
+        }
+
+        $maskedEmail = $this->maskEmail($user->email ?? '');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mã OTP 6 chữ số đã được gửi đến email ' . $maskedEmail . '. Mã có hiệu lực trong 10 phút.',
+            'masked_email' => $maskedEmail,
+        ]);
+    }
+
+    // Xử lý logic đổi mật khẩu kèm xác thực OTP
     public function updatePassword(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user() ?? Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
         $authenticatedWithGoogle = $request->session()->get('authenticated_with_google', false);
 
         $request->validate([
             'current_password' => $authenticatedWithGoogle ? 'nullable' : 'required',
             'new_password' => 'required|min:8|confirmed',
+            'otp' => 'required|digits:6',
         ], [
             'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
             'new_password.required' => 'Vui lòng nhập mật khẩu mới.',
             'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
-            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.'
+            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
+            'otp.required' => 'Vui lòng nhập mã OTP đã nhận qua email.',
+            'otp.digits' => 'Mã xác thực OTP phải gồm 6 chữ số.',
         ]);
 
         // Kiểm tra mật khẩu cũ có đúng không
         if (!$authenticatedWithGoogle && !Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không đúng.']);
+            return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không chính xác.'])->withInput();
+        }
+
+        // Kiểm tra mã OTP
+        $sessionOtp = session('change_password_otp');
+        $sessionExpiresAt = session('change_password_otp_expires_at');
+        $cached = Cache::get('change_password_otp_' . $user->id);
+
+        $validOtp = $sessionOtp ?? ($cached['code'] ?? null);
+        $expiresAt = $sessionExpiresAt ?? ($cached['expires_at'] ?? 0);
+
+        if (!$validOtp || now()->timestamp > $expiresAt) {
+            return back()->withErrors(['otp' => 'Mã OTP đã hết hạn hoặc chưa được tạo. Vui lòng bấm "Gửi mã OTP" để nhận mã mới.'])->withInput();
+        }
+
+        if ((string) $request->otp !== (string) $validOtp) {
+            return back()->withErrors(['otp' => 'Mã OTP không chính xác. Vui lòng kiểm tra lại email.'])->withInput();
         }
 
         // Cập nhật mật khẩu mới
@@ -346,9 +432,34 @@ class AuthController extends Controller
         $user->login_attempts = 0;
         $user->login_locked_at = null;
         $user->save();
-        $request->session()->forget('authenticated_with_google');
 
-        return back()->with('success', 'Đổi mật khẩu thành công!');
+        // Xóa OTP khỏi session và cache
+        session()->forget(['change_password_otp', 'change_password_otp_expires_at', 'change_password_otp_last_sent', 'authenticated_with_google']);
+        Cache::forget('change_password_otp_' . $user->id);
+
+        ActivityLogService::record(
+            'auth.password_changed',
+            'Tài khoản ' . $user->name . ' đã đổi mật khẩu thành công qua xác thực OTP email.',
+            $user
+        );
+
+        return back()->with('success', 'Đổi mật khẩu thành công! Mật khẩu mới của bạn đã có hiệu lực.');
+    }
+
+    protected function maskEmail(?string $email): string
+    {
+        if (empty($email)) return '';
+        $parts = explode('@', $email);
+        if (count($parts) !== 2) return $email;
+        $name = $parts[0];
+        $domain = $parts[1];
+        $len = mb_strlen($name);
+        if ($len <= 2) {
+            $maskedName = mb_substr($name, 0, 1) . '*';
+        } else {
+            $maskedName = mb_substr($name, 0, 2) . str_repeat('*', min(5, max(1, $len - 3))) . mb_substr($name, -1);
+        }
+        return $maskedName . '@' . $domain;
     }
     // Xử lý đăng xuất người dùng 
     public function logout(Request $request) 

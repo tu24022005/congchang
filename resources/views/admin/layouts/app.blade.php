@@ -13,9 +13,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset_v('css/admin-layout.css') }}" rel="stylesheet">
     
 </head>
 <body class="admin-body">
+    <script src="{{ asset_v('js/admin-layout.js') }}" defer></script>
 
     <!-- Thanh điều hướng Navbar -->
     <nav class="navbar navbar-expand-lg glass-navbar shadow-sm">
@@ -116,12 +118,11 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm admin-user-menu">
                                 <li>
-                                    <a class="dropdown-item text-danger fw-bold py-2" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
                                         @csrf
+                                        <button type="submit" class="dropdown-item text-danger fw-bold py-2 border-0 bg-transparent w-100 text-start">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                        </button>
                                     </form>
                                 </li>
                             </ul>
@@ -138,32 +139,15 @@
     </main>
 
     @if(!request()->routeIs('admin.chat.index') && in_array(Auth::user()->role, ['admin', 'customer_service'], true))
-        <style>
-            .admin-chat-dock { position: fixed; z-index: 1040; right: 24px; bottom: 24px; display: flex; align-items: center; gap: .55rem; padding: .75rem 1rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
-            .admin-chat-dock:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(24,59,86,.32); }
-            .admin-chat-dock i { font-size: 1.15rem; }
-            .admin-chat-dock span { font-size: .78rem; font-weight: 800; }
-            .admin-chat-dock .admin-chat-badge { position: absolute; top: -7px; left: -7px; min-width: 20px; padding: .2rem .35rem; color: #fff; background: #e63950; border: 2px solid #fff; border-radius: 999px; font-size: .65rem; text-align: center; }
-            @media (max-width: 576px) { .admin-chat-dock { right: 16px; bottom: 16px; padding: .7rem .85rem; } .admin-chat-dock span { display: none; } }
-        </style>
+        
         <a class="admin-chat-dock" href="{{ route('admin.chat.index') }}" title="Mở chat hỗ trợ khách hàng">
             <i class="bi bi-chat-square-text-fill"></i><span>Chat hỗ trợ</span><b id="admin-chat-dock-badge" class="admin-chat-badge d-none">0</b>
         </a>
-        <script>
-            (function () {
-                const badge = document.getElementById('admin-chat-dock-badge');
-                const refreshChatBadge = () => fetch('/chat/users').then(response => response.json()).then(users => {
-                    const total = users.reduce((sum, user) => sum + Number(user.unread_messages_count || 0), 0);
-                    badge.textContent = total > 99 ? '99+' : total;
-                    badge.classList.toggle('d-none', total === 0);
-                }).catch(() => {});
-                refreshChatBadge();
-                setInterval(refreshChatBadge, 15000);
-            })();
-        </script>
+        
     @endif
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script src="{{ asset_v('js/inline-assets.js') }}" defer></script>
 </body>
 </html>

@@ -34,20 +34,7 @@
 @endphp
 
 <div class="container py-4 order-detail-page">
-    <style>
-        /* Timeline styles for order status */
-        .order-timeline { display:flex; gap:1rem; align-items:flex-start; overflow:auto; }
-        .order-timeline-step { display:flex; flex-direction:column; align-items:center; gap:.5rem; text-align:center; min-width:110px; position:relative; padding:0 0.75rem; }
-        .order-timeline-step::after { content:''; height:2px; background:#e9eef5; position:absolute; left:50%; top:26px; right:-50%; z-index:0; }
-        .order-timeline-step:first-child::after { left:50%; }
-        .order-timeline-step.is-done::after { background:linear-gradient(90deg,#a78bfa,#60a5fa); }
-        .order-timeline-icon { z-index:2; display:grid; place-items:center; width:46px; height:46px; border-radius:50%; background:#f1f5f9; color:#64748b; border:2px solid #f1f5f9; }
-        .order-timeline-step.is-done .order-timeline-icon { background:linear-gradient(135deg,#a78bfa,#60a5fa); color:#fff; border-color:transparent; box-shadow:0 6px 18px rgba(99,102,241,.18); }
-        .order-timeline-step.is-current .order-timeline-icon { box-shadow:0 10px 28px rgba(99,102,241,.18); transform:scale(1.06); }
-        .order-timeline-step strong { display:block; font-size:.85rem; color:#16324f; }
-        .order-timeline-step small { color:#6b7280; font-size:.75rem; }
-        @media (max-width:576px){ .order-timeline { gap:.6rem; } .order-timeline-step { min-width:96px; } }
-    </style>
+    <link rel="stylesheet" href="{{ asset_v('css/views/orders-show-blade-php.css') }}">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -140,7 +127,7 @@
                     </div>
 
                     @if(!in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true) && in_array($order->status, ['processing', 'confirmed', 'paid'], true))
-                        <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
+                        <hr class="my-4 view-inline-1">
                         <form action="{{ $order->payment_method !== 'COD' && $order->status === 'paid' ? route('orders.refund.request', $order) : route('orders.cancel', $order) }}" method="POST" class="d-grid">
                             @csrf
                             @if($order->payment_method !== 'COD' && $order->status === 'paid')
@@ -187,28 +174,17 @@
                     @endif
 
                     @if($order->status === 'shipping')
-                        <hr class="my-4" style="border-color: rgba(0,0,0,0.1);">
+                        <hr class="my-4 view-inline-1">
                         <form action="{{ route('orders.confirm_received', $order->id) }}" method="POST" class="d-grid animate__animated animate__fadeInUp">
                             @csrf
-                            <button type="submit" class="btn text-white fw-bold py-2 shadow-sm" 
-                                    style="background: linear-gradient(135deg, #00b09b, #96c93d); border-radius: 12px; letter-spacing: 0.5px;" 
+                            <button type="submit" class="btn text-white fw-bold py-2 shadow-sm view-inline-2" 
                                     onclick="return confirm('Bạn xác nhận đã nhận được kiện hàng này nguyên vẹn chứ?')">
                                 <i class="bi bi-check-circle-fill me-2 fs-5"></i> XÁC NHẬN ĐÃ NHẬN HÀNG
                             </button>
                         </form>
                     @endif
                 </div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const bank = document.getElementById('refundBankSelect');
-                        const bin = document.getElementById('refundBankBin');
-                        if (bank && bin) {
-                            bank.addEventListener('change', function () {
-                                bin.value = this.options[this.selectedIndex].dataset.bin || '';
-                            });
-                        }
-                    });
-                </script>
+                <script src="{{ asset_v('js/views/orders-show-blade-php.js') }}" defer></script>
             </div>
         </div>
 
@@ -244,7 +220,7 @@
                             <tr>
                                 <td class="ps-4">
                                     @if($item->product && $item->product->image)
-                                        <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}" class="img-thumbnail rounded-3 shadow-sm storefront-thumb-image">
+                                        <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}" class="img-thumbnail rounded-3 shadow-sm storefront-thumb-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                     @else
                                         <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-muted border shadow-sm storefront-thumb-placeholder">
                                             <i class="bi bi-image"></i>
@@ -440,7 +416,7 @@
                                 </div>
                             </div>
                             <div class="modal-footer border-top-0 pt-0">
-                                <button type="submit" class="btn text-white w-100 rounded-pill fw-bold review-submit-button" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);">{{ $existingReview ? 'Cập nhật đánh giá' : 'Gửi Đánh Giá' }}</button>
+                                <button type="submit" class="btn text-white w-100 rounded-pill fw-bold review-submit-button view-inline-3">{{ $existingReview ? 'Cập nhật đánh giá' : 'Gửi Đánh Giá' }}</button>
                             </div>
                         </form>
                     </div>
@@ -450,82 +426,7 @@
     @endforeach
 @endif
 
-<style>
-    /* CSS hiệu ứng chọn sao đánh giá */
-    .star-rating-custom { display: inline-flex; flex-direction: row-reverse; gap: 5px; }
-    .rating-star-button { padding: 0 .15rem; color: #e4e5e9; background: transparent; border: 0; font-size: 2rem; cursor: pointer; transition: color .2s, transform .2s; }
-    .rating-star-button:hover, .rating-star-button.is-selected { color: #ffc107; transform: translateY(-2px); }
-    .rating-star-button:focus-visible { outline: 2px solid #117c83; outline-offset: 3px; border-radius: .25rem; }
-    .my-review-box { padding: .45rem .65rem; background: #f0fbf5; border: 1px solid #cceedd; border-radius: .5rem; }
-    .review-thumbnail { width: 42px; height: 42px; object-fit: cover; border-radius: .35rem; border: 1px solid #dbe4ef; }
-</style>
+<link rel="stylesheet" href="{{ asset_v('css/views/orders-show-blade-php.css') }}">
 
-<script>
-// =========================================================================
-// TRICK VÀNG: Đẩy toàn bộ Modal ra thẳng thẻ <body> để thoát khỏi lỗi xám màn hình
-// =========================================================================
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.modal').forEach(function(modal) {
-        document.body.appendChild(modal);
-    });
-});
-
-function copyOrderText(value) {
-    navigator.clipboard.writeText(value).then(function () {
-        const notice = document.createElement('div');
-        notice.className = 'order-copy-notice';
-        notice.innerHTML = '<i class="bi bi-check-circle me-2"></i>Đã sao chép thông tin';
-        document.body.appendChild(notice);
-        setTimeout(() => notice.remove(), 1800);
-    });
-}
-
-document.querySelectorAll('.review-submit-button').forEach(function (button) {
-    button.closest('form').addEventListener('submit', function (event) {
-        const form = event.currentTarget;
-        const rating = form.querySelector('input[name="rating"]').value;
-        const message = form.querySelector('.rating-required-message');
-
-        if (!rating) {
-            event.preventDefault();
-            message.classList.remove('d-none');
-            form.querySelector('.rating-star-button').focus();
-        } else {
-            message.classList.add('d-none');
-        }
-    });
-});
-
-document.querySelectorAll('.star-rating-custom').forEach(function (ratingGroup) {
-    const ratingInput = ratingGroup.querySelector('input[name="rating"]');
-    const buttons = ratingGroup.querySelectorAll('.rating-star-button');
-
-    buttons.forEach(function (button) {
-        button.addEventListener('click', function () {
-            const selectedRating = Number(button.dataset.rating);
-            ratingInput.value = selectedRating;
-            buttons.forEach(function (star) {
-                const isSelected = Number(star.dataset.rating) <= selectedRating;
-                star.classList.toggle('is-selected', isSelected);
-                star.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-            });
-            ratingGroup.closest('form').querySelector('.rating-required-message').classList.add('d-none');
-        });
-    });
-});
-
-function selectReviewRating(button) {
-    const ratingGroup = button.closest('.star-rating-custom');
-    const ratingInput = ratingGroup.querySelector('input[name="rating"]');
-    const selectedRating = Number(button.dataset.rating);
-
-    ratingInput.value = selectedRating;
-    ratingGroup.querySelectorAll('.rating-star-button').forEach(function (star) {
-        const isSelected = Number(star.dataset.rating) <= selectedRating;
-        star.classList.toggle('is-selected', isSelected);
-        star.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    });
-    ratingGroup.closest('form').querySelector('.rating-required-message').classList.add('d-none');
-}
-</script>
+<script src="{{ asset_v('js/views/orders-show-blade-php.js') }}" defer></script>
 @endsection

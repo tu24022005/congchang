@@ -2,27 +2,51 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'BeatyCare 🌸')</title>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', config('shop.seo.default_title'))</title>
+    <meta name="description" content="@yield('meta_description', config('shop.seo.default_description'))">
+    <meta name="theme-color" content="#f88379" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="canonical" href="@yield('canonical', url()->current())">
+
+    <!-- Open Graph / Facebook / Zalo -->
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="@yield('canonical', url()->current())">
+    <meta property="og:title" content="@yield('og_title', View::getSection('title') ? View::getSection('title') : config('shop.seo.default_title'))">
+    <meta property="og:description" content="@yield('og_description', View::getSection('meta_description') ? View::getSection('meta_description') : config('shop.seo.default_description'))">
+    <meta property="og:image" content="@yield('og_image', asset(config('shop.seo.default_og_image')))">
+    <meta property="og:site_name" content="{{ config('shop.seo.site_name') }}">
+    <meta property="og:locale" content="vi_VN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('og_title', View::getSection('title') ? View::getSection('title') : config('shop.seo.default_title'))">
+    <meta name="twitter:description" content="@yield('og_description', View::getSection('meta_description') ? View::getSection('meta_description') : config('shop.seo.default_description'))">
+    <meta name="twitter:image" content="@yield('og_image', asset(config('shop.seo.default_og_image')))">
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     @stack('head')
-    <link href="{{ asset('css/style.css') }}?v={{ time() }}" rel="stylesheet">
-    <link href="{{ asset('css/animations.css') }}?v={{ time() }}" rel="stylesheet">
+    <link href="{{ asset_v('css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset_v('css/animations.css') }}" rel="stylesheet">
+    <link href="{{ asset_v('css/layout.css') }}" rel="stylesheet">
     @stack('styles')
-    <script>
-        if (localStorage.getItem('beatycare-theme') === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-        }
-    </script>
+    @yield('structured_data')
+    @stack('schema')
+    
 </head>
-<body class="{{ request()->routeIs('login', 'register', 'password.request', 'password.reset', 'verification.notice') ? 'auth-page' : '' }}">
+<body class="{{ request()->routeIs('login', 'register', 'password.request', 'password.reset', 'verification.notice') ? 'auth-page' : '' }}" data-user-id="{{ Auth::id() ?? 'null' }}" data-newsletter-url="{{ route('newsletter.subscribe') }}">
+    <script src="{{ asset_v('js/layout.js') }}" defer></script>
     <!-- PRELOADER MỞ WEB (BRAND ENTRANCE) -->
     <div id="app-preloader" class="app-preloader" aria-hidden="true">
         <div class="preloader-card">
@@ -83,22 +107,58 @@
                 </ul>
 
                 <!-- THANH TÌM KIẾM TRUNG TÂM CO GỢI Ý (LIVE SEARCH) -->
-                <form action="{{ route('products.index') }}" method="GET" class="d-flex mx-lg-3 my-3 my-lg-0 flex-grow-1 justify-content-center position-relative live-search-form">
+                <form action="{{ route('products.index') }}" method="GET" class="d-flex mx-lg-3 my-3 my-lg-0 flex-grow-1 justify-content-center position-relative live-search-form" role="search">
                     <div class="input-group live-search-group">
                         <button type="submit" class="input-group-text bg-transparent border-0 text-dark ps-3 pe-2" aria-label="Tìm kiếm">
                             <i class="bi bi-search fw-bold search-icon"></i>
                         </button>
-                        <input type="text" name="search" id="live-search-input" class="form-control border-0 shadow-none bg-transparent px-2 live-search-input" placeholder="Tìm kiếm mỹ phẩm, chăm sóc da..." value="{{ request('search') }}" autocomplete="off">
+                        <input type="text" name="search" id="live-search-input" class="form-control border-0 shadow-none bg-transparent px-2 live-search-input" placeholder="Tìm kiếm mỹ phẩm, chăm sóc da..." value="{{ request('search') }}" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-suggestions" aria-haspopup="listbox">
                     </div>
                     
                     <!-- Khung Dropdown chứa kết quả gợi ý -->
-                    <div id="search-suggestions" class="position-absolute w-100 bg-white shadow-lg rounded-4 d-none search-suggestions">
+                    <div id="search-suggestions" class="position-absolute w-100 bg-white shadow-lg rounded-4 d-none search-suggestions" role="listbox" aria-label="Gợi ý tìm kiếm">
                         <!-- Kết quả JS sẽ đổ vào đây -->
                     </div>
                 </form>
 
                 <!-- CỤM BÊN PHẢI: TÀI KHOẢN & GIỎ HÀNG -->
                 <ul class="navbar-nav ms-auto align-items-center">
+                    @php
+                        $isStaffRole = Auth::check() && in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff', 'customer_service'], true);
+                        if (Auth::check()) {
+                            $cartCount = (int) Auth::user()->cartItems()->sum('quantity');
+                            $cartDropdownItems = Auth::user()->cartItems()->with('product')->latest()->take(3)->get()->map(function ($item) {
+                                return (object)[
+                                    'name' => $item->product->name ?? 'Sản phẩm',
+                                    'price' => (float)$item->price,
+                                    'quantity' => (int)$item->quantity,
+                                    'image' => $item->product->image ?? '',
+                                ];
+                            });
+                        } else {
+                            $sessionCart = session()->get('cart', []);
+                            $cartCount = (int) collect($sessionCart)->sum('quantity');
+                            $cartDropdownItems = collect($sessionCart)->take(3)->map(function ($item) {
+                                return (object)[
+                                    'name' => $item['name'] ?? 'Sản phẩm',
+                                    'price' => (float)($item['price'] ?? 0),
+                                    'quantity' => (int)($item['quantity'] ?? 1),
+                                    'image' => $item['image'] ?? '',
+                                ];
+                            });
+                        }
+                    @endphp
+
+                    @if(!$isStaffRole)
+                        <!-- GIỎ HÀNG CHUNG (CẢ KHÁCH VÀ THÀNH VIÊN) - OFFCANVAS DRAWER -->
+                        <li class="nav-item me-3">
+                            <a class="nav-link text-nowrap position-relative fw-semibold d-flex align-items-center" href="{{ route('cart.index') }}" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvasDrawer" role="button" aria-controls="cartOffcanvasDrawer" aria-label="Mở giỏ hàng">
+                                <i class="bi bi-cart3 fs-5 me-1"></i> Giỏ hàng
+                                <span id="global-cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count-badge {{ $cartCount > 0 ? '' : 'd-none' }}">{{ $cartCount }}</span>
+                            </a>
+                        </li>
+                    @endif
+
                     @guest
                         <li class="nav-item me-2"><a class="nav-link text-nowrap fw-semibold" href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
                         <li class="nav-item"><a class="nav-link text-nowrap fw-semibold" href="{{ route('register') }}"><i class="bi bi-person-plus me-1"></i> Đăng ký</a></li>
@@ -128,6 +188,7 @@
                                         <li><a class="dropdown-item" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags text-warning"></i><span>Danh mục</span></a></li>
                                         <li><a class="dropdown-item" href="{{ route('admin.vouchers.index') }}"><i class="bi bi-ticket-perforated text-success"></i><span>Voucher</span></a></li>
                                         <li><a class="dropdown-item" href="{{ route('admin.posts.index') }}"><i class="bi bi-newspaper text-primary"></i><span>Blog</span></a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.newsletter.index') }}"><i class="bi bi-envelope-paper text-danger"></i><span>Bản tin đăng ký</span></a></li>
                                         <li><a class="dropdown-item" href="{{ route('admin.home-banners.index') }}"><i class="bi bi-images text-primary"></i><span>Banner trang chủ</span></a></li>
                                         <li><a class="dropdown-item" href="{{ route('admin.reports.index') }}"><i class="bi bi-bar-chart-line text-info"></i><span>Báo cáo</span></a></li>
                                     @endif
@@ -159,7 +220,7 @@
                                     </span>
                                 @endif
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" style="min-width: 300px;">
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm layout-inline-1">
                                 <li><h6 class="dropdown-header">{{ $isStaffAccount ? 'Thông báo quản trị' : 'Thông báo của bạn' }}</h6></li>
                                 @forelse($unreadAccountNotifications as $notification)
                                     <li>
@@ -176,47 +237,13 @@
                             </ul>
                         </li>
 
-                        <!-- GIỎ HÀNG CHUNG: không hiển thị trong khu vực quản trị -->
-                        @if(!in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff', 'customer_service'], true))
-                            <li class="nav-item me-4 dropdown cart-dropdown">
-                                <a class="nav-link text-nowrap position-relative fw-semibold" href="{{ route('cart.index') }}">
-                                    <i class="bi bi-cart3 fs-5 me-1"></i> Giỏ hàng
-                                    @php
-                                        $cartCount = Auth::user()->cartItems()->sum('quantity');
-                                        $cartItems = Auth::user()->cartItems()->with('product')->latest()->take(3)->get();
-                                    @endphp
-                                    @if($cartCount > 0)
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count-badge">{{ $cartCount }}</span>
-                                    @endif
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm p-3 mini-cart-dropdown" style="min-width: 320px;">
-                                    <li><h6 class="dropdown-header px-0 text-dark fw-bold">Giỏ hàng của bạn</h6></li>
-                                    @if($cartCount > 0)
-                                        @foreach($cartItems as $item)
-                                            <li class="d-flex align-items-center mb-3">
-                                                <img src="{{ asset('storage/' . ($item->product->image ?? '')) }}" class="rounded me-3 object-fit-cover" width="50" height="50" alt="" onerror="this.src=''">
-                                                <div class="flex-grow-1">
-                                                    <div class="small fw-semibold text-truncate" style="max-width: 180px;">{{ $item->product->name ?? 'Sản phẩm' }}</div>
-                                                    <div class="small text-muted">{{ number_format($item->price, 0, ',', '.') }} đ x {{ $item->quantity }}</div>
-                                                </div>
-                                            </li>
-                                        @endforeach
-                                        @if($cartCount > 3)
-                                            <li class="text-center small text-muted mb-2">Và {{ $cartCount - 3 }} sản phẩm khác...</li>
-                                        @endif
-                                        <li><a href="{{ route('cart.index') }}" class="btn btn-primary w-100 btn-sm btn-nhan-ngay">Xem giỏ hàng</a></li>
-                                    @else
-                                        <li><span class="small text-muted">Chưa có sản phẩm nào.</span></li>
-                                    @endif
-                                </ul>
-                            </li>
-                        @endif
+
 
                         <!-- USER PROFILE -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle active text-nowrap fw-bold" href="#" data-bs-toggle="dropdown">
                                 @if(Auth::user()->avatar_path)
-                                    <img src="{{ Storage::url(Auth::user()->avatar_path) }}" alt="Ảnh đại diện" class="rounded-circle me-1" style="width:32px;height:32px;object-fit:cover;">
+                                    <img src="{{ Storage::url(Auth::user()->avatar_path) }}" alt="Ảnh đại diện" class="rounded-circle me-1 layout-inline-2">
                                 @else
                                     <i class="bi bi-person-circle fs-5 me-1 text-primary"></i>
                                 @endif
@@ -233,10 +260,12 @@
                                 <li><a class="dropdown-item fw-bold py-2" href="{{ route('password.change') }}"><i class="bi bi-key text-warning me-2"></i> Đổi mật khẩu</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger fw-bold py-2" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+                                    <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger fw-bold py-2 border-0 bg-transparent w-100 text-start">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                        </button>
+                                    </form>
                                 </li>
                             </ul>
                         </li>
@@ -244,7 +273,7 @@
 
                     <!-- THEME TOGGLE (NAVBAR) -->
                     <li class="nav-item ms-2 d-flex align-items-center">
-                        <button type="button" id="global-theme-toggle" class="btn rounded-circle shadow-sm" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(150,150,150,0.3); font-size: 1.1rem; background: rgba(255,255,255,0.8); color: #333; transition: all 0.3s;" aria-label="Sáng/Tối" title="Chuyển chế độ Sáng / Tối">
+                        <button type="button" id="global-theme-toggle" class="btn rounded-circle shadow-sm layout-inline-3" aria-label="Sáng/Tối" title="Chuyển chế độ Sáng / Tối">
                             ☀️
                         </button>
                     </li>
@@ -253,7 +282,7 @@
         </div>
     </nav>
 
-    @if(!request()->is('admin*') && !request()->routeIs('login', 'register', 'password.*', 'verification.*'))
+    @if(!request()->is('admin*') && !request()->routeIs('login', 'register', 'password.*', 'verification.*', 'cart.*', 'checkout', 'orders.*'))
         <div class="home-side-promotions" aria-label="Ưu đãi nổi bật">
             <aside class="home-side-rail home-side-rail-left">
                 <a href="{{ route('products.index') }}" class="side-promo-card side-promo-pink" aria-label="Xem sản phẩm skincare giảm 20 phần trăm">
@@ -318,7 +347,7 @@
                     <h6 class="footer-column-title">Hỗ trợ</h6>
                     <ul class="list-unstyled footer-menu">
                         <li><a href="{{ route('cart.index') }}">Giỏ hàng của bạn</a></li>
-                        <li><a href="{{ route('orders.index') }}">Theo dõi đơn hàng</a></li>
+                        <li><a href="{{ route('orders.track') }}">Theo dõi đơn hàng</a></li>
                         <li><a href="{{ route('pages.policies') }}">Đổi trả & hoàn tiền</a></li>
                         <li><a href="{{ route('pages.policies') }}">Giao hàng & thanh toán</a></li>
                         <li><a href="{{ route('pages.contact') }}">Liên hệ Aloha</a></li>
@@ -330,7 +359,20 @@
                     <div class="footer-connect-panel">
                         <span class="footer-panel-kicker">STAY IN THE GLOW</span>
                         <h6>Đừng bỏ lỡ những ưu đãi xinh xắn</h6>
-                        <p>Follow Aloha Beauty để cập nhật sản phẩm mới và tips chăm sóc bản thân.</p>
+                        <p class="small text-muted mb-3">Nhận ngay voucher ưu đãi 10% và cập nhật bí quyết chăm sóc da từ chuyên gia Aloha Beauty.</p>
+                        
+                        <!-- Form Đăng ký bản tin với Honeypot chống Bot (Prompt 3.6) -->
+                        <form id="footer-newsletter-form" class="mb-3" onsubmit="handleNewsletterSubscribe(event)">
+                            @csrf
+                            <input type="text" name="hp_email" class="layout-inline-4" tabindex="-1" autocomplete="off">
+                            <div class="input-group">
+                                <input type="email" id="newsletter-email" name="email" class="form-control rounded-start-pill border-0 ps-3" placeholder="Nhập email của bạn..." required>
+                                <button class="btn btn-primary rounded-end-pill px-3" type="submit" id="btn-newsletter-submit" title="Đăng ký">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+                        </form>
+
                         <div class="d-flex flex-wrap gap-2 mb-4">
                             <a href="https://www.facebook.com/aimachan205/" target="_blank" class="footer-social footer-social-facebook" title="Facebook"><i class="bi bi-facebook social-icon-spin"></i><span>Facebook</span></a>
                             <a href="https://www.youtube.com/@VanTu-vp6yn" target="_blank" class="footer-social footer-social-youtube" title="YouTube"><i class="bi bi-youtube social-icon-spin"></i><span>YouTube</span></a>
@@ -359,20 +401,7 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('supportPolicyModal')?.addEventListener('show.bs.modal', function (event) {
-            const policy = event.relatedTarget?.dataset.policy;
-            const title = document.getElementById('supportPolicyTitle');
-            const content = document.getElementById('supportPolicyContent');
-            if (policy === 'returns') {
-                title.textContent = 'Đổi trả & hoàn tiền';
-                content.innerHTML = '<p class="text-muted">Aloha Beauty hỗ trợ đổi trả trong 7 ngày nếu sản phẩm bị lỗi, giao sai hoặc hư hỏng khi nhận.</p><ul class="text-muted ps-3"><li>Giữ nguyên sản phẩm, hộp và phụ kiện.</li><li>Gửi ảnh/video tình trạng sản phẩm qua chat hỗ trợ.</li><li>Thời gian xử lý: 2-3 ngày làm việc sau khi nhận đủ thông tin.</li><li>Hoàn tiền về phương thức thanh toán ban đầu sau khi xác nhận.</li></ul>';
-            } else {
-                title.textContent = 'Giao hàng & thanh toán';
-                content.innerHTML = '<p class="text-muted">Aloha Beauty giao hàng toàn quốc và đóng gói cẩn thận để sản phẩm đến bạn an toàn.</p><ul class="text-muted ps-3"><li>Thời gian dự kiến: 2-5 ngày làm việc.</li><li>Thanh toán COD khi nhận hàng.</li><li>Thanh toán chuyển khoản nhanh qua PayOS.</li><li>Địa chỉ giao hàng có thể được ghim chính xác trên bản đồ lúc đặt hàng.</li></ul>';
-            }
-        });
-    </script>
+    
 
             <audio id="ting-sound" src="https://actions.google.com/sounds/v1/communications/incoming_message.ogg" preload="auto" class="d-none"></audio>
 
@@ -380,80 +409,7 @@
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
     <!-- SCRIPT TÌM KIẾM TRỰC TIẾP (LIVE SEARCH) HOẠT ĐỘNG TOÀN CỤC -->
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const searchInput = document.getElementById('live-search-input');
-        const suggestionsBox = document.getElementById('search-suggestions');
-
-        if(searchInput && suggestionsBox) {
-            // Ẩn hộp gợi ý khi click chuột ra ngoài
-            document.addEventListener('click', function(e) {
-                if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                    suggestionsBox.classList.add('d-none');
-                }
-            });
-
-            // Bắt sự kiện khi người dùng gõ phím
-            searchInput.addEventListener('input', function() {
-                let query = this.value.trim();
-                
-                if (query.length < 1) {
-                    suggestionsBox.classList.add('d-none');
-                    return;
-                }
-
-                // Gọi ngầm xuống Backend lấy dữ liệu
-                fetch(`/search-suggestions?query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        suggestionsBox.innerHTML = ''; 
-                        
-                        if (data.products.length > 0 || data.categories.length > 0 || data.keywords.length > 0) {
-                            let html = '';
-                            if (data.products.length > 0) {
-                                html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Sản phẩm</div><ul class="list-unstyled mb-0">';
-                            }
-                            data.products.forEach(item => {
-                                let imgHtml = item.image_url 
-                                    ? `<img src="${item.image_url}" class="me-3 rounded search-result-image">`
-                                    : `<div class="d-flex align-items-center justify-content-center bg-light rounded me-3 search-result-image"><i class="bi bi-box text-muted"></i></div>`;
-                                
-                                html += `
-                                <li>
-                                    <a href="${item.detail_url}" class="d-flex align-items-center px-3 py-2 text-decoration-none text-dark search-item-hover">
-                                        ${imgHtml}
-                                        <div>
-                                            <div class="fw-bold fs-6 text-truncate search-result-name">${item.name}</div>
-                                            <div class="text-danger small fw-semibold">${item.formatted_price}</div>
-                                        </div>
-                                    </a>
-                                </li>`;
-                            });
-                            if (data.products.length > 0) html += '</ul></div>';
-                            if (data.categories.length > 0) {
-                                html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Danh mục</div><ul class="list-unstyled mb-0">';
-                                data.categories.forEach(item => {
-                                    html += `<li><a href="${item.url}" class="search-related-link"><i class="bi bi-grid-3x3-gap me-2"></i><span>${item.name}</span><small>${item.count} sản phẩm</small></a></li>`;
-                                });
-                                html += '</ul></div>';
-                            }
-                            html += '<div class="search-suggestion-group"><div class="search-suggestion-title">Từ khóa liên quan</div><div class="search-related-keywords">';
-                            data.keywords.forEach(keyword => {
-                                html += `<a href="/products?search=${encodeURIComponent(keyword)}" class="search-keyword-chip">${keyword}</a>`;
-                            });
-                            html += '</div></div>';
-                            suggestionsBox.innerHTML = html;
-                            suggestionsBox.classList.remove('d-none');
-                        } else {
-                            suggestionsBox.innerHTML = '<div class="p-3 text-center text-muted small"><i class="bi bi-emoji-frown me-1"></i> Không tìm thấy sản phẩm</div>';
-                            suggestionsBox.classList.remove('d-none');
-                        }
-                    })
-                    .catch(error => console.error("Lỗi tìm kiếm:", error));
-            });
-        }
-    });
-    </script>
+    
 
     <!-- ============================================================== -->
     <!-- LOGIC TỰ ĐỘNG PHÂN LUỒNG CHAT DỰA TRÊN ROLE CỦA USER ĐĂNG NHẬP -->
@@ -464,27 +420,8 @@
                 <a class="storefront-admin-chat-dock" href="{{ route('admin.chat.index') }}" title="Mở trung tâm chat khách hàng">
                     <i class="bi bi-chat-square-text-fill"></i><span>Chat hỗ trợ</span><b id="storefront-chat-badge" class="storefront-chat-badge d-none">0</b>
                 </a>
-                <style>
-                    /* ĐÃ SỬA Z-INDEX CHO ADMIN Ở ĐÂY LÊN 99999 */
-                    .storefront-admin-chat-dock { position: fixed; z-index: 10001 !important; right: 1rem; bottom: 1rem; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; gap: .55rem; padding: .58rem .82rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #183b56, #1686a0); border-radius: 999px; box-shadow: 0 8px 22px rgba(24,59,86,.24); transition: transform .2s, box-shadow .2s; }
-                    .storefront-admin-chat-dock:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(24,59,86,.32); }
-                    @media (max-width: 1100px) { .storefront-admin-chat-dock { right: .75rem; bottom: .75rem; width: 44px; height: 44px; padding: 0; justify-content: center; } .storefront-admin-chat-dock span { display: none; } .storefront-admin-chat-dock i { margin: 0; } }
-                    .storefront-admin-chat-dock i { font-size: 1.15rem; }
-                    .storefront-admin-chat-dock span { font-size: .78rem; font-weight: 800; }
-                    .storefront-admin-chat-dock .storefront-chat-badge { position: absolute; top: -7px; left: -7px; min-width: 20px; padding: .2rem .35rem; color: #fff; background: #e63950; border: 2px solid #fff; border-radius: 999px; font-size: .65rem; text-align: center; }
-                </style>
-                <script>
-                    (function () {
-                        const badge = document.getElementById('storefront-chat-badge');
-                        const refreshChatBadge = () => fetch('/chat/users').then(response => response.json()).then(users => {
-                            const total = users.reduce((sum, user) => sum + Number(user.unread_messages_count || 0), 0);
-                            badge.textContent = total > 99 ? '99+' : total;
-                            badge.classList.toggle('d-none', total === 0);
-                        }).catch(() => {});
-                        refreshChatBadge();
-                        setInterval(refreshChatBadge, 15000);
-                    })();
-                </script>
+                
+                
             @endif
         @else
             <!-- KHUNG CHAT MÀU XANH DÀNH CHO KHÁCH HÀNG -->
@@ -494,23 +431,7 @@
             </div>
 
             <!-- ĐÃ THÊM CSS FIX LỖI KHUẤT NÚT CHO KHÁCH HÀNG Ở ĐÂY -->
-            <style>
-                .chat-widget-button {
-                    position: fixed !important;
-                    right: 24px !important;
-                    bottom: 24px !important;
-                    z-index: 99999 !important;
-                }
-                @media (max-width: 576px) {
-                    .chat-widget-button {
-                        right: 16px !important;
-                        bottom: 16px !important;
-                    }
-                }
-                .chat-widget-window {
-                    z-index: 999999 !important;
-                }
-            </style>
+            
 
             <div id="chat-widget-window" class="shadow-lg border-0 d-none chat-widget-window">
                 <div class="p-3 text-white d-flex justify-content-between align-items-center chat-header-user">
@@ -536,166 +457,15 @@
                 </div>
             </div>
 
-            <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const chatBtn = document.getElementById('chat-widget-button');
-                const chatWin = document.getElementById('chat-widget-window');
-                const chatBadge = document.getElementById('chat-badge');
-                const tingSound = document.getElementById('ting-sound');
-                
-                let currentUserId = {{ Auth::id() ?? 'null' }};
-                let unreadCount = 0;
-                const customerAttachment = document.getElementById('customer-attachment');
-                const customerAttachmentPreview = document.getElementById('customer-attachment-preview');
-
-                chatBtn.addEventListener('click', () => {
-                    chatWin.classList.toggle('d-none');
-                    if(!chatWin.classList.contains('d-none')) { 
-                        loadMessages(); 
-                        updateSupportPresence();
-                        chatBtn.style.transform = 'scale(0)'; 
-                        unreadCount = 0;
-                        chatBadge.classList.add('d-none');
-                        chatBadge.innerText = '0';
-                    }
-                });
-                
-                document.getElementById('close-chat').addEventListener('click', () => {
-                    chatWin.classList.add('d-none'); chatBtn.style.transform = 'scale(1)';
-                });
-
-                function loadMessages() {
-                    fetch('/chat/messages').then(res => res.json()).then(data => {
-                        document.getElementById('chat-messages').innerHTML = '';
-                        if (data.length === 0) appendMessage({ is_admin: 1, message: 'Xin chào! Aloha Beauty có thể hỗ trợ bạn điều gì hôm nay?' });
-                        data.forEach(msg => appendMessage(msg));
-                        scrollToBottom();
-                    });
-                }
-
-                function updateSupportPresence() {
-                    fetch('/chat/presence').then(res => res.json()).then(status => {
-                        const target = document.getElementById('support-presence');
-                        if (!target) return;
-                        target.innerHTML = status.online ? '<i class="bi bi-circle-fill text-success me-1"></i>Đang online' : (status.last_seen_minutes === null ? 'Chưa hoạt động' : 'Hoạt động ' + status.last_seen_minutes + ' phút trước');
-                    });
-                }
-
-                function appendMessage(msg) {
-                    let isMine = msg.is_admin == 0;
-                    let attachment = msg.attachment_url ? `<img src="${msg.attachment_url}" alt="Ảnh đính kèm" style="max-width:180px;max-height:120px;border-radius:10px;display:block;margin-top:6px">` : '';
-                    let html = `<div class="w-100 mb-2 chat-message-row">
-                                    ${!isMine ? '<small class="d-block text-muted mb-1 chat-sender-label">Admin Shop</small>' : ''}
-                                    <div class="msg-bubble ${isMine ? 'msg-mine' : 'msg-other'}">${msg.message || ''}${attachment}</div>
-                                </div>`;
-                    document.getElementById('chat-messages').insertAdjacentHTML('beforeend', html);
-                    scrollToBottom();
-                }
-
-                function scrollToBottom() { let box = document.getElementById('chat-messages'); box.scrollTop = box.scrollHeight; }
-
-                function sendMessage() {
-                    let text = document.getElementById('btn-input').value.trim();
-                    if(!text && !customerAttachment.files.length) return;
-                    document.getElementById('btn-input').value = '';
-                    const formData = new FormData();
-                    formData.append('message', text);
-                    if (customerAttachment.files[0]) formData.append('attachment', customerAttachment.files[0]);
-                    fetch('/chat/message', {
-                        method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: formData
-                    }).then(response => response.json()).then(sent => { appendMessage({...sent.message, is_admin: 0, message: text}); });
-                    customerAttachment.value = '';
-                    customerAttachmentPreview.innerHTML = '';
-                }
-
-                customerAttachment.addEventListener('change', () => {
-                    const file = customerAttachment.files[0];
-                    customerAttachmentPreview.textContent = file ? 'Đã chọn: ' + file.name : '';
-                });
-                document.querySelectorAll('.chat-topic').forEach(button => button.addEventListener('click', () => {
-                    document.getElementById('btn-input').value = button.dataset.topic;
-                    document.getElementById('btn-input').focus();
-                }));
-                document.getElementById('customer-emoji').addEventListener('click', () => {
-                    document.getElementById('btn-input').value += ' 😊';
-                    document.getElementById('btn-input').focus();
-                });
-
-                document.getElementById('btn-chat').addEventListener('click', sendMessage);
-                document.getElementById('btn-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-
-                var pusher = new Pusher('c7b756312af017cea0f9', { cluster: 'ap1' });
-                pusher.subscribe('chat-channel').bind('message.sent', function(data) {
-                    if(data.message.user_id == currentUserId && data.message.is_admin == 1) {
-                        tingSound.currentTime = 0;
-                        tingSound.play().catch(e => console.log('Âm thanh chờ tương tác người dùng: ', e));
-                        if(!chatWin.classList.contains('d-none')) {
-                            appendMessage(data.message);
-                        } else {
-                            appendMessage(data.message); 
-                            
-                            unreadCount++;
-                            chatBadge.innerText = unreadCount > 99 ? '99+' : unreadCount;
-                            chatBadge.classList.remove('d-none');
-                            
-                            chatBtn.classList.add('animate__animated', 'animate__tada');
-                            setTimeout(() => chatBtn.classList.remove('animate__animated', 'animate__tada'), 1000);
-                            
-                            if ('Notification' in window && Notification.permission === 'granted') {
-                                new Notification('Aloha Beauty có tin nhắn mới', {body: data.message.message});
-                            }
-                        }
-                    }
-                });
-                const heartbeat = () => fetch('/chat/heartbeat', {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}});
-                heartbeat();
-                setInterval(heartbeat, 60000);
-                setInterval(updateSupportPresence, 60000);
-            });
-            </script>
+            
         @endif
     @endauth
     @auth
-        <script>
-            (function () {
-                const sendPresence = () => fetch('/chat/heartbeat', {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}}).catch(() => {});
-                sendPresence();
-                setInterval(sendPresence, 60000);
-            })();
-        </script>
+        
     @endauth
     @stack('scripts')
     @include('components.product-advisor')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('input[type="password"]').forEach(function (input) {
-                if (input.parentElement.querySelector('.password-toggle')) return;
-
-                const container = input.parentElement;
-                container.classList.add('password-field');
-
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'password-toggle';
-                button.setAttribute('aria-label', 'Hiện mật khẩu');
-                button.innerHTML = '<i class="bi bi-eye"></i>';
-                const positionToggle = function () {
-                    button.style.top = (input.offsetTop + (input.offsetHeight / 2)) + 'px';
-                };
-                positionToggle();
-                button.addEventListener('click', function () {
-                    const visible = input.type === 'text';
-                    input.type = visible ? 'password' : 'text';
-                    button.setAttribute('aria-label', visible ? 'Hiện mật khẩu' : 'Ẩn mật khẩu');
-                    button.innerHTML = visible ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-                });
-                container.appendChild(button);
-                window.addEventListener('resize', positionToggle);
-            });
-        });
-    </script>
+    
     <!-- GLOBAL UI ELEMENTS: CIRCULAR PROGRESS BACK TO TOP & TOAST -->
     <button id="back-to-top" class="back-to-top-btn" aria-label="Lên đầu trang" title="Cuộn lên đầu trang">
         <svg class="progress-ring" width="48" height="48" viewBox="0 0 48 48">
@@ -712,45 +482,16 @@
     </button>
     <div id="toast-container"></div>
     
-    <script src="{{ asset('js/animations.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('js/interactions.js') }}?v={{ time() }}"></script>
+    @include('components.mini-cart-drawer')
+    @include('components.quick-view-modal')
+    @include('components.compare-floating-dock')
+
+    <script src="{{ asset_v('js/animations.js') }}" defer></script>
+    <script src="{{ asset_v('js/interactions.js') }}" defer></script>
+    <script src="{{ asset_v('js/inline-assets.js') }}" defer></script>
+    <script src="{{ asset_v('js/cart-drawer.js') }}" defer></script>
     
     <!-- Toggles moved to navbar -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleBtn = document.getElementById('global-theme-toggle');
-            const body = document.body;
-            
-            // Khôi phục trạng thái
-            const savedTheme = localStorage.getItem('beatycare-theme');
-            if (savedTheme === 'dark') {
-                body.classList.add('dark-mode');
-                document.documentElement.classList.add('dark-mode');
-                if (toggleBtn) {
-                    toggleBtn.innerHTML = '🌙';
-                    toggleBtn.style.background = 'rgba(30, 30, 30, 0.9)';
-                    toggleBtn.style.color = 'white';
-                }
-            }
-
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', () => {
-                    body.classList.toggle('dark-mode');
-                    document.documentElement.classList.toggle('dark-mode');
-                    const isDark = body.classList.contains('dark-mode');
-                    toggleBtn.innerHTML = isDark ? '🌙' : '☀️';
-                    localStorage.setItem('beatycare-theme', isDark ? 'dark' : 'light');
-                    
-                    if (isDark) {
-                        toggleBtn.style.background = 'rgba(30, 30, 30, 0.9)';
-                        toggleBtn.style.color = 'white';
-                    } else {
-                        toggleBtn.style.background = 'rgba(255, 255, 255, 0.8)';
-                        toggleBtn.style.color = '#333';
-                    }
-                });
-            }
-        });
-    </script>
+    
 </body>
 </html>

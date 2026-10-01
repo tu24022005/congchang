@@ -1,0 +1,271 @@
+/* account/index.blade.php - ki?u d?ng m?n h?nh */
+/* ===== TRANG TÀI KHOẢN - PHIÊN BẢN XỊN ===== */
+.acc-page { max-width: 1080px; }
+
+/* PROFILE HERO CARD */
+.acc-hero {
+    background: linear-gradient(135deg, #ff6b9d 0%, #c44dde 55%, #7b2ff7 100%);
+    border-radius: 24px;
+    padding: 2rem 2.2rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+.acc-hero::before {
+    content:'';
+    position:absolute; top:-50px; right:-50px;
+    width:220px; height:220px; border-radius:50%;
+    background:rgba(255,255,255,.08);
+    pointer-events:none;
+}
+.acc-hero::after {
+    content:'';
+    position:absolute; bottom:-60px; left:20%;
+    width:160px; height:160px; border-radius:50%;
+    background:rgba(255,255,255,.05);
+    pointer-events:none;
+}
+.acc-avatar-wrap {
+    position:relative; flex-shrink:0;
+}
+.acc-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255,255,255,.6);
+    box-shadow: 0 4px 20px rgba(0,0,0,.2);
+}
+.acc-avatar-placeholder {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    border: 3px solid rgba(255,255,255,.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: rgba(255,255,255,.9);
+}
+.acc-verified-dot {
+    position: absolute; bottom:3px; right:3px;
+    width:20px; height:20px; border-radius:50%;
+    background: #10b981; border: 2px solid #fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.65rem; color:#fff;
+}
+.acc-hero-info { flex:1; min-width:0; }
+.acc-hero-info .acc-name { font-size:1.4rem; font-weight:800; margin:0; line-height:1.2; }
+.acc-hero-info .acc-email { opacity:.8; font-size:.84rem; margin:.2rem 0 0; }
+.acc-hero-meta { display:flex; gap:.6rem; margin-top:.7rem; flex-wrap:wrap; }
+.acc-hero-badge {
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 50px;
+    padding: .25rem .75rem;
+    font-size: .75rem;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    display: inline-flex; align-items: center; gap:.3rem;
+}
+.acc-hero-actions { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
+.acc-hero-btn {
+    background: rgba(255,255,255,.2);
+    border: 1.5px solid rgba(255,255,255,.4);
+    color:#fff; border-radius:50px;
+    padding:.38rem 1rem; font-size:.8rem; font-weight:600;
+    text-decoration:none; transition:background .18s;
+    display:inline-flex; align-items:center; gap:.3rem;
+}
+.acc-hero-btn:hover { background:rgba(255,255,255,.35); color:#fff; }
+
+/* ORDER MINI STATS */
+.acc-order-mini {
+    background:#fff; border-radius:18px;
+    border:1.5px solid #f0f0f0;
+    box-shadow: 0 2px 14px rgba(0,0,0,.05);
+    padding: 1.2rem 1.4rem;
+}
+.acc-order-mini-head {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:1rem;
+}
+.acc-order-mini-head .title { font-weight:700; font-size:.92rem; display:flex; align-items:center; gap:.5rem; }
+.acc-order-mini-head .see-all { font-size:.8rem; font-weight:600; color:#c44dde; text-decoration:none; }
+.acc-order-mini-head .see-all:hover { text-decoration:underline; }
+
+.order-step {
+    background:#f9fafb; border-radius:14px;
+    padding:.85rem .5rem; text-align:center;
+    text-decoration:none; border:1.5px solid transparent;
+    transition:all .2s; display:block;
+}
+.order-step:hover { border-color:#c44dde; background:#fdf4ff; transform:translateY(-2px); }
+.order-step .step-icon { font-size:1.5rem; margin-bottom:.3rem; position:relative; display:inline-block; }
+.order-step .step-icon .badge {
+    position:absolute; top:-6px; right:-8px;
+    font-size:.6rem; min-width:17px; height:17px;
+    display:flex; align-items:center; justify-content:center;
+    padding:0 .3rem; border-radius:50px;
+}
+.order-step .step-name { font-size:.78rem; font-weight:700; color:#222; display:block; margin-bottom:.1rem; }
+.order-step .step-count { font-size:.72rem; color:#aaa; }
+
+/* QUICK SERVICES GRID */
+.acc-services { display:grid; grid-template-columns:repeat(6,1fr); gap:.75rem; }
+@media (max-width:991.98px) { .acc-services { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:575.98px) { .acc-services { grid-template-columns:repeat(3,1fr); } }
+
+.acc-svc {
+    background:#fff; border-radius:16px;
+    border:1.5px solid #f0f0f0;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    padding:1rem .6rem; text-align:center;
+    text-decoration:none; transition:all .2s; position:relative;
+    display:flex; flex-direction:column; align-items:center; gap:.35rem;
+}
+.acc-svc:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.09); border-color:var(--sc,#c44dde); }
+.acc-svc .svc-icon {
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; background:var(--sb,#fdf4ff); color:var(--sc,#c44dde);
+    flex-shrink:0;
+}
+.acc-svc .svc-name  { font-size:.78rem; font-weight:700; color:#222; }
+.acc-svc .svc-sub   { font-size:.68rem; color:#aaa; line-height:1.3; }
+.acc-svc .svc-badge {
+    position:absolute; top:6px; right:8px;
+    background:#ef4444; color:#fff; border-radius:50px;
+    font-size:.6rem; font-weight:700;
+    min-width:18px; height:18px; padding:0 .3rem;
+    display:flex; align-items:center; justify-content:center;
+}
+.svc-blue   { --sc:#3b82f6; --sb:#eff6ff; }
+.svc-yellow { --sc:#f59e0b; --sb:#fffbeb; }
+.svc-red    { --sc:#ef4444; --sb:#fef2f2; }
+.svc-pink   { --sc:#ec4899; --sb:#fdf2f8; }
+.svc-teal   { --sc:#06b6d4; --sb:#ecfeff; }
+.svc-green  { --sc:#10b981; --sb:#ecfdf5; }
+
+/* POINTS CARD */
+.acc-points-card {
+    background: linear-gradient(135deg, #7b2ff7, #c44dde);
+    border-radius:18px; color:#fff; padding:1.4rem 1.5rem;
+    position:relative; overflow:hidden;
+}
+.acc-points-card::before {
+    content:''; position:absolute; top:-30px; right:-30px;
+    width:120px; height:120px; border-radius:50%;
+    background:rgba(255,255,255,.1);
+}
+.acc-points-num { font-size:2.2rem; font-weight:900; line-height:1; }
+.acc-points-label { opacity:.8; font-size:.8rem; margin-top:.1rem; }
+.acc-tier-badge {
+    background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.3);
+    border-radius:50px; padding:.25rem .75rem; font-size:.75rem; font-weight:700;
+}
+.acc-points-progress { margin:1rem 0 .4rem; }
+.acc-points-progress .progress { height:6px; border-radius:99px; background:rgba(255,255,255,.25); }
+.acc-points-progress .progress-bar { background:#fff; border-radius:99px; }
+.acc-points-hint { font-size:.72rem; opacity:.8; }
+.acc-points-actions { display:flex; gap:.5rem; margin-top:1rem; flex-wrap:wrap; }
+.acc-points-btn {
+    background:rgba(255,255,255,.18); border:1.5px solid rgba(255,255,255,.35);
+    color:#fff; border-radius:50px; padding:.35rem .9rem; font-size:.78rem;
+    font-weight:600; text-decoration:none; transition:background .18s;
+    display:inline-flex; align-items:center; gap:.3rem;
+}
+.acc-points-btn:hover { background:rgba(255,255,255,.32); color:#fff; }
+
+/* PANELS */
+.acc-panel {
+    background:#fff; border-radius:18px;
+    border:1.5px solid #f0f0f0;
+    box-shadow:0 2px 14px rgba(0,0,0,.05);
+    overflow:hidden;
+}
+.acc-panel-head {
+    padding:1.1rem 1.4rem;
+    border-bottom:1px solid #f3f3f3;
+    background:#fafafa;
+    display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+}
+.acc-panel-head .ph-left { display:flex; align-items:center; gap:.75rem; }
+.acc-panel-head .ph-icon {
+    width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; flex-shrink:0;
+}
+.ph-icon-purple { background:#f5f0ff; color:#7b2ff7; }
+.ph-icon-gold   { background:#fffbeb; color:#f59e0b; }
+.ph-icon-teal   { background:#ecfeff; color:#06b6d4; }
+.acc-panel-head .ph-title { font-weight:700; font-size:.95rem; margin:0; }
+.acc-panel-head .ph-sub   { font-size:.78rem; color:#aaa; margin:0; }
+.acc-panel-body { padding:1.2rem 1.4rem; }
+
+/* Address cards */
+.addr-card {
+    background:#f9fafb; border-radius:12px;
+    border:1.5px solid #e5e7eb;
+    padding:1rem 1.1rem; margin-bottom:.75rem;
+    transition:border-color .18s;
+}
+.addr-card.is-default { border-color:#c44dde; background:#fdf4ff; }
+.addr-card .addr-label { font-weight:700; font-size:.88rem; color:#222; }
+.addr-card .addr-detail { font-size:.8rem; color:#666; margin-top:.2rem; }
+.addr-actions { display:flex; gap:.4rem; flex-wrap:wrap; }
+.addr-actions .btn { font-size:.75rem; border-radius:50px; padding:.25rem .7rem; }
+
+/* Add address form */
+.addr-add-form {
+    background:#f9fafb; border-radius:14px; border:2px dashed #e5e7eb;
+    padding:1.2rem;
+}
+.addr-add-form .form-control { font-size:.84rem; border-radius:10px; }
+
+/* Form */
+.acc-panel-body .form-label { font-size:.83rem; font-weight:600; color:#555; margin-bottom:.3rem; }
+.acc-panel-body .form-control { border-radius:12px; font-size:.88rem; }
+.acc-panel-body .form-control:focus { border-color:#c44dde; box-shadow:0 0 0 3px rgba(196,77,222,.12); }
+
+/* Security note */
+.acc-security-note {
+    background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px;
+    padding:.8rem 1rem; font-size:.82rem; color:#166534;
+    display:flex; align-items:center; gap:.5rem;
+}
+
+/* DARK MODE */
+.dark-mode .acc-order-mini,
+.dark-mode .acc-services .acc-svc,
+.dark-mode .acc-panel         { background:#1e1e2d; border-color:#2d2d40; }
+.dark-mode .acc-panel-head    { background:#252535; border-color:#2d2d40; }
+.dark-mode .order-step        { background:#252535; }
+.dark-mode .order-step:hover  { background:#2f1a4a; }
+.dark-mode .order-step .step-name,
+.dark-mode .acc-svc .svc-name { color:#f0f0f0; }
+.dark-mode .addr-card         { background:#252535; border-color:#3a3a50; }
+.dark-mode .addr-card.is-default { background:#2f1a4a; border-color:#c44dde; }
+.dark-mode .addr-card .addr-label { color:#f0f0f0; }
+.dark-mode .addr-card .addr-detail { color:#aaa; }
+.dark-mode .addr-add-form     { background:#252535; border-color:#3a3a50; }
+.dark-mode .acc-panel-body .form-control { background:#2a2a3d; border-color:#3a3a50; color:#eee; }
+.dark-mode .acc-security-note { background:#052e16; border-color:#166534; color:#86efac; }
+
+@media (max-width:575.98px) {
+    .acc-hero { padding:1.4rem 1.2rem; }
+    .acc-hero-info .acc-name { font-size:1.15rem; }
+    .acc-services { gap:.5rem; }
+    .acc-svc .svc-icon { width:38px; height:38px; font-size:.95rem; }
+    .acc-svc .svc-name { font-size:.72rem; }
+}
+
+
+/* account/index.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { font-size:.72rem; }
+.view-inline-2 { font-size:.75rem;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.05em; }
+.view-inline-3 { font-size:.83rem; }
+.view-inline-4 { background:#f5f0ff;color:#7b2ff7;font-size:.65rem; }
+.view-inline-5 { font-size:.72rem;padding:.2rem .6rem;border-radius:50px; }
+.view-inline-6 { font-size:.8rem; }
+.view-inline-7 { font-size:.85rem; }

@@ -30,9 +30,17 @@ Route::get('/blog', [PostController::class, 'index'])->name('posts.index');
 Route::get('/blog/{slug}', [PostController::class, 'show'])->name('posts.show');
 Route::get('/about', [PageController::class, 'about'])->name('pages.about');
 Route::get('/contact', [PageController::class, 'contact'])->name('pages.contact');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
 Route::get('/policies', [PageController::class, 'policies'])->name('pages.policies');
 Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
+Route::get('/compare', [\App\Http\Controllers\CompareController::class, 'index'])->name('products.compare');
+Route::get('/track-order', [\App\Http\Controllers\OrderTrackingController::class, 'index'])->name('orders.track');
+Route::post('/track-order', [\App\Http\Controllers\OrderTrackingController::class, 'track'])->name('orders.track.submit');
+Route::post('/newsletter/subscribe', [\App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/newsletter/confirm/{token}', [\App\Http\Controllers\NewsletterController::class, 'confirm'])->name('newsletter.confirm');
+Route::get('/newsletter/unsubscribe/{token}', [\App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 Route::post('/product-advisor/recommend', [\App\Http\Controllers\ProductAdvisorController::class, 'recommend'])->name('product-advisor.recommend');
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
 // ==================================================
 // ĐĂNG NHẬP GOOGLE (ĐỂ NGOÀI CÙNG ĐỂ AI CŨNG BẤM ĐƯỢC)
@@ -58,7 +66,7 @@ Route::middleware('guest')->group(function () {
 // ==================================================
 // 3. ĐĂNG XUẤT
 // ==================================================
-Route::match(['get', 'post'], 'logout', [AuthController::class, 'logout'])
+Route::post('logout', [AuthController::class, 'logout'])
     ->name('logout');
 
 // ==================================================
@@ -106,15 +114,23 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('members.update');
     Route::delete('/members/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('members.destroy');
     Route::get('/customers', [\App\Http\Controllers\Admin\MemberController::class, 'index'])->middleware('role:admin,manager')->name('customers.index');
+    Route::get('/customers/export', [\App\Http\Controllers\Admin\MemberController::class, 'export'])->middleware('role:admin,manager')->name('customers.export');
     Route::get('/customers/create', [\App\Http\Controllers\Admin\MemberController::class, 'create'])->middleware('role:admin,manager')->name('customers.create');
     Route::post('/customers', [\App\Http\Controllers\Admin\MemberController::class, 'store'])->middleware('role:admin,manager')->name('customers.store');
     Route::get('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'show'])->middleware('role:admin,manager')->name('customers.show');
     Route::get('/customers/{user}/edit', [\App\Http\Controllers\Admin\MemberController::class, 'edit'])->middleware('role:admin,manager')->name('customers.edit');
     Route::put('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'update'])->middleware('role:admin,manager')->name('customers.update');
+    Route::patch('/customers/{user}/toggle-lock', [\App\Http\Controllers\Admin\MemberController::class, 'toggleLock'])->middleware('role:admin,manager')->name('customers.toggle-lock');
+    Route::patch('/customers/{user}/reset-password', [\App\Http\Controllers\Admin\MemberController::class, 'resetPassword'])->middleware('role:admin,manager')->name('customers.reset-password');
+    Route::post('/customers/{user}/adjust-points', [\App\Http\Controllers\Admin\MemberController::class, 'adjustPoints'])->middleware('role:admin,manager')->name('customers.adjust-points');
+    Route::post('/customers/{user}/give-voucher', [\App\Http\Controllers\Admin\MemberController::class, 'giveVoucher'])->middleware('role:admin,manager')->name('customers.give-voucher');
+    Route::post('/customers/{user}/avatar', [\App\Http\Controllers\Admin\MemberController::class, 'updateAvatar'])->middleware('role:admin,manager')->name('customers.avatar');
     Route::delete('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('customers.destroy');
     Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->middleware('role:admin')->name('staff.index');
     Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->middleware('role:admin')->name('staff.store');
-    Route::patch('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->middleware('role:admin')->name('staff.update');
+    Route::match(['patch', 'put'], '/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->middleware('role:admin')->name('staff.update');
+    Route::patch('/staff/{user}/reset-password', [\App\Http\Controllers\Admin\StaffController::class, 'resetPassword'])->middleware('role:admin')->name('staff.reset-password');
+    Route::patch('/staff/{user}/toggle-lock', [\App\Http\Controllers\Admin\StaffController::class, 'toggleLock'])->middleware('role:admin')->name('staff.toggle-lock');
     Route::delete('/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'destroy'])->middleware('role:admin')->name('staff.destroy');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->middleware('role:admin,manager')->name('activity-logs.index');
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->middleware('role:admin,manager,warehouse_staff')->name('inventory-logs.index');
@@ -144,7 +160,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
         ->only(['index', 'store', 'update', 'destroy'])->middleware('role:admin,manager');
     Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'adminIndex'])->middleware('role:admin,customer_service')->name('chat.index');
     
-    // Dữ liệu biểu đồ
+    // Bản tin & Hỏi đáp sản phẩm
+    Route::get('/newsletter-subscribers', [\App\Http\Controllers\NewsletterController::class, 'adminIndex'])->middleware('role:admin,manager')->name('newsletter.index');
+    Route::get('/newsletter/export', [\App\Http\Controllers\NewsletterController::class, 'adminExport'])->middleware('role:admin,manager')->name('newsletter.export');
+    Route::post('/questions/{question}/answer', [\App\Http\Controllers\ProductQuestionController::class, 'answer'])->middleware('role:admin,manager,customer_service')->name('questions.answer');
+    Route::patch('/questions/{question}/toggle-visibility', [\App\Http\Controllers\ProductQuestionController::class, 'toggleVisibility'])->middleware('role:admin,manager')->name('questions.toggle-visibility');
 });
 
 // ==================================================
@@ -153,8 +173,24 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 // Các trang catalog có thể xem công khai để hỗ trợ SEO và khách vãng lai.
 Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class, 'show_normal'])->name('products.show');
+Route::get('/products/{product:slug}/quick-view', [ProductController::class, 'quickView'])->name('products.quick-view');
+Route::get('/search-suggestions', [ProductController::class, 'suggestions'])->name('products.suggestions')->middleware('throttle:60,1');
 Route::get('/categories', [CategoryController::class, 'indexNormal'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'showNormal'])->name('categories.show');
+
+// Giỏ hàng & Thanh toán (Hỗ trợ cả khách vãng lai và thành viên)
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+Route::patch('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
+Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
+Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply_voucher');
+Route::post('/cart/apply-vouchers', [CartController::class, 'applyVouchers'])->name('cart.apply_vouchers');
+Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+Route::post('/cart/save-for-later/{item}', [CartController::class, 'saveForLater'])->name('cart.save_for_later');
+Route::post('/cart/move-to-cart/{item}', [CartController::class, 'moveToCart'])->name('cart.move_to_cart');
+Route::post('/reviews/{review}/vote-helpful', [\App\Http\Controllers\ReviewHelpfulVoteController::class, 'toggle'])->name('reviews.vote-helpful');
+Route::post('/products/{product}/questions', [\App\Http\Controllers\ProductQuestionController::class, 'store'])->name('products.questions.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -177,24 +213,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/products/{product}/stock-alert', [StockAlertController::class, 'store'])->name('products.stock-alert.store');
     Route::delete('/products/{product}/stock-alert', [StockAlertController::class, 'destroy'])->name('products.stock-alert.destroy');
     Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::post('/change-password/send-otp', [AuthController::class, 'sendChangePasswordOtp'])->middleware('throttle:5,1')->name('password.send-otp');
     Route::put('/change-password', [AuthController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
     
     // Đánh giá sản phẩm yêu cầu đăng nhập và xác thực email.
     Route::post('/products/{product}/reviews', [ProductReviewController::class, 'store'])->name('products.reviews.store');
     Route::patch('/products/{product}/reviews/{review}', [ProductReviewController::class, 'update'])->name('products.reviews.update');
     
-    // Giỏ hàng
-    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::patch('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
-    Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
-    Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply_voucher');
-    Route::post('/cart/apply-vouchers', [CartController::class, 'applyVouchers'])->name('cart.apply_vouchers');
-    
-    // Thanh toán (Checkout)
-    Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
-
     // Chat Real-time
     Route::get('/chat/messages', [App\Http\Controllers\ChatController::class, 'fetchMessages']);
     Route::get('/admin/chat/history', [App\Http\Controllers\ChatController::class, 'history'])->middleware(['admin', 'role:admin,customer_service'])->name('admin.chat.history');
@@ -203,11 +228,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/chat/heartbeat', [App\Http\Controllers\ChatController::class, 'heartbeat']);
     Route::get('/chat/presence', [App\Http\Controllers\ChatController::class, 'presence']);
 
-Route::get('/search-suggestions', [App\Http\Controllers\ProductController::class, 'suggestions'])->name('products.suggestions');
     // Đơn hàng của người dùng
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
     Route::post('/orders/{order}/continue-payment', [OrderController::class, 'continuePayment'])->name('orders.continue_payment');
     Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('orders.confirm_received');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');

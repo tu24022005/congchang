@@ -12,11 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up', 
     ) 
     ->withMiddleware(function (Middleware $middleware): void { 
-        // Đăng ký alias 'admin' cho AdminMiddleware 
+        // Đăng ký alias
         $middleware->alias([ 
             'admin' => \App\Http\Middleware\AdminMiddleware::class, 
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-        ]); 
+            'role'  => \App\Http\Middleware\RoleMiddleware::class,
+        ]);
+        // Ép UTF-8 cho mọi web response (fix browser CốC CốC và tương tự)
+        $middleware->web(append: [
+            \App\Http\Middleware\ForceUtf8::class,
+        ]);
     }) 
     ->withExceptions(function (Exceptions $exceptions): void { 
         // 

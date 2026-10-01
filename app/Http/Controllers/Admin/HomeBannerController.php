@@ -27,6 +27,7 @@ class HomeBannerController extends Controller
     {
         $banner = new HomeBanner($this->validated($request));
         $this->storeImage($request, $banner);
+        $this->storeVideo($request, $banner);
         $banner->save();
 
         return redirect()->route('admin.home-banners.index')->with('success', 'Đã thêm banner trang chủ.');
@@ -41,6 +42,7 @@ class HomeBannerController extends Controller
     {
         $homeBanner->fill($this->validated($request, $homeBanner));
         $this->storeImage($request, $homeBanner);
+        $this->storeVideo($request, $homeBanner);
         $homeBanner->save();
 
         return redirect()->route('admin.home-banners.index')->with('success', 'Đã cập nhật banner trang chủ.');
@@ -50,6 +52,9 @@ class HomeBannerController extends Controller
     {
         if ($homeBanner->image_path) {
             Storage::disk('public')->delete($homeBanner->image_path);
+        }
+        if ($homeBanner->video_path) {
+            Storage::disk('public')->delete($homeBanner->video_path);
         }
 
         $homeBanner->delete();
@@ -64,17 +69,26 @@ class HomeBannerController extends Controller
             'title' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:1000'],
             'image_url' => ['nullable', 'url', 'max:2048'],
+            'video_url' => ['nullable', 'url', 'max:2048'],
             'alt_text' => ['nullable', 'string', 'max:180'],
             'button_text' => ['nullable', 'string', 'max:80'],
             'button_url' => ['nullable', 'string', 'max:2048'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:9999'],
             'is_active' => ['nullable', 'boolean'],
+            'video_autoplay' => ['nullable', 'boolean'],
+            'video_loop' => ['nullable', 'boolean'],
+            'video_muted' => ['nullable', 'boolean'],
+            'remove_video' => ['nullable', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'video' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov', 'max:51200'],
         ]);
 
-        if (!$request->hasFile('image') && !$request->filled('image_url') && !$banner?->image_path) {
+        $hasImage = $request->hasFile('image') || $request->filled('image_url') || !empty($banner?->image_path) || !empty($banner?->image_url);
+        $hasVideo = $request->hasFile('video') || $request->filled('video_url') || (!empty($banner?->video_path) && !$request->boolean('remove_video'));
+
+        if (!$hasImage && !$hasVideo) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'image' => 'Vui lòng upload ảnh hoặc nhập URL ảnh.',
+                'image' => 'Vui lòng cung cấp hình ảnh hoặc video cho banner.',
             ]);
         }
 
@@ -93,5 +107,31 @@ class HomeBannerController extends Controller
 
         $banner->image_path = $request->file('image')->store('home-banners', 'public');
         $banner->image_url = null;
+    }
+
+    private function storeVideo(Request $request, HomeBanner $banner): void
+    {
+        if ($request->boolean('remove_video')) {
+            if ($banner->video_path) {
+                Storage::disk('public')->delete($banner->video_path);
+                $banner->video_path = null;
+            }
+            $banner->video_url = null;
+            return;
+        }
+
+        if ($request->hasFile('video')) {
+            if ($banner->video_path) {
+                Storage::disk('public')->delete($banner->video_path);
+            }
+            $banner->video_path = $request->file('video')->store('home-banners/videos', 'public');
+            $banner->video_url = null;
+        } elseif ($request->filled('video_url')) {
+            if ($banner->video_path) {
+                Storage::disk('public')->delete($banner->video_path);
+                $banner->video_path = null;
+            }
+            $banner->video_url = $request->input('video_url');
+        }
     }
 }

@@ -208,8 +208,9 @@
 
             btn.style.width = btn.dataset.originalWidth;
             btn.classList.add('is-loading');
-            btn.disabled = true;
+            btn.style.pointerEvents = 'none';
             btn.setAttribute('aria-busy', 'true');
+            setTimeout(() => { if (btn) btn.disabled = true; }, 150);
 
             const text = customText || btn.dataset.loadingText;
             if (text) {

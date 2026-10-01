@@ -83,7 +83,7 @@ class CartController extends Controller
         $this->cartService->syncSession(Auth::user());
 
         if ($request->boolean('buy_now')) {
-            return redirect()->route('cart.index')->with('success', 'Đã thêm sản phẩm vào giỏ hàng!');
+            return redirect()->route('checkout');
         }
 
         return back()->with('success', 'Đã thêm sản phẩm vào giỏ hàng!');
@@ -223,7 +223,17 @@ class CartController extends Controller
         }
 
         $total = collect($cart)->sum(fn (array $item) => $item['price'] * $item['quantity']);
+        $vouchers = Voucher::where(function ($query) {
+                $query->whereNull('expires_at')->orWhereDate('expires_at', '>=', today());
+            })
+            ->where(function ($query) {
+                $query->whereNull('usage_limit')->orWhereColumn('used_count', '<', 'usage_limit');
+            })
+            ->where('scope', 'platform')
+            ->latest()
+            ->get();
         $addresses = Auth::user()->addresses()->orderByDesc('is_default')->latest('id')->get();
-        return view('cart.checkout', compact('cart', 'total', 'addresses'));
+
+        return view('cart.checkout', compact('cart', 'total', 'vouchers', 'addresses'));
     }
 }

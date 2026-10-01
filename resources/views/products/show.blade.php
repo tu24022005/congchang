@@ -181,9 +181,10 @@
                                 <div class="quantity-picker"><button type="button" data-quantity-step="-1" aria-label="Giảm số lượng">−</button><input type="number" name="quantity" id="detail-quantity" value="1" min="1" max="{{ max(1, $product->quantity) }}" aria-label="Số lượng"><button type="button" data-quantity-step="1" aria-label="Tăng số lượng">+</button></div>
                                 <small class="text-muted" id="detail-stock-note">Tối đa {{ $product->quantity }} sản phẩm</small>
                             </div>
+                            <input type="hidden" name="buy_now" id="detail-buy-now-input" value="0">
                             <div class="d-flex gap-2">
-                                <button type="submit" class="aloha-cart-button flex-grow-1"><i class="bi bi-bag-plus"></i><span>Thêm vào giỏ hàng</span></button>
-                                <button type="submit" name="buy_now" value="1" class="btn btn-dark detail-buy flex-grow-1"><i class="bi bi-lightning-charge me-2"></i>Mua ngay</button>
+                                <button type="submit" id="btn-add-to-cart" class="aloha-cart-button flex-grow-1"><i class="bi bi-bag-plus"></i><span>Thêm vào giỏ hàng</span></button>
+                                <button type="submit" id="btn-buy-now" name="buy_now" value="1" class="btn btn-dark detail-buy flex-grow-1"><i class="bi bi-lightning-charge me-2"></i>Mua ngay</button>
                             </div>
                         </form>
                     @else
@@ -444,16 +445,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const cartForm = document.getElementById('detail-cart-form');
     if (cartForm) {
+        const buyNowInput = document.getElementById('detail-buy-now-input');
+        const buyNowBtn = document.getElementById('btn-buy-now');
+        const addToCartBtn = document.getElementById('btn-add-to-cart');
+
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', function() {
+                if (buyNowInput) buyNowInput.value = '1';
+            });
+        }
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function() {
+                if (buyNowInput) buyNowInput.value = '0';
+            });
+        }
+
         cartForm.addEventListener('submit', function(e) {
-            const submitter = e.submitter;
-            if (submitter && submitter.name === 'buy_now') {
-                if (window.setButtonLoading) window.setButtonLoading(submitter, 'Đang xử lý...');
-                return; // Let buy now submit normally
+            const isBuyNow = (buyNowInput && buyNowInput.value === '1') || 
+                             (e.submitter && (e.submitter.name === 'buy_now' || e.submitter.id === 'btn-buy-now'));
+
+            if (isBuyNow) {
+                if (buyNowInput) buyNowInput.value = '1';
+                if (buyNowBtn && window.setButtonLoading) {
+                    window.setButtonLoading(buyNowBtn, 'Đang chuyển thanh toán...');
+                }
+                return; // Submit normally to checkout
             }
+
+            if (buyNowInput) buyNowInput.value = '0';
             e.preventDefault();
             const mainImg = document.getElementById('detail-main-image');
-            if (submitter && window.setButtonLoading) {
-                window.setButtonLoading(submitter, 'Đang thêm...');
+            if (addToCartBtn && window.setButtonLoading) {
+                window.setButtonLoading(addToCartBtn, 'Đang thêm...');
             }
             if (window.flyToCart && mainImg) {
                 window.flyToCart(mainImg);

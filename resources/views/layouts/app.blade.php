@@ -501,6 +501,12 @@
                     bottom: 24px !important;
                     z-index: 99999 !important;
                 }
+                @media (max-width: 576px) {
+                    .chat-widget-button {
+                        right: 16px !important;
+                        bottom: 16px !important;
+                    }
+                }
                 .chat-widget-window {
                     z-index: 999999 !important;
                 }
@@ -691,7 +697,7 @@
         });
     </script>
     <!-- GLOBAL UI ELEMENTS: CIRCULAR PROGRESS BACK TO TOP & TOAST -->
-    <button id="back-to-top" class="back-to-top-btn" aria-label="Lên đầu trang">
+    <button id="back-to-top" class="back-to-top-btn" aria-label="Lên đầu trang" title="Cuộn lên đầu trang">
         <svg class="progress-ring" width="48" height="48" viewBox="0 0 48 48">
             <circle class="progress-ring-bg" stroke="rgba(255, 107, 129, 0.2)" stroke-width="3" fill="transparent" r="20" cx="24" cy="24" />
             <circle id="scroll-progress-circle" class="progress-ring-circle" stroke="url(#progress-ring-gradient)" stroke-width="3" stroke-linecap="round" fill="transparent" r="20" cx="24" cy="24" />
@@ -706,8 +712,8 @@
     </button>
     <div id="toast-container"></div>
     
-    <script src="{{ asset('js/animations.js') }}"></script>
-    <script src="{{ asset('js/interactions.js') }}"></script>
+    <script src="{{ asset('js/animations.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/interactions.js') }}?v={{ time() }}"></script>
     
     <!-- Toggles moved to navbar -->
     <script>

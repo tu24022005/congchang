@@ -160,10 +160,5 @@
         </div>
     </div>
 </div>
-<script>
-document.getElementById('voucher-applies-to')?.addEventListener('change', function () {
-    document.getElementById('voucher-category-field').classList.toggle('d-none', this.value !== 'category');
-    document.getElementById('voucher-product-field').classList.toggle('d-none', this.value !== 'product');
-});
-</script>
+<script src="{{ asset_v('js/views/admin-vouchers-index-blade-php.js') }}" defer></script>
 @endsection

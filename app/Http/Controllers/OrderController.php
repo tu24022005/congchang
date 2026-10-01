@@ -55,6 +55,14 @@ class OrderController extends Controller
             $ordersQuery->whereIn('status', $statusFilters[$request->input('status')] ?? [$request->input('status')]);
         }
 
+        // Sắp xếp
+        match ($request->input('sort', 'newest')) {
+            'oldest'     => $ordersQuery->reorder('created_at', 'asc'),
+            'total_desc' => $ordersQuery->reorder('total', 'desc'),
+            'total_asc'  => $ordersQuery->reorder('total', 'asc'),
+            default      => null, // newest đã được set bởi ->latest() ở trên
+        };
+
         $orders = $ordersQuery->get();
         $orderStats = [
             'all' => Order::where('user_id', Auth::id())->count(),
@@ -118,7 +126,19 @@ class OrderController extends Controller
             $validated['customer_address'] = $savedAddress->address;
         }
 
-        $cart = $this->cartService->syncSession(Auth::user());
+        $isBuyNow = ($request->boolean('buy_now') || session('is_buy_now')) && session()->has('buy_now_item');
+        if ($isBuyNow) {
+            $buyNowData = session('buy_now_item');
+            $cart = [
+                $buyNowData['key'] => $buyNowData['item'],
+            ];
+        } else {
+            $cart = $this->cartService->syncSession(Auth::user());
+            if (session()->has('selected_cart_keys')) {
+                $selectedKeys = session('selected_cart_keys');
+                $cart = collect($cart)->filter(fn ($item, $key) => in_array((string)$key, $selectedKeys, true))->all();
+            }
+        }
         
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn trống.');
@@ -217,6 +237,7 @@ class OrderController extends Controller
                     $variation->decrement('stock', $details['quantity']);
                     $variation->refresh();
                     InventoryLog::record($variation, $beforeStock, (int) $variation->stock, 'Giữ hàng theo đơn hàng', $order, null, false);
+                    $product->update(['quantity' => (int) $product->variations()->sum('stock')]);
                 } else {
                     if ($product->quantity < $details['quantity']) {
                         throw new \RuntimeException('Sản phẩm trong giỏ vừa hết hàng.');
@@ -236,7 +257,24 @@ class OrderController extends Controller
             }
 
             // 5. Dọn dẹp session
-            $this->cartService->clear(Auth::user());
+            if ($isBuyNow) {
+                session()->forget(['is_buy_now', 'buy_now_item']);
+                // Đơn mua ngay độc lập, giữ nguyên các sản phẩm khác trong giỏ hàng
+            } else {
+                if (session()->has('selected_cart_keys')) {
+                    $selectedKeys = session('selected_cart_keys');
+                    foreach ($selectedKeys as $key) {
+                        $parts = explode(':', (string) $key);
+                        $query = $this->cartService->forUser(Auth::user())->items()->where('product_id', (int) $parts[0]);
+                        $query = isset($parts[1]) ? $query->where('variation_id', (int) $parts[1]) : $query->whereNull('variation_id');
+                        $query->delete();
+                    }
+                    $this->cartService->syncSession(Auth::user());
+                    session()->forget('selected_cart_keys');
+                } else {
+                    $this->cartService->clear(Auth::user());
+                }
+            }
             session()->forget(['voucher', 'voucher_discount', 'voucher_shipping']);
             
             DB::commit(); 
@@ -598,5 +636,47 @@ class OrderController extends Controller
         $order->load('items.product', 'items.variation');
 
         return view('orders.show', compact('order'));
+    }
+
+    public function reorder(Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $order->load(['items.product.variations', 'items.variation']);
+        $addedCount = 0;
+        $skippedCount = 0;
+
+        foreach ($order->items as $item) {
+            $product = $item->product;
+            if (!$product) {
+                $skippedCount++;
+                continue;
+            }
+
+            $variation = $item->variation;
+            $stock = $variation ? $variation->stock : $product->quantity;
+
+            if ($stock <= 0) {
+                $skippedCount++;
+                continue;
+            }
+
+            $qtyToAdd = min((int) $item->quantity, (int) $stock);
+            $this->cartService->add(Auth::user(), $product, $variation, $qtyToAdd);
+            $addedCount++;
+        }
+
+        if ($addedCount === 0) {
+            return redirect()->route('cart.index')->with('warning', 'Rất tiếc, các sản phẩm trong đơn hàng này hiện đã hết hàng hoặc ngừng kinh doanh.');
+        }
+
+        $message = "Đã thêm {$addedCount} sản phẩm vào giỏ hàng.";
+        if ($skippedCount > 0) {
+            $message .= " ({$skippedCount} sản phẩm đã hết hàng nên bị bỏ qua).";
+        }
+
+        return redirect()->route('cart.index')->with('success', $message);
     }
 }

@@ -10,7 +10,7 @@
             <i class="bi bi-chat-heart me-1"></i> Trung tâm hỗ trợ khách hàng
         </span>
         <h1 class="display-6 fw-bold text-dark mt-2">BeatyCare 🌸 luôn sẵn sàng lắng nghe</h1>
-        <p class="text-muted mx-auto" style="max-width: 620px;">
+        <p class="text-muted mx-auto view-inline-1">
             Dù bạn cần tư vấn chu trình dưỡng da hay thắc mắc về đơn hàng, đội ngũ Aloha Beauty luôn có mặt hỗ trợ nhanh chóng nhất.
         </p>
     </div>
@@ -27,7 +27,7 @@
                     </div>
                     <div>
                         <div class="fw-bold text-dark">Showroom chính</div>
-                        <p class="text-muted small mb-0">Tầng 1, Aloha Beauty Center, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh</p>
+                        <p class="text-muted small mb-0">Tầng 1, Aloha Beauty Center, Phường Cầu Giấy, Hà Nội </p>
                     </div>
                 </div>
 
@@ -114,33 +114,6 @@
 </div>
 
 @push('scripts')
-<script>
-function handleContactSubmit(event) {
-    event.preventDefault();
-    const btn = document.getElementById('btn-contact-submit');
-    const name = document.getElementById('contact-name').value;
-    
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi tin...';
-    
-    setTimeout(function() {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-check2-circle me-2"></i>Đã gửi thành công!';
-        btn.classList.replace('btn-primary', 'btn-success');
-        
-        if (typeof window.showToast === 'function') {
-            window.showToast(`Cảm ơn bạn ${name}! BeatyCare đã nhận được thông tin và sẽ phản hồi sớm nhất.`, 'success');
-        } else {
-            alert(`Cảm ơn bạn ${name}! BeatyCare đã nhận được thông tin và sẽ phản hồi sớm nhất.`);
-        }
-        
-        document.getElementById('contact-form').reset();
-        setTimeout(() => {
-            btn.classList.replace('btn-success', 'btn-primary');
-            btn.innerHTML = '<i class="bi bi-paperplane-fill me-2"></i>Gửi thông tin liên hệ';
-        }, 4000);
-    }, 800);
-}
-</script>
+<script src="{{ asset_v('js/views/pages-contact-blade-php.js') }}" defer></script>
 @endpush
 @endsection

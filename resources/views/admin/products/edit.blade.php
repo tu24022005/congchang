@@ -2,19 +2,7 @@
 @section('title', 'Chỉnh sửa sản phẩm')
 
 @section('content')
-<style>
-    .product-editor { --ink: #203047; --muted: #718096; --line: #e6ebf2; }
-    .editor-hero { background: linear-gradient(135deg, #183b56, #267d8f); color: #fff; border-radius: 18px; padding: 1.6rem 1.8rem; }
-    .editor-panel { border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 12px 30px rgba(32, 48, 71, .07); }
-    .editor-panel-title { color: var(--ink); font-weight: 800; letter-spacing: -.02em; }
-    .editor-label { color: var(--ink); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
-    .editor-input { border-color: var(--line); border-radius: 10px; padding: .72rem .85rem; }
-    .editor-input:focus { border-color: #27a7bd; box-shadow: 0 0 0 .2rem rgba(39, 167, 189, .12); }
-    .image-preview { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 14px; background: #f4f7fa; border: 1px solid var(--line); }
-    .gallery-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: .65rem; }
-    .gallery-preview img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
-    .stock-chip { border-radius: 999px; padding: .42rem .7rem; font-size: .78rem; font-weight: 800; }
-</style>
+<link rel="stylesheet" href="{{ asset_v('css/views/admin-products-edit-blade-php.css') }}">
 
 <div class="product-editor py-2">
     <div class="editor-hero d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -79,6 +67,51 @@
                         <div class="text-end text-muted small mt-1"><span id="description-count">0</span>/1000 ký tự</div>
                         @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+
+                    <!-- THÔNG TIN MỸ PHẨM -->
+                    <div class="border rounded-3 p-3 my-4 bg-light">
+                        <h5 class="fw-bold mb-2 text-primary"><i class="bi bi-flower1 me-1"></i>Thông tin mỹ phẩm & làm đẹp</h5>
+                        <small class="text-muted d-block mb-3">Hiển thị trong bảng thông số chi tiết sản phẩm và tư vấn làm đẹp.</small>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="origin" class="form-label editor-label">Xuất xứ / Nơi sản xuất</label>
+                                <input type="text" name="origin" id="origin" class="form-control editor-input" value="{{ old('origin', $product->origin) }}" placeholder="VD: Hàn Quốc, Nhật Bản, Pháp...">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="expiry_info" class="form-label editor-label">Hạn sử dụng</label>
+                                <input type="text" name="expiry_info" id="expiry_info" class="form-control editor-input" value="{{ old('expiry_info', $product->expiry_info) }}" placeholder="VD: 36 tháng kể từ NSX, 12 tháng sau mở nắp">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label editor-label">Phù hợp loại da</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @php
+                                    $availableSkinTypes = [
+                                        'da_dau' => 'Da dầu',
+                                        'da_kho' => 'Da khô',
+                                        'da_hon_hop' => 'Da hỗn hợp',
+                                        'da_nhay_cam' => 'Da nhạy cảm',
+                                        'moi_loai_da' => 'Mọi loại da',
+                                    ];
+                                    $currentSkinTypes = old('skin_types', $product->skin_types ?: []);
+                                @endphp
+                                @foreach($availableSkinTypes as $key => $label)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="skin_types[]" value="{{ $key }}" id="edit_skin_type_{{ $key }}" @checked(in_array($key, (array)$currentSkinTypes, true))>
+                                        <label class="form-check-label" for="edit_skin_type_{{ $key }}">{{ $label }}</label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ingredients" class="form-label editor-label">Thành phần chi tiết (Ingredients)</label>
+                            <textarea name="ingredients" id="ingredients" rows="3" class="form-control editor-input" placeholder="VD: Niacinamide 10%, Zinc PCA 1%, Aqua, Glycerin...">{{ old('ingredients', $product->ingredients) }}</textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label for="usage_instructions" class="form-label editor-label">Hướng dẫn sử dụng (Usage Instructions)</label>
+                            <textarea name="usage_instructions" id="usage_instructions" rows="3" class="form-control editor-input" placeholder="VD: Sử dụng sau bước toner, lấy 2-3 giọt thoa đều lên da mặt...">{{ old('usage_instructions', $product->usage_instructions) }}</textarea>
+                        </div>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-12">
                             <label for="quantity" class="form-label editor-label">Tồn kho</label>
@@ -116,7 +149,7 @@
                                 <div class="col-md-1"><label class="form-label small">Đơn vị</label><select name="variations[{{ $index }}][size_unit]" class="form-select editor-input"><option value="">-</option>@foreach(['g', 'kg', 'ml', 'l'] as $unit)<option value="{{ $unit }}" @selected(($variation['size_unit'] ?? '') === $unit)>{{ $unit }}</option>@endforeach</select></div>
                                 <div class="col-md-1"><label class="form-label small">Giá bán</label><input type="number" min="0" name="variations[{{ $index }}][price]" class="form-control editor-input" value="{{ $variation['price'] ?? '' }}" required></div>
                                 <div class="col-md-1"><label class="form-label small">Tồn</label><input type="number" min="0" name="variations[{{ $index }}][stock]" class="form-control editor-input" value="{{ $variation['stock'] ?? 0 }}"></div>
-                                <div class="col-md-2"><label class="form-label small">Ảnh biến thể</label>@if(!empty($variation['image']))<img src="{{ asset('storage/' . $variation['image']) }}" class="rounded mb-1" style="width:42px;height:42px;object-fit:cover" alt="Ảnh hiện tại">@endif<input type="file" name="variations[{{ $index }}][image]" class="form-control form-control-sm" accept="image/*"><small class="text-muted">Để trống để giữ ảnh</small></div>
+                                <div class="col-md-2"><label class="form-label small">Ảnh biến thể</label>@if(!empty($variation['image']))<img src="{{ asset('storage/' . $variation['image']) }}" class="rounded mb-1 view-inline-1" alt="Ảnh hiện tại">@endif<input type="file" name="variations[{{ $index }}][image]" class="form-control form-control-sm" accept="image/*"><small class="text-muted">Để trống để giữ ảnh</small></div>
                                 <div class="col-md-1 variation-actions"><button type="button" class="btn btn-outline-primary duplicate-variation" title="Nhân bản dòng"><i class="bi bi-copy"></i></button><button type="button" class="btn btn-outline-danger remove-variation" title="Xóa dòng"><i class="bi bi-trash"></i></button></div>
                             </div>
                         @endforeach
@@ -156,7 +189,7 @@
                     <h2 class="h5 editor-panel-title mb-3">Tóm tắt kho</h2>
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3"><span class="text-muted">Tồn hiện tại</span><strong class="fs-4 {{ $product->quantity > 0 ? 'text-success' : 'text-danger' }}">{{ number_format($product->quantity) }}</strong></div>
                     <div class="d-flex justify-content-between align-items-center"><span class="text-muted">Giá niêm yết</span><strong class="text-danger">{{ number_format($product->price, 0, ',', '.') }} đ</strong></div>
-                    <div class="progress mt-3" style="height: 8px"><div class="progress-bar {{ $product->quantity > 10 ? 'bg-success' : 'bg-warning' }}" style="width: {{ min(100, max(4, $product->quantity)) }}%"></div></div>
+                    <div class="progress mt-3 view-inline-2"><div class="progress-bar {{ $product->quantity > 10 ? 'bg-success' : 'bg-warning' }}" data-inline-width="{{ min(100, max(4, $product->quantity)) }}" class="inline-dynamic-width"></div></div>
                     <small class="text-muted d-block mt-2">{{ $product->quantity <= 10 ? 'Nên bổ sung hàng sớm.' : 'Mức tồn kho đang ổn định.' }}</small>
                 </div>
                 <div class="editor-panel p-4">
@@ -170,54 +203,5 @@
     </form>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('main-image-preview');
-    const galleryInput = document.getElementById('gallery');
-    const galleryPreview = document.getElementById('gallery-preview');
-    const description = document.getElementById('description');
-    const descriptionCount = document.getElementById('description-count');
-
-    imageInput?.addEventListener('change', function () {
-        const file = this.files?.[0];
-        if (file) imagePreview.src = URL.createObjectURL(file);
-    });
-
-    galleryInput?.addEventListener('change', function () {
-        galleryPreview.innerHTML = '';
-        Array.from(this.files || []).forEach(function (file) {
-            const image = document.createElement('img');
-            image.src = URL.createObjectURL(file);
-            image.alt = file.name;
-            galleryPreview.appendChild(image);
-        });
-    });
-
-    const updateCount = () => descriptionCount.textContent = description.value.length;
-    description.addEventListener('input', updateCount);
-    updateCount();
-
-    const list = document.getElementById('variations-list');
-    let variationIndex = list.querySelectorAll('.variation-row').length;
-    const reindexRows = () => list.querySelectorAll('.variation-row').forEach((row, index) => row.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/variations\[\d+\]/, `variations[${index}]`)));
-    document.getElementById('add-variation').addEventListener('click', function () {
-        const index = list.querySelectorAll('.variation-row').length;
-        list.insertAdjacentHTML('beforeend', `<div class="row g-2 align-items-end variation-row mb-2"><div class="col-md-2"><label class="form-label small">Mã SKU</label><input name="variations[${index}][sku]" class="form-control editor-input" placeholder="SON-RED-01"></div><div class="col-md-2"><label class="form-label small">Màu</label><input name="variations[${index}][color]" class="form-control editor-input" placeholder="Đỏ"></div><div class="col-md-2"><label class="form-label small">Bộ nhớ / loại</label><input name="variations[${index}][storage]" class="form-control editor-input" placeholder="256GB"></div><div class="col-md-2"><label class="form-label small">Khối lượng</label><input type="number" step="0.01" min="0" name="variations[${index}][size_value]" class="form-control editor-input" placeholder="250"></div><div class="col-md-1"><label class="form-label small">Đơn vị</label><select name="variations[${index}][size_unit]" class="form-select editor-input"><option value="">-</option><option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option></select></div><div class="col-md-1"><label class="form-label small">Giá</label><input type="number" min="0" name="variations[${index}][price]" class="form-control editor-input"></div><div class="col-md-1"><label class="form-label small">Tồn</label><input type="number" min="0" name="variations[${index}][stock]" class="form-control editor-input" value="0"></div><div class="col-md-2"><label class="form-label small">Ảnh biến thể</label><input type="file" name="variations[${index}][image]" class="form-control form-control-sm" accept="image/*"><small class="text-muted">Để trống để giữ ảnh</small></div><div class="col-md-1 variation-actions"><button type="button" class="btn btn-outline-primary duplicate-variation" title="Nhân bản dòng"><i class="bi bi-copy"></i></button><button type="button" class="btn btn-outline-danger remove-variation" title="Xóa dòng"><i class="bi bi-trash"></i></button></div></div>`);
-        variationIndex++;
-    });
-    list.addEventListener('click', event => {
-        const row = event.target.closest('.variation-row');
-        if (!row) return;
-        if (event.target.closest('.remove-variation')) row.remove();
-        if (event.target.closest('.duplicate-variation')) {
-            const clone = row.cloneNode(true);
-            clone.querySelector('input[name$="[id]"]')?.remove();
-            list.appendChild(clone);
-        }
-        reindexRows();
-        variationIndex = list.querySelectorAll('.variation-row').length;
-    });
-});
-</script>
+<script src="{{ asset_v('js/views/admin-products-edit-blade-php.js') }}" defer></script>
 @endsection

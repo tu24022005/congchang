@@ -42,4 +42,15 @@ class ProductReview extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function helpfulVotes()
+    {
+        return $this->hasMany(ReviewHelpfulVote::class, 'review_id');
+    }
+
+    public function isHelpfulVotedBy(?User $user): bool
+    {
+        if (!$user) return false;
+        return $this->helpfulVotes()->where('user_id', $user->id)->exists();
+    }
 }

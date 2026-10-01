@@ -2,18 +2,7 @@
 @section('title', 'Chi tiết sản phẩm')
 
 @section('content')
-<style>
-    .product-overview { --ink: #203047; --line: #e6ebf2; }
-    .overview-hero { background: linear-gradient(135deg, #183b56, #267d8f); color: #fff; border-radius: 18px; padding: 1.5rem 1.7rem; }
-    .overview-panel { border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 12px 30px rgba(32, 48, 71, .07); }
-    .main-product-image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 16px; background: #f4f7fa; }
-    .overview-thumb { width: 74px; height: 74px; object-fit: cover; border-radius: 10px; border: 2px solid transparent; cursor: pointer; }
-    .overview-thumb:hover, .overview-thumb.active { border-color: #27a7bd; }
-    .metric-card { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; height: 100%; }
-    .metric-label { color: #718096; font-size: .78rem; text-transform: uppercase; font-weight: 800; letter-spacing: .04em; }
-    .detail-label { width: 34%; color: #718096; font-size: .85rem; }
-    .review-stars { color: #f59e0b; letter-spacing: .08em; }
-</style>
+<link rel="stylesheet" href="{{ asset_v('css/views/admin-products-show-blade-php.css') }}">
 
 <div class="product-overview py-2">
     <div class="overview-hero d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -95,7 +84,7 @@
             </div>
             <div class="table-responsive"><table class="table align-middle mb-0"><thead class="table-light"><tr><th>Khách hàng</th><th>Đánh giá</th><th>Nội dung</th><th>Thời gian</th></tr></thead><tbody>
                 @foreach($product->allReviews as $review)
-                    <tr><td class="fw-semibold">{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng' }}<small class="d-block text-success">Đã mua hàng</small></td><td><span class="review-stars">{{ str_repeat('★', $review->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $review->rating) }}</span></span><small class="d-block text-muted">{{ $review->rating }}/5</small></td><td>{{ $review->comment ?: 'Không có nhận xét.' }}@if($review->media_paths)<div class="d-flex gap-1 mt-2">@foreach($review->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" style="width:48px;height:48px;object-fit:cover;border-radius:6px">@endforeach</div>@endif</td><td class="text-muted">{{ $review->created_at?->format('d/m/Y H:i') }}<form action="{{ route('admin.product-reviews.visibility', $review) }}" method="POST" class="mt-2">@csrf @method('PATCH')<button class="btn btn-sm {{ $review->is_visible ? 'btn-outline-warning' : 'btn-outline-success' }}">{{ $review->is_visible ? 'Ẩn đánh giá' : 'Hiện đánh giá' }}</button></form></td></tr>
+                    <tr><td class="fw-semibold">{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng' }}<small class="d-block text-success">Đã mua hàng</small></td><td><span class="review-stars">{{ str_repeat('★', $review->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $review->rating) }}</span></span><small class="d-block text-muted">{{ $review->rating }}/5</small></td><td>{{ $review->comment ?: 'Không có nhận xét.' }}@if($review->media_paths)<div class="d-flex gap-1 mt-2">@foreach($review->media_paths as $path)<img src="{{ asset('storage/' . $path) }}" alt="Ảnh đánh giá" class="view-inline-1">@endforeach</div>@endif</td><td class="text-muted">{{ $review->created_at?->format('d/m/Y H:i') }}<form action="{{ route('admin.product-reviews.visibility', $review) }}" method="POST" class="mt-2">@csrf @method('PATCH')<button class="btn btn-sm {{ $review->is_visible ? 'btn-outline-warning' : 'btn-outline-success' }}">{{ $review->is_visible ? 'Ẩn đánh giá' : 'Hiện đánh giá' }}</button></form></td></tr>
                 @endforeach
             </tbody></table></div>
         @else
@@ -104,16 +93,5 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const mainImage = document.getElementById('main-product-image');
-    document.querySelectorAll('.overview-thumb').forEach(function (thumb) {
-        thumb.addEventListener('click', function () {
-            if (mainImage.tagName === 'IMG') mainImage.src = this.dataset.image;
-            document.querySelectorAll('.overview-thumb').forEach(item => item.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-});
-</script>
+<script src="{{ asset_v('js/views/admin-products-show-blade-php.js') }}" defer></script>
 @endsection

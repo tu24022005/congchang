@@ -113,91 +113,13 @@
         'itemListElement' => $breadcrumbElements,
     ];
 @endphp
-<script type="application/ld+json">
+<template class="jsonld-template">
 @json([$productSchema, $breadcrumbSchema], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
-</script>
+</template>
 @endsection
 
 @section('content')
-<style>
-    .shop-detail { --shop-ink: #1f2d3d; --shop-muted: #718096; --shop-line: #e5eaf0; }
-    .detail-breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; color: #64748b; font-size: .82rem; }
-    .detail-breadcrumb a { color: #1677c8; text-decoration: none; }
-    .detail-breadcrumb a:hover { color: #ee4d2d; text-decoration: underline; }
-    .detail-breadcrumb .breadcrumb-separator { color: #a0aec0; }
-    .detail-breadcrumb .breadcrumb-current { max-width: min(55vw, 620px); overflow: hidden; color: #526170; text-overflow: ellipsis; white-space: nowrap; }
-    .detail-shell { background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.95); border-radius: 22px; box-shadow: 0 18px 50px rgba(38, 60, 80, .1); }
-    .detail-gallery { position: sticky; top: 1rem; }
-    .detail-main-image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 18px; background: #f6f8fb; }
-    .detail-thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: border-color .2s, transform .2s; }
-    .detail-thumb:hover, .detail-thumb.active { border-color: #08a9d2; transform: translateY(-2px); }
-    .detail-kicker { color: #0082c8; font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-    .detail-title { color: var(--shop-ink); font-size: clamp(1.7rem, 3vw, 2.65rem); line-height: 1.1; letter-spacing: -.04em; }
-    .detail-rating { color: #f59e0b; }
-    .detail-price { color: #e63950; font-size: 2rem; font-weight: 800; }
-    .detail-stock { color: #16865b; background: #eaf8f0; border-radius: 999px; padding: .45rem .75rem; font-size: .78rem; font-weight: 800; }
-    .detail-stock.out { color: #c0394b; background: #fff0f2; }
-    .detail-copy { color: #65717c; line-height: 1.75; white-space: pre-line; }
-    .variation-picker { padding: 1rem; background: #fff8f8; border: 1px solid #f5dddd; border-radius: 12px; }
-    .variation-picker-row { display: flex; align-items: flex-start; gap: 1rem; }
-    .variation-picker-label { flex: 0 0 105px; padding-top: .55rem; color: #64748b; font-size: .85rem; }
-    .variation-options { display: flex; flex: 1; flex-wrap: wrap; gap: .55rem; }
-    .variation-option { position: relative; display: inline-flex; min-width: 100px; flex-direction: column; gap: .15rem; padding: .5rem .75rem; color: #334155; background: #fff; border: 1px solid #d8dee8; border-radius: 4px; cursor: pointer; }
-    .variation-option:has(input:checked) { color: #ee4d2d; background: #fff; border-color: #ee4d2d; box-shadow: 0 0 0 1px #ee4d2d; }
-    .variation-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-    .variation-code { font-weight: 700; }
-    .variation-name { color: #64748b; font-size: .75rem; }
-    .detail-divider { border-color: var(--shop-line); }
-    .quantity-picker { display: inline-flex; align-items: center; border: 1px solid #dbe4ef; border-radius: 12px; overflow: hidden; height: 48px; }
-    .quantity-picker button { width: 44px; height: 100%; border: 0; color: #1f6578; background: #f2fbfd; font-size: 1.2rem; }
-    .quantity-picker input { width: 52px; height: 100%; border: 0; text-align: center; font-weight: 800; outline: 0; }
-    .detail-buy { min-height: 48px; border-radius: 12px; font-weight: 800; }
-    .detail-benefit { border-top: 1px solid var(--shop-line); padding-top: 1rem; margin-top: 1.35rem; }
-    .detail-benefit-item { display: flex; gap: .65rem; color: #526170; font-size: .82rem; }
-    .detail-benefit-item i { color: #08a9d2; font-size: 1.1rem; }
-    .recommendation-band { margin-top: 2rem; }
-    .recommendation-card { border: 1px solid rgba(229,234,240,.9); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.9); transition: transform .2s, box-shadow .2s; }
-    .recommendation-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(38,60,80,.12); }
-    .recommendation-image, .recommendation-placeholder { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
-    .recommendation-placeholder { display: grid; place-items: center; background: #f5f7fa; }
-    .product-information { margin-top: 1.5rem; padding: 1.5rem; background: rgba(255,255,255,.92); border: 1px solid #e5eaf0; border-radius: 18px; box-shadow: 0 12px 30px rgba(38,60,80,.06); }
-    .product-information-title { margin: 0; padding-bottom: 1rem; color: #263238; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid #edf0f3; }
-    .product-detail-table { width: 100%; margin: 1rem 0 0; }
-    .product-detail-table th { width: 190px; padding: .55rem 1rem .55rem 0; color: #87909a; font-weight: 400; vertical-align: top; }
-    .product-detail-table td { padding: .55rem 0; color: #334155; }
-    .product-detail-chip { display: inline-block; margin: 0 .35rem .35rem 0; padding: .3rem .6rem; color: #526170; background: #f6f8fa; border: 1px solid #e2e8f0; border-radius: 4px; font-size: .86rem; }
-    .product-description-block { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #edf0f3; }
-    .product-description-block p { color: #526170; line-height: 1.8; white-space: pre-line; }
-    .product-reviews { margin-top: 1.5rem; padding: 1.5rem; background: rgba(255,255,255,.92); border: 1px solid #e5eaf0; border-radius: 18px; box-shadow: 0 12px 30px rgba(38,60,80,.06); }
-    .review-summary { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem; padding: 1.2rem; background: #fff8f8; border: 1px solid #f5dddd; }
-    .review-score { min-width: 130px; color: #d73211; text-align: center; }
-    .review-score strong { display: block; font-size: 2.2rem; line-height: 1; }
-    .review-stars { color: #ee4d2d; letter-spacing: .08em; }
-    .review-filters { display: flex; flex: 1; flex-wrap: wrap; align-content: center; gap: .5rem; }
-    .review-distribution { display: grid; flex: 1 1 360px; gap: .35rem; min-width: 280px; }
-    .review-distribution-row { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; gap: .5rem; color: #526170; font-size: .76rem; }
-    .review-distribution-bar { height: 8px; overflow: hidden; background: #f1e3df; border-radius: 999px; }
-    .review-distribution-bar span { display: block; height: 100%; background: linear-gradient(90deg, #ffc107, #ee4d2d); border-radius: inherit; }
-    .review-filter { padding: .45rem .7rem; color: #526170; background: #fff; border: 1px solid #d8dee8; border-radius: 4px; }
-    .review-filter.active, .review-filter:hover { color: #ee4d2d; border-color: #ee4d2d; }
-    .review-item { display: flex; gap: .75rem; padding: 1.2rem 0; border-bottom: 1px solid #edf0f3; }
-    .review-image-button { padding: 0; background: transparent; border: 0; cursor: zoom-in; }
-    .review-image-button img { width: 76px; height: 76px; object-fit: cover; border: 1px solid #e2e8f0; border-radius: 8px; transition: transform .2s, box-shadow .2s; }
-    .review-image-button:hover img { transform: scale(1.04); box-shadow: 0 8px 18px rgba(38,60,80,.18); }
-    .review-video-wrap { position: relative; width: 150px; height: 96px; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 8px; background: #111827; }
-    .review-video-wrap video { width: 100%; height: 100%; object-fit: cover; }
-    .review-video-wrap > span { position: absolute; left: .35rem; bottom: .35rem; padding: .2rem .35rem; color: #fff; background: rgba(0,0,0,.6); border-radius: 4px; font-size: .65rem; pointer-events: none; }
-    .review-image-preview { display: block; max-width: min(92vw, 1100px); max-height: 82vh; margin: 0 auto; border-radius: 12px; object-fit: contain; }
-        .review-image-lightbox { display: none; position: fixed; inset: 0; z-index: 1080; align-items: center; justify-content: center; padding: 3rem 1rem 1rem; background: rgba(0,0,0,.72); }
-        .review-image-lightbox.is-open { display: flex; }
-        .review-image-back-button { position: fixed; top: 1rem; right: 3.5rem; z-index: 1082; color: #263238; background: #fff; border: 0; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
-        .review-image-lightbox .review-image-close { position: fixed; top: 1.2rem; right: 1.2rem; z-index: 1082; }
-    .review-avatar { display: grid; flex: 0 0 38px; place-items: center; width: 38px; height: 38px; color: #0b5961; background: #dff5f2; border-radius: 50%; font-weight: 700; }
-    .review-meta { color: #8a959f; font-size: .78rem; }
-    .review-verified { color: #15966a; font-size: .78rem; }
-    .review-comment { margin: .45rem 0 0; color: #334155; line-height: 1.6; }
-    @media (max-width: 991.98px) { .detail-gallery { position: static; } }
-</style>
+<link rel="stylesheet" href="{{ asset_v('css/views/products-show-blade-php.css') }}">
 
 <div class="shop-detail container py-4 py-lg-5">
     <nav class="detail-breadcrumb mb-3" aria-label="Đường dẫn trang">
@@ -216,12 +138,15 @@
         <div class="row g-4 g-lg-5">
             <div class="col-lg-6">
                 <div class="detail-gallery">
-                    <div class="product-image-zoom">
+                    <div class="product-image-zoom position-relative view-inline-1" onclick="window.openGalleryModal()">
                         @if($product->image)
                             <img id="detail-main-image" src="{{ asset('storage/' . $product->image) }}" class="detail-main-image" alt="{{ $product->name }}" fetchpriority="high" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                         @else
                             <div id="detail-main-image" class="detail-main-image d-grid place-items-center text-muted"><i class="bi bi-image fs-1"></i></div>
                         @endif
+                        <span class="position-absolute bottom-0 end-0 m-3 badge bg-dark bg-opacity-75 rounded-pill px-2.5 py-1.5 text-white view-inline-2">
+                            <i class="bi bi-arrows-fullscreen me-1"></i>Phóng to ảnh
+                        </span>
                     </div>
                     @php
                         $shownGalleryImages = $product->image ? [$product->image] : [];
@@ -245,7 +170,16 @@
                             @endif
                         @endforeach
                     </div>
-                    <button type="button" class="btn btn-sm btn-light border rounded-pill mt-3" id="copy-product-link"><i class="bi bi-link-45deg me-1"></i>Chia sẻ sản phẩm</button>
+                    <div class="d-flex align-items-center gap-2 mt-3 flex-wrap">
+                        <span class="text-muted small fw-semibold"><i class="bi bi-share me-1"></i>Chia sẻ:</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary rounded-circle view-inline-3" title="Chia sẻ Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="https://sp.zalo.me/plugins/share?url={{ urlencode(url()->current()) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info rounded-circle view-inline-4" title="Chia sẻ Zalo">
+                            Z
+                        </a>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" id="copy-product-link"><i class="bi bi-link-45deg me-1"></i>Sao chép liên kết</button>
+                    </div>
                 </div>
             </div>
 
@@ -270,13 +204,12 @@
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4">@if($product->isFlashSaleActive())<span class="badge bg-danger"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span><span class="detail-price">{{ number_format($product->effectivePrice(), 0, ',', '.') }} đ</span><span class="text-muted text-decoration-line-through">{{ number_format($product->price, 0, ',', '.') }} đ</span><small class="text-danger">Đến {{ $product->flash_sale_ends_at->format('d/m H:i') }}</small>@else<span class="detail-price">{{ number_format($product->price, 0, ',', '.') }} đ</span>@endif<span class="{{ $product->quantity > 0 ? 'detail-stock' : 'detail-stock out' }}"><i class="bi bi-{{ $product->quantity > 0 ? 'check-circle' : 'x-circle' }} me-1"></i>{{ $product->quantity > 0 ? 'Còn ' . $product->quantity . ' sản phẩm' : 'Hết hàng' }}</span></div>
                 <p class="detail-copy mb-4">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
 
-                @auth
-                    @if(in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Đây là trang xem sản phẩm. Sử dụng nút quản lý phía trên để cập nhật thông tin hoặc tồn kho.
-                        </div>
-                    @else
+                @if(Auth::check() && in_array(Auth::user()->role, ['admin', 'manager', 'warehouse_staff'], true))
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Đây là trang xem sản phẩm. Sử dụng nút quản lý phía trên để cập nhật thông tin hoặc tồn kho.
+                    </div>
+                @else
                     @if($product->quantity > 0)
                         <form action="{{ route('cart.add', $product->id) }}" method="POST" id="detail-cart-form">
                             @csrf
@@ -305,27 +238,24 @@
                             </div>
                         </form>
                     @else
-                        @if($isStockAlertSubscribed)
-                            <form action="{{ route('products.stock-alert.destroy', $product) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-secondary detail-buy w-100"><i class="bi bi-bell-slash me-2"></i>Hủy báo khi có hàng</button>
-                            </form>
+                        @auth
+                            @if($isStockAlertSubscribed)
+                                <form action="{{ route('products.stock-alert.destroy', $product) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-secondary detail-buy w-100"><i class="bi bi-bell-slash me-2"></i>Hủy báo khi có hàng</button>
+                                </form>
+                            @else
+                                <form action="{{ route('products.stock-alert.store', $product) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Báo khi có hàng</button>
+                                </form>
+                            @endif
                         @else
-                            <form action="{{ route('products.stock-alert.store', $product) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Báo khi có hàng</button>
-                            </form>
-                        @endif
+                            <a href="{{ route('login') }}" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Đăng nhập để được báo khi có hàng</a>
+                        @endauth
                     @endif
-                    @endif
-                @else
-                    @if($product->quantity > 0)
-                        <a href="{{ route('login') }}" class="btn btn-warning detail-buy w-100"><i class="bi bi-person me-2"></i>Đăng nhập để mua hàng</a>
-                    @else
-                        <a href="{{ route('login') }}" class="btn btn-warning detail-buy w-100"><i class="bi bi-bell me-2"></i>Đăng nhập để được báo khi có hàng</a>
-                    @endif
-                @endauth
+                @endif
 
                 <div class="detail-benefit row g-3">
                     <div class="col-sm-6"><div class="detail-benefit-item"><i class="bi bi-shield-check"></i><span><strong>Chính hãng</strong><br>Kiểm tra nguồn gốc rõ ràng</span></div></div>
@@ -340,6 +270,29 @@
         <table class="product-detail-table">
             <tbody>
                 <tr><th>Thương hiệu</th><td>{{ $product->brand?->name ?? 'Chưa cập nhật' }}</td></tr>
+                <tr><th>Xuất xứ</th><td>{{ $product->origin ?: 'Chính hãng' }}</td></tr>
+                <tr><th>Hạn sử dụng</th><td>{{ $product->expiry_info ?: 'Xem trên bao bì sản phẩm' }}</td></tr>
+                @if(!empty($product->skin_types))
+                    @php
+                        $skinTypeNames = [
+                            'da_dau' => 'Da dầu',
+                            'da_kho' => 'Da khô',
+                            'da_hon_hop' => 'Da hỗn hợp',
+                            'da_nhay_cam' => 'Da nhạy cảm',
+                            'moi_loai_da' => 'Mọi loại da',
+                        ];
+                    @endphp
+                    <tr>
+                        <th>Phù hợp loại da</th>
+                        <td>
+                            @foreach((array)$product->skin_types as $st)
+                                <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-1 me-1 mb-1 fw-semibold">
+                                    <i class="bi bi-check2 me-1"></i>{{ $skinTypeNames[$st] ?? $st }}
+                                </span>
+                            @endforeach
+                        </td>
+                    </tr>
+                @endif
                 <tr><th>Danh mục</th><td>{{ $product->category?->name ?? 'Mỹ phẩm & chăm sóc cá nhân' }}</td></tr>
                 <tr><th>Mã sản phẩm</th><td><span class="product-detail-chip">{{ $product->product_code ?: 'Chưa có mã sản phẩm' }}</span></td></tr>
                 <tr><th>Mã biến thể / SKU</th><td>@forelse($product->variations as $variation)<span class="product-detail-chip">{{ $variation->sku ?: 'Chưa có SKU' }}</span>@empty<span>Chưa có mã biến thể</span>@endforelse</td></tr>
@@ -349,6 +302,29 @@
                 <tr><th>Tình trạng</th><td>{{ $product->quantity > 0 ? 'Còn hàng' : 'Hết hàng' }}</td></tr>
             </tbody>
         </table>
+
+        @if($product->ingredients)
+            <div class="mt-4 pt-3 border-top">
+                <h3 class="h6 fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-droplet-half text-primary"></i>Thành phần chi tiết (Ingredients)
+                </h3>
+                <div class="p-3 bg-light rounded-3 text-secondary small view-inline-5">
+                    {{ $product->ingredients }}
+                </div>
+            </div>
+        @endif
+
+        @if($product->usage_instructions)
+            <div class="mt-3 pt-3 border-top">
+                <h3 class="h6 fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-magic text-danger"></i>Hướng dẫn sử dụng (Usage Instructions)
+                </h3>
+                <div class="p-3 bg-light rounded-3 text-secondary small view-inline-5">
+                    {{ $product->usage_instructions }}
+                </div>
+            </div>
+        @endif
+
         <div class="product-description-block">
             <h2 class="product-information-title">Mô tả sản phẩm</h2>
             <p class="mb-0 mt-3">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
@@ -369,7 +345,7 @@
             <div class="review-distribution" aria-label="Phân bố đánh giá">
                 @for($rating = 5; $rating >= 1; $rating--)
                     @php $ratingPercent = $reviewCount ? round(($ratingCounts[$rating] / $reviewCount) * 100) : 0; @endphp
-                    <div class="review-distribution-row"><span>{{ $rating }} <i class="bi bi-star-fill text-warning"></i></span><div class="review-distribution-bar"><span style="width: {{ $ratingPercent }}%"></span></div><strong>{{ $ratingPercent }}%</strong></div>
+                    <div class="review-distribution-row"><span>{{ $rating }} <i class="bi bi-star-fill text-warning"></i></span><div class="review-distribution-bar"><span data-inline-width="{{ $ratingPercent }}" class="inline-dynamic-width"></span></div><strong>{{ $ratingPercent }}%</strong></div>
                 @endfor
             </div>
             <div class="review-filters">
@@ -404,6 +380,12 @@
                                 @endforeach
                             </div>
                         @endif
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2.5 btn-vote-helpful {{ $review->isHelpfulVotedBy(Auth::user()) ? 'active text-primary border-primary bg-primary-subtle' : '' }}" data-review-id="{{ $review->id }}" class="view-inline-6">
+                                <i class="bi bi-hand-thumbs-up{{ $review->isHelpfulVotedBy(Auth::user()) ? '-fill' : '' }} me-1"></i>
+                                Hữu ích (<span class="helpful-count">{{ $review->helpfulVotes->count() }}</span>)
+                            </button>
+                        </div>
                     </div>
                 </article>
             @empty
@@ -411,6 +393,95 @@
             @endforelse
         </div>
 
+    </section>
+
+    <!-- HỎI & ĐÁP SẢN PHẨM (PROMPT 3.5 & 3.7) -->
+    <section class="product-questions mt-4 p-4 bg-white rounded-4 border shadow-sm" aria-labelledby="product-qa-title">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <h3 id="product-qa-title" class="h5 fw-bold mb-1 text-dark">
+                    <i class="bi bi-chat-dots-fill text-primary me-2"></i>Hỏi & Đáp về sản phẩm
+                </h3>
+                <small class="text-muted">Bạn có thắc mắc về thành phần hay cách dùng? Hãy đặt câu hỏi để Aloha Beauty giải đáp ngay!</small>
+            </div>
+            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">
+                <span id="qa-count">{{ $product->questions->count() }}</span> câu hỏi
+            </span>
+        </div>
+
+        <!-- Form đặt câu hỏi -->
+        <form id="product-question-form" class="mb-4 p-3 bg-light rounded-3 border" data-product-slug="{{ $product->slug }}" data-question-url="{{ route('products.questions.store', $product) }}" onsubmit="handleQuestionSubmit(event)">
+            @csrf
+            <div class="mb-2">
+                <textarea id="qa-question-input" name="question" rows="2" class="form-control" placeholder="Viết câu hỏi của bạn về sản phẩm này (tối thiểu 5 ký tự)..." required minlength="5" maxlength="1000"></textarea>
+            </div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <small class="text-muted">
+                    @auth
+                        Gửi dưới tên: <strong class="text-dark">{{ Auth::user()->name }}</strong>
+                    @else
+                        Bạn đang gửi với tư cách: <span class="badge bg-secondary-subtle text-secondary">Khách vãng lai</span>
+                    @endauth
+                </small>
+                <button type="submit" id="btn-submit-question" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-send me-1"></i>Gửi câu hỏi
+                </button>
+            </div>
+        </form>
+
+        <!-- Danh sách câu hỏi -->
+        <div id="qa-list" class="d-flex flex-column gap-3">
+            @forelse($product->questions as $qa)
+                <div class="p-3 rounded-3 bg-light border qa-item" id="qa-item-{{ $qa->id }}">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <div class="fw-bold text-dark">
+                            <i class="bi bi-question-circle-fill text-warning me-1"></i>
+                            {{ $qa->user?->name ?: 'Khách hàng' }}
+                        </div>
+                        <small class="text-muted">{{ $qa->created_at->diffForHumans() }}</small>
+                    </div>
+                    <p class="mb-2 text-dark">{{ $qa->question }}</p>
+
+                    @if($qa->answer)
+                        <div class="p-2.5 rounded-3 bg-primary-subtle text-dark border-start border-3 border-primary ms-3">
+                            <div class="d-flex align-items-center gap-1 mb-1">
+                                <span class="badge bg-primary text-white view-inline-7">
+                                    <i class="bi bi-patch-check-fill me-1"></i>Aloha Beauty phản hồi
+                                </span>
+                                @if($qa->answered_at)
+                                    <small class="text-muted ms-auto view-inline-8">{{ $qa->answered_at->diffForHumans() }}</small>
+                                @endif
+                            </div>
+                            <div class="small view-inline-9">{{ $qa->answer }}</div>
+                        </div>
+                    @else
+                        <div class="ms-3 text-muted small fst-italic">
+                            <i class="bi bi-hourglass-split me-1"></i>Đang chờ chuyên viên Aloha Beauty phản hồi...
+                        </div>
+                    @endif
+
+                    @if(Auth::check() && in_array(Auth::user()->role, ['admin', 'manager', 'customer_service'], true))
+                        <div class="mt-2 pt-2 border-top ms-3">
+                            <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 view-inline-10" onclick="toggleAnswerForm({{ $qa->id }})">
+                                <i class="bi bi-reply-fill me-1"></i>{{ $qa->answer ? 'Sửa câu trả lời' : 'Trả lời ngay' }}
+                            </button>
+                            <form id="answer-form-{{ $qa->id }}" action="{{ route('admin.questions.answer', $qa) }}" method="POST" class="d-none mt-2">
+                                @csrf
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="answer" class="form-control" placeholder="Nhập câu trả lời..." value="{{ $qa->answer }}" required>
+                                    <button class="btn btn-success" type="submit">Lưu</button>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div id="qa-empty-msg" class="text-center text-muted py-3">
+                    <i class="bi bi-chat-square-dots fs-3 d-block text-secondary mb-1"></i>
+                    Chưa có câu hỏi nào cho sản phẩm này. Hãy là người đầu tiên đặt câu hỏi!
+                </div>
+            @endforelse
+        </div>
     </section>
 
     <div id="reviewImageModal" class="review-image-lightbox" aria-hidden="true" role="dialog" aria-label="Ảnh đánh giá phóng to">
@@ -457,154 +528,47 @@
             </div>
         </section>
     @endif
+
+    <x-recently-viewed currentSlug="{{ $product->slug }}" />
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+<!-- STICKY ADD TO CART BAR (PROMPT 3.5) -->
+<div id="sticky-add-to-cart" class="sticky-add-to-cart" aria-hidden="true">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3 min-w-0">
+            <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/placeholder.svg') }}" class="rounded-2 object-fit-cover flex-shrink-0 view-inline-11" alt="{{ $product->name }}">
+            <div class="text-truncate">
+                <div class="fw-bold text-dark text-truncate small view-inline-12">{{ $product->name }}</div>
+                <div class="text-danger fw-bold fs-6">{{ number_format($product->effectivePrice(), 0, ',', '.') }} đ</div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            @if($product->quantity > 0)
+                <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-1 shadow-sm" onclick="document.getElementById('btn-add-to-cart')?.click()">
+                    <i class="bi bi-bag-plus-fill"></i>
+                    <span class="d-none d-sm-inline">Thêm vào giỏ</span>
+                </button>
+            @else
+                <button class="btn btn-secondary rounded-pill px-4 py-2 fw-bold disabled" disabled>Hết hàng</button>
+            @endif
+        </div>
+    </div>
+</div>
 
-    // TRICK GIẢI CỨU MÀN HÌNH ĐEN: Đưa Lightbox tự code ra ngoài thẻ body
-    const reviewLightbox = document.getElementById('reviewImageModal');
-    if (reviewLightbox) {
-        document.body.appendChild(reviewLightbox);
-    }
+<!-- GALLERY LIGHTBOX MODAL (PROMPT 3.5) -->
+<div id="productGalleryModal" class="gallery-modal-overlay" aria-hidden="true" role="dialog" aria-label="Bộ sưu tập ảnh sản phẩm">
+    <button type="button" class="btn-close btn-close-white position-fixed top-0 end-0 m-4 view-inline-13" onclick="window.closeGalleryModal()" aria-label="Đóng"></button>
+    <button type="button" class="gallery-modal-nav prev" onclick="window.navGallery(-1)" aria-label="Ảnh trước"><i class="bi bi-chevron-left"></i></button>
+    <button type="button" class="gallery-modal-nav next" onclick="window.navGallery(1)" aria-label="Ảnh kế tiếp"><i class="bi bi-chevron-right"></i></button>
+    
+    <div class="gallery-modal-stage">
+        <img id="galleryModalMainImg" src="" alt="{{ $product->name }}">
+    </div>
 
-    const mainImage = document.getElementById('detail-main-image');
-    document.querySelectorAll('.detail-thumb').forEach(function (thumb) {
-        thumb.addEventListener('click', function () {
-            if (mainImage?.tagName === 'IMG') mainImage.src = this.dataset.image;
-            document.querySelectorAll('.detail-thumb').forEach(item => item.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
+    <div class="text-white-50 small mt-2 mb-1" id="galleryModalCounter">1 / 1</div>
 
-    const quantityInput = document.getElementById('detail-quantity');
-    const priceElement = document.querySelector('.detail-price');
-    const stockElement = document.querySelector('.detail-stock');
-    const stockNote = document.getElementById('detail-stock-note');
-    document.querySelectorAll('input[name="variation_id"]').forEach(function (option) {
-        option.addEventListener('change', function () {
-            const stock = Number(this.dataset.stock || 0);
-            quantityInput.max = Math.max(1, stock);
-            quantityInput.value = Math.min(Number(quantityInput.value || 1), Math.max(1, stock));
-            priceElement.textContent = Number(this.dataset.price).toLocaleString('vi-VN') + ' đ';
-            stockNote.textContent = 'Tối đa ' + stock + ' sản phẩm';
-            stockElement.classList.toggle('out', stock < 1);
-            stockElement.innerHTML = stock > 0 ? '<i class="bi bi-check-circle me-1"></i>Còn ' + stock + ' sản phẩm' : '<i class="bi bi-x-circle me-1"></i>Hết hàng';
-            if (this.dataset.image && mainImage?.tagName === 'IMG') {
-                mainImage.src = this.dataset.image;
-                document.querySelectorAll('.detail-thumb').forEach(item => item.classList.toggle('active', item.dataset.variation === this.value));
-            }
-            document.querySelectorAll('.detail-buy').forEach(button => {
-                button.disabled = stock < 1;
-            });
-        });
-    });
-    document.querySelector('input[name="variation_id"]:checked')?.dispatchEvent(new Event('change'));
+    <div class="gallery-modal-thumbs" id="galleryModalThumbs"></div>
+</div>
 
-    document.querySelectorAll('[data-review-filter]').forEach(function (filter) {
-        filter.addEventListener('click', function () {
-            document.querySelectorAll('.review-filter').forEach(item => item.classList.remove('active'));
-            this.classList.add('active');
-            const selected = this.dataset.reviewFilter;
-            document.querySelectorAll('[data-review-rating]').forEach(function (review) {
-                const visible = selected === 'all'
-                    || (selected === 'comment' && review.dataset.reviewComment === '1')
-                    || (selected === 'media' && review.dataset.reviewMedia === '1')
-                    || review.dataset.reviewRating === selected;
-                review.classList.toggle('d-none', !visible);
-            });
-        });
-    });
-
-    const reviewImageModal = document.getElementById('reviewImageModal');
-    const reviewImagePreview = document.getElementById('reviewImagePreview');
-    document.querySelectorAll('[data-review-image]').forEach(function (imageButton) {
-        imageButton.addEventListener('click', function () {
-            reviewImagePreview.src = this.dataset.reviewImage;
-            reviewImageModal.classList.add('is-open');
-            reviewImageModal.setAttribute('aria-hidden', 'false');
-        });
-    });
-    reviewImageModal?.addEventListener('click', function (event) {
-        if (!event.target.closest('.review-image-preview')) {
-            window.closeReviewImage(event);
-        }
-    });
-
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && reviewImageModal?.classList.contains('is-open')) {
-            window.closeReviewImage(event);
-        }
-    });
-
-    window.closeReviewImage = function (event) {
-        event?.stopPropagation();
-        if (!reviewImageModal) return;
-        reviewImageModal.classList.remove('is-open');
-        reviewImageModal.setAttribute('aria-hidden', 'true');
-        reviewImagePreview?.removeAttribute('src');
-    };
-
-    document.querySelectorAll('[data-quantity-step]').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const step = Number(this.dataset.quantityStep);
-            const next = Math.max(Number(quantityInput.min), Math.min(Number(quantityInput.max), Number(quantityInput.value || 1) + step));
-            quantityInput.value = next;
-        });
-    });
-
-    document.getElementById('copy-product-link')?.addEventListener('click', async function () {
-        await navigator.clipboard.writeText(window.location.href);
-        const original = this.innerHTML;
-        this.innerHTML = '<i class="bi bi-check2 me-1"></i>Đã sao chép liên kết';
-        setTimeout(() => this.innerHTML = original, 1800);
-    });
-
-    const cartForm = document.getElementById('detail-cart-form');
-    if (cartForm) {
-        const buyNowInput = document.getElementById('detail-buy-now-input');
-        const buyNowBtn = document.getElementById('btn-buy-now');
-        const addToCartBtn = document.getElementById('btn-add-to-cart');
-
-        if (buyNowBtn) {
-            buyNowBtn.addEventListener('click', function() {
-                if (buyNowInput) buyNowInput.value = '1';
-            });
-        }
-        if (addToCartBtn) {
-            addToCartBtn.addEventListener('click', function() {
-                if (buyNowInput) buyNowInput.value = '0';
-            });
-        }
-
-        cartForm.addEventListener('submit', function(e) {
-            const isBuyNow = (buyNowInput && buyNowInput.value === '1') || 
-                             (e.submitter && (e.submitter.name === 'buy_now' || e.submitter.id === 'btn-buy-now'));
-
-            if (isBuyNow) {
-                if (buyNowInput) buyNowInput.value = '1';
-                if (buyNowBtn && window.setButtonLoading) {
-                    window.setButtonLoading(buyNowBtn, 'Đang chuyển thanh toán...');
-                }
-                return; // Submit normally to checkout
-            }
-
-            if (buyNowInput) buyNowInput.value = '0';
-            e.preventDefault();
-            const mainImg = document.getElementById('detail-main-image');
-            if (addToCartBtn && window.setButtonLoading) {
-                window.setButtonLoading(addToCartBtn, 'Đang thêm...');
-            }
-            if (window.flyToCart && mainImg) {
-                window.flyToCart(mainImg);
-                setTimeout(() => {
-                    HTMLFormElement.prototype.submit.call(cartForm);
-                }, 800);
-            } else {
-                HTMLFormElement.prototype.submit.call(cartForm);
-            }
-        });
-    }
-});
-</script>
+<script src="{{ asset_v('js/views/products-show-blade-php.js') }}" defer></script>
 @endsection

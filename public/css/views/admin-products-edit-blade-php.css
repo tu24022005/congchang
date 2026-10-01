@@ -1,0 +1,17 @@
+/* admin/products/edit.blade.php - ki?u d?ng m?n h?nh */
+.product-editor { --ink: #203047; --muted: #718096; --line: #e6ebf2; }
+    .editor-hero { background: linear-gradient(135deg, #183b56, #267d8f); color: #fff; border-radius: 18px; padding: 1.6rem 1.8rem; }
+    .editor-panel { border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 12px 30px rgba(32, 48, 71, .07); }
+    .editor-panel-title { color: var(--ink); font-weight: 800; letter-spacing: -.02em; }
+    .editor-label { color: var(--ink); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .editor-input { border-color: var(--line); border-radius: 10px; padding: .72rem .85rem; }
+    .editor-input:focus { border-color: #27a7bd; box-shadow: 0 0 0 .2rem rgba(39, 167, 189, .12); }
+    .image-preview { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 14px; background: #f4f7fa; border: 1px solid var(--line); }
+    .gallery-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: .65rem; }
+    .gallery-preview img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+    .stock-chip { border-radius: 999px; padding: .42rem .7rem; font-size: .78rem; font-weight: 800; }
+
+
+/* admin/products/edit.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { width:42px;height:42px;object-fit:cover }
+.view-inline-2 { height: 8px }

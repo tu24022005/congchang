@@ -2,9 +2,9 @@
 @section('title', '404 - Không tìm thấy trang | BeatyCare 🌸')
 
 @section('content')
-<div class="container py-5 text-center my-auto" style="min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<div class="container py-5 text-center my-auto view-inline-1">
     <div class="error-illustration mb-4">
-        <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate__animated animate__pulse animate__infinite" style="animation-duration: 3s;">
+        <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate__animated animate__pulse animate__infinite view-inline-2">
             <circle cx="100" cy="100" r="90" fill="#fff1f3" stroke="#fbcfe8" stroke-width="4"/>
             <!-- Flower petals -->
             <circle cx="100" cy="65" r="28" fill="#fda4af" opacity="0.8"/>
@@ -19,7 +19,7 @@
     </div>
     <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-semibold mb-2">Trang không tồn tại</span>
     <h1 class="display-6 fw-bold text-dark mt-2 mb-3">Ôi! Trang bạn tìm đã lạc trong vườn hoa 🌸</h1>
-    <p class="text-muted mx-auto mb-4" style="max-width: 520px; line-height: 1.7;">
+    <p class="text-muted mx-auto mb-4 view-inline-3">
         Đường dẫn bạn vừa truy cập có thể đã đổi địa chỉ, bị xóa hoặc tạm thời không khả dụng. Hãy để Aloha Beauty dẫn bạn trở lại nhé!
     </p>
     <div class="d-flex flex-wrap justify-content-center gap-3">

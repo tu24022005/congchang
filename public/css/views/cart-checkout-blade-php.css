@@ -1,0 +1,49 @@
+/* cart/checkout.blade.php - ki?u d?ng m?n h?nh */
+.checkout-page {
+            max-width: 1200px;
+        }
+        .checkout-panel-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        body.dark-mode .checkout-panel-card {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .checkout-step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #ff6b81, #ff8fa3);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+        .delivery-map {
+            height: 240px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            z-index: 1;
+        }
+        body.dark-mode .delivery-map {
+            border-color: #334155;
+        }
+        .checkout-product-row:last-child {
+            border-bottom: 0 !important;
+        }
+        .order-summary-sticky {
+            position: sticky;
+            top: 90px;
+        }
+
+
+/* cart/checkout.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { width: 64px; height: 64px; }

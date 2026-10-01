@@ -29,15 +29,15 @@
 @endphp
 
 @section('structured_data')
-<script type="application/ld+json">
+<template class="jsonld-template">
 @json($faqSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
-</script>
+</template>
 @endsection
 
 @section('content')
 <div class="container py-5">
     <div class="text-center mb-5"><span class="text-primary fw-bold small text-uppercase">FAQ</span><h1 class="fw-bold mt-2">Câu hỏi thường gặp</h1></div>
-    <div class="accordion mx-auto" id="faqAccordion" style="max-width: 850px">
+    <div class="accordion mx-auto" id="faqAccordion" class="view-inline-1">
         @foreach($faqItems as $index => $item)
             <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
                 <h2 class="accordion-header">

@@ -1,0 +1,185 @@
+/*
+ * CSS riêng cho trang danh sách đơn hàng (/orders).
+ * Mỗi nhóm bên dưới tương ứng với khu vực được ghi chú trong view orders/index.blade.php.
+ */
+/* Khu vực tổng thể trang đơn hàng. */
+.orders-page { max-width: 1100px; }
+
+/* Hero: tiêu đề, mô tả và nút mua sắm. */
+.orders-hero {
+    background: linear-gradient(135deg, #ff6b9d 0%, #c44dde 60%, #7b2ff7 100%);
+    border-radius: 20px;
+    padding: 2rem 2.2rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+.orders-hero::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%; background: rgba(255,255,255,.08);
+}
+.orders-hero::after {
+    content: '';
+    position: absolute; bottom: -60px; left: 30%;
+    width: 150px; height: 150px;
+    border-radius: 50%; background: rgba(255,255,255,.06);
+}
+.orders-hero h2 { font-size: 1.7rem; font-weight: 800; margin: 0; }
+.orders-hero p  { opacity: .85; font-size: .88rem; margin: .3rem 0 0; }
+.orders-hero .btn-shop {
+    background: rgba(255,255,255,.2); border: 1.5px solid rgba(255,255,255,.45);
+    color: #fff; border-radius: 50px; padding: .5rem 1.3rem;
+    font-size: .84rem; font-weight: 600; backdrop-filter: blur(8px);
+    transition: background .2s; white-space: nowrap; text-decoration: none;
+}
+.orders-hero .btn-shop:hover { background: rgba(255,255,255,.35); color: #fff; }
+
+/* Thẻ thống kê trạng thái đơn hàng. */
+.order-stat-card {
+    background: #fff; border-radius: 16px; padding: 1.1rem 1rem;
+    text-align: center; border: 2px solid transparent;
+    cursor: pointer; text-decoration: none;
+    transition: all .22s ease;
+    display: flex; flex-direction: column; align-items: center; gap: .25rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+.order-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+.order-stat-card.active { border-color: var(--sc,#7b2ff7); background: var(--sb,#f5f0ff); }
+.order-stat-card .stat-icon  { font-size: 1.4rem; color: var(--sc,#7b2ff7); }
+.order-stat-card .stat-num   { font-size: 1.8rem; font-weight: 800; color: var(--sc,#7b2ff7); line-height: 1; }
+.order-stat-card .stat-label { font-size: .72rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .04em; }
+.s-all  { --sc:#7b2ff7; --sb:#f5f0ff; }
+.s-proc { --sc:#f59e0b; --sb:#fffbeb; }
+.s-done { --sc:#10b981; --sb:#ecfdf5; }
+.s-canc { --sc:#ef4444; --sb:#fef2f2; }
+
+/* Dải tổng chi tiêu. */
+.spend-strip {
+    background: linear-gradient(90deg,#fff7f0,#fff0fa);
+    border: 1.5px solid #ffd6f0; border-radius: 14px;
+    padding: .9rem 1.3rem; font-size: .84rem;
+    display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+}
+.spend-strip .spend-val { font-size: 1.1rem; font-weight: 800; color: #c44dde; }
+
+/* Thanh lọc, sắp xếp và tìm kiếm. */
+.orders-filter-bar {
+    background: #fff; border-radius: 16px; padding: 1rem 1.2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+}
+.filter-tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
+.filter-tab {
+    border: 1.5px solid #e5e7eb; background: #f9fafb; border-radius: 50px;
+    padding: .35rem .9rem; font-size: .8rem; font-weight: 600; color: #555;
+    cursor: pointer; text-decoration: none; transition: all .18s; white-space: nowrap;
+}
+.filter-tab:hover { border-color: #c44dde; color: #c44dde; background: #fdf4ff; }
+.filter-tab.active { border-color: #c44dde; color: #fff; background: linear-gradient(135deg,#ff6b9d,#c44dde); }
+.filter-tab .bt { background: rgba(255,255,255,.3); border-radius: 50px; padding: .1rem .45rem; font-size: .7rem; margin-left: .3rem; }
+.filter-tab:not(.active) .bt { background: #e5e7eb; color: #888; }
+
+.order-search-wrap { flex: 1; min-width: 220px; max-width: 360px; }
+.order-search-wrap .input-group-text { background: #f9fafb; border-right: 0; border-color: #dee2e6; }
+.order-search-wrap input { border-left: 0; font-size: .84rem; border-color: #dee2e6; }
+.order-sort-select {
+    font-size: .8rem; border-radius: 50px; padding: .38rem .85rem;
+    border: 1.5px solid #e5e7eb; color: #555; background: #f9fafb;
+}
+
+/* Thẻ thông tin từng đơn hàng. */
+.order-card {
+    background: #fff; border-radius: 18px; border: 1.5px solid #f0f0f0;
+    box-shadow: 0 2px 14px rgba(0,0,0,.05); overflow: hidden;
+    transition: box-shadow .22s, transform .22s;
+}
+.order-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.1); transform: translateY(-2px); }
+.order-card-head {
+    padding: .9rem 1.25rem; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+    border-bottom: 1px solid #f3f3f3; background: #fafafa;
+}
+.order-num  { font-weight: 800; color: #7b2ff7; font-size: .94rem; }
+.order-id   { font-size: .78rem; color: #aaa; margin-top: .1rem; }
+.order-date { font-size: .78rem; color: #aaa; }
+.order-card-body {
+    padding: 1rem 1.25rem; display: flex; align-items: center;
+    gap: 1rem; flex-wrap: wrap;
+}
+.order-products-preview { display: flex; gap: 0; align-items: center; flex: 1; min-width: 0; }
+.product-thumb {
+    width: 52px; height: 52px; border-radius: 10px; object-fit: cover;
+    border: 2px solid #fff; box-shadow: 0 0 0 1.5px #e5e7eb; flex-shrink: 0;
+}
+.product-thumb + .product-thumb { margin-left: -14px; }
+.more-thumb {
+    width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg,#f0e6ff,#fce4ff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 700; color: #c44dde;
+    border: 2px solid #fff; box-shadow: 0 0 0 1.5px #e5e7eb; margin-left: -14px;
+}
+.prod-info { margin-left: .8rem; min-width: 0; }
+.prod-name { font-weight: 700; font-size: .87rem; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; }
+.prod-sub  { font-size: .74rem; color: #999; margin-top: .1rem; }
+.order-card-meta { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-left: auto; }
+.pay-badge { font-size: .7rem; font-weight: 600; padding: .3rem .7rem; border-radius: 50px; }
+.order-price { font-size: 1.1rem; font-weight: 800; color: #ef4444; white-space: nowrap; }
+.order-card-foot {
+    padding: .75rem 1.25rem; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+    border-top: 1px solid #f3f3f3;
+}
+.order-address { font-size: .74rem; color: #aaa; }
+.order-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+.order-actions .btn { font-size: .78rem; font-weight: 600; border-radius: 50px; padding: .35rem .9rem; display: inline-flex; align-items: center; gap: .3rem; }
+
+/* Trạng thái khi không có đơn hàng. */
+.empty-orders { text-align: center; padding: 5rem 2rem; background: #fff; border-radius: 20px; border: 2px dashed #e5e7eb; }
+.empty-icon { font-size: 4rem; color: #d1d5db; }
+
+/* Tương thích chế độ sáng/tối. */
+.dark-mode .order-stat-card         { background: #2a2a3d; border-color: #3a3a50; }
+.dark-mode .order-stat-card.active  { background: #2f1e4a; }
+.dark-mode .orders-filter-bar       { background: #1e1e2d; }
+.dark-mode .order-card              { background: #1e1e2d; border-color: #2d2d40; }
+.dark-mode .order-card-head,
+.dark-mode .order-card-foot         { background: #252535; border-color: #2d2d40; }
+.dark-mode .filter-tab              { background: #252535; border-color: #3a3a50; color: #ccc; }
+.dark-mode .filter-tab:hover        { background: #3a1a4d; }
+.dark-mode .order-search-wrap .input-group-text,
+.dark-mode .order-search-wrap input { background: #252535; border-color: #3a3a50; color: #ddd; }
+.dark-mode .order-sort-select       { background: #252535; border-color: #3a3a50; color: #ddd; }
+.dark-mode .spend-strip             { background: linear-gradient(90deg,#2a1a10,#2a1020); border-color: #4a2040; }
+.dark-mode .prod-name               { color: #f0f0f0; }
+.dark-mode .empty-orders            { background: #1e1e2d; border-color: #3a3a50; }
+
+/* Bố cục mobile dưới 576px. */`r`n@media (max-width: 575.98px) {
+    .orders-hero { padding: 1.5rem 1.2rem; }
+    .orders-hero h2 { font-size: 1.3rem; }
+    .prod-name { max-width: 140px; }
+}
+/* Thành phần được tách từ inline style trong view. */
+.orders-breadcrumb {
+    font-size: .72rem;
+    font-weight: 700;
+    opacity: .7;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: .3rem;
+}
+
+.order-search-submit {
+    border-radius: 0 50px 50px 0;
+}
+
+.order-status-badge {
+    font-size: .75rem;
+    padding: .32rem .78rem;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+}

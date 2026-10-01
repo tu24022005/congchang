@@ -1,0 +1,185 @@
+/* admin/reports/index.blade.php - ki?u d?ng m?n h?nh */
+/* Styling chuyên nghiệp cho trang Báo cáo */
+    .report-page-header {
+        background: linear-gradient(135deg, #f8fbfb 0%, #eef6f5 100%);
+        border: 1px solid #e1eceb;
+        border-radius: 20px;
+        padding: 1.75rem 2rem;
+        box-shadow: 0 4px 20px rgba(17, 124, 131, 0.04);
+    }
+    .report-kicker {
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #117c83;
+        display: inline-block;
+        margin-bottom: 0.25rem;
+    }
+    .report-quick-pill {
+        border: 1px solid #dce8e7;
+        background: #ffffff;
+        color: #486566;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .report-quick-pill:hover,
+    .report-quick-pill.active {
+        background: #117c83;
+        border-color: #117c83;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(17, 124, 131, 0.25);
+        transform: translateY(-1px);
+    }
+    .report-filter-box {
+        background: #ffffff;
+        border: 1px solid #e4eeee;
+        border-radius: 18px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    }
+    .report-kpi-card {
+        border: none;
+        border-radius: 18px;
+        padding: 1.4rem;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .report-kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+    }
+    .report-kpi-card .kpi-icon-bubble {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .kpi-bg-revenue { background: linear-gradient(135deg, #1fa363, #38c47f); }
+    .kpi-bg-aov { background: linear-gradient(135deg, #0d8296, #20b8cc); }
+    .kpi-bg-success { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .kpi-bg-orders { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+    .kpi-bg-pending { background: linear-gradient(135deg, #ea580c, #f97316); }
+    .kpi-bg-products { background: linear-gradient(135deg, #9333ea, #c084fc); }
+
+    .report-nav-tabs .nav-link {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #526b6c;
+        border: none;
+        padding: 0.85rem 1.4rem;
+        border-radius: 12px;
+        margin-right: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    .report-nav-tabs .nav-link:hover {
+        color: #117c83;
+        background: #f0f7f7;
+    }
+    .report-nav-tabs .nav-link.active {
+        color: #ffffff;
+        background: #117c83;
+        box-shadow: 0 4px 14px rgba(17, 124, 131, 0.25);
+    }
+    .report-table thead th {
+        background-color: #f7faf9;
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #637778;
+        padding: 0.85rem 1rem;
+        border-bottom: 2px solid #e7eeed;
+    }
+    .report-table tbody td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        font-size: 0.88rem;
+    }
+    .growth-up { color: #16a34a; font-weight: 600; }
+    .growth-down { color: #dc2626; font-weight: 600; }
+    .growth-neutral { color: #64748b; font-weight: 500; }
+    
+    .low-stock-critical { background-color: #fef2f2 !important; }
+    .low-stock-warning { background-color: #fffbeb !important; }
+
+    /* Print styling chuyên dụng cho báo cáo A4 */
+    @media print {
+        body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-size: 11pt !important;
+        }
+        .navbar, .app-preloader, #top-progress-bar, .report-quick-pills-wrap,
+        .report-filter-box, .btn-print-hide, .nav-tabs, footer,
+        .dropdown, .btn {
+            display: none !important;
+        }
+        .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .tab-content > .tab-pane {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            page-break-before: always;
+        }
+        .tab-content > .tab-pane:first-child {
+            page-break-before: auto;
+        }
+        .report-page-header {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 0 1.5rem 0 !important;
+            border-bottom: 2px solid #333 !important;
+            margin-bottom: 1.5rem !important;
+        }
+        .report-kpi-card {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+            color: #000 !important;
+            background: #f9f9f9 !important;
+        }
+        .report-kpi-card h3, .report-kpi-card p, .report-kpi-card span {
+            color: #000 !important;
+        }
+        .kpi-icon-bubble {
+            display: none !important;
+        }
+        .print-signature-block {
+            display: block !important;
+            margin-top: 3rem;
+            page-break-inside: avoid;
+        }
+    }
+    .print-signature-block {
+        display: none;
+    }
+
+
+/* admin/reports/index.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { min-height: 350px; }
+.view-inline-2 { width: 50px; height: 6px; }
+.view-inline-3 { min-height: 280px; }
+.view-inline-4 { min-height: 220px; }
+.view-inline-5 { min-height: 260px; }
+.view-inline-6 { width: 50px; }
+.view-inline-7 { width: 44px; height: 44px; object-fit: cover; }
+.view-inline-8 { width: 44px; height: 44px; }
+.view-inline-9 { height: 70px; }

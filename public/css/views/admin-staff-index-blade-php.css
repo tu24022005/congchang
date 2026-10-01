@@ -1,0 +1,142 @@
+/* admin/staff/index.blade.php - ki?u d?ng m?n h?nh */
+.staff-page-header {
+        background: linear-gradient(135deg, #f8fbfb 0%, #eef6f5 100%);
+        border: 1px solid #e1eceb;
+        border-radius: 20px;
+        padding: 1.75rem 2rem;
+        box-shadow: 0 4px 20px rgba(17, 124, 131, 0.04);
+    }
+    .staff-eyebrow {
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #117c83;
+        display: inline-block;
+        margin-bottom: 0.25rem;
+    }
+    .role-metric-card {
+        border: 1px solid #e8eeee;
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 1.25rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .role-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+    .role-metric-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+    }
+    .role-card-admin::before { background: #8b5cf6; }
+    .role-card-manager::before { background: #10b981; }
+    .role-card-warehouse::before { background: #f59e0b; }
+    .role-card-cs::before { background: #3b82f6; }
+
+    .role-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .role-avatar-admin { background: #ede9fe; color: #7c3aed; }
+    .role-avatar-manager { background: #d1fae5; color: #059669; }
+    .role-avatar-warehouse { background: #fef3c7; color: #d97706; }
+    .role-avatar-cs { background: #dbeafe; color: #2563eb; }
+
+    .user-avatar-circle {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #ffffff;
+        background: linear-gradient(135deg, #117c83, #238b5c);
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .matrix-table thead th {
+        background-color: #f8fafc;
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #475569;
+        padding: 0.85rem 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .matrix-table tbody td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        font-size: 0.88rem;
+    }
+
+    .staff-table thead th {
+        background-color: #f7faf9;
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #637778;
+        padding: 0.9rem 1rem;
+        border-bottom: 2px solid #e7eeed;
+    }
+    .staff-table tbody td {
+        padding: 0.95rem 1rem;
+        vertical-align: middle;
+        font-size: 0.88rem;
+    }
+
+    .badge-role-admin { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .badge-role-manager { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-role-warehouse { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-role-cs { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .table-responsive {
+        min-height: 380px;
+    }
+    .dropdown-menu {
+        border-radius: 14px !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+    }
+    .dropdown-item {
+        font-size: 0.86rem;
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
+        margin: 2px 6px;
+        width: calc(100% - 12px);
+        transition: all 0.15s ease;
+    }
+    .dropdown-item:hover {
+        background-color: #f1f7f6;
+    }
+    .dropdown-item.text-danger:hover {
+        background-color: #fee2e2;
+    }
+
+
+/* admin/staff/index.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { width: 35%; }
+.view-inline-2 { width: 16%; }
+.view-inline-3 { width: 100%; height: 100%; object-fit: cover; }
+.view-inline-4 { font-size: 0.72rem; }
+.view-inline-5 { max-width: 250px; }
+.view-inline-6 { width: 28px; height: 28px; }
+.view-inline-7 { width: 32px; height: 32px; }
+.view-inline-8 { min-width: 210px; }

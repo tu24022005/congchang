@@ -2,7 +2,7 @@
 @section('title', '419 - Phiên làm việc đã hết hạn | BeatyCare 🌸')
 
 @section('content')
-<div class="container py-5 text-center my-auto" style="min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<div class="container py-5 text-center my-auto view-inline-1">
     <div class="error-illustration mb-4">
         <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="100" cy="100" r="90" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="4"/>
@@ -12,7 +12,7 @@
     </div>
     <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold mb-2">Bảo mật phiên</span>
     <h1 class="display-6 fw-bold text-dark mt-2 mb-3">Phiên làm việc đã hết hạn ⏳</h1>
-    <p class="text-muted mx-auto mb-4" style="max-width: 520px; line-height: 1.7;">
+    <p class="text-muted mx-auto mb-4 view-inline-2">
         Để bảo vệ an toàn cho dữ liệu và giỏ hàng của bạn, phiên làm việc đã tạm dừng do không có hoạt động trong thời gian dài. Vui lòng tải lại trang để tiếp tục nhé!
     </p>
     <div class="d-flex flex-wrap justify-content-center gap-3">

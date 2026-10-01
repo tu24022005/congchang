@@ -20,7 +20,14 @@
         @forelse($banners as $banner)
             <div class="col-xl-6">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                    <img src="{{ $banner->image_source }}" alt="{{ $banner->alt_text ?: $banner->title }}" style="height:220px;object-fit:cover;">
+                    <div class="position-relative view-inline-1">
+                        <img src="{{ $banner->image_source ?: asset('images/placeholder.svg') }}" alt="{{ $banner->alt_text ?: $banner->title }}" class="w-100 h-100 view-inline-2">
+                        @if($banner->has_video)
+                            <span class="position-absolute top-0 end-0 m-3 badge bg-danger rounded-pill shadow-sm px-3 py-2">
+                                <i class="bi bi-play-circle-fill me-1"></i>Video ({{ strtoupper($banner->video_type) }})
+                            </span>
+                        @endif
+                    </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between gap-3">
                             <div>

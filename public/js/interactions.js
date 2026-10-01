@@ -107,35 +107,11 @@
                     return;
                 }
 
-                // Guard against double clicks during navigation
-                if (this.isNavigating) {
-                    e.preventDefault();
-                    return;
-                }
-
-                // Nếu bật prefers-reduced-motion: điều hướng ngay, bỏ delay 200ms
-                if (window.prefersReducedMotion?.matches) {
-                    window.location.href = targetUrl.href;
-                    return;
-                }
-
-                e.preventDefault();
-                this.isNavigating = true;
-
-                // Show exit transition
-                document.body.classList.add('page-exit');
-
-                // Trigger top progress line
+                // Show instant top progress indicator without blocking navigation or breaking bfcache
                 if (this.progressBar) {
                     this.progressBar.style.opacity = '1';
                     this.progressBar.classList.add('is-loading');
                 }
-
-                // 200ms smooth delay then navigate
-                setTimeout(() => {
-                    window.location.href = targetUrl.href;
-                }, 200);
-
             } catch (err) {
                 // If invalid URL, fallback to default behavior
             }

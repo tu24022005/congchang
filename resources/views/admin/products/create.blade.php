@@ -77,6 +77,51 @@
                 @enderror
             </div>
 
+            <!-- THÔNG TIN MỸ PHẨM -->
+            <div class="border rounded-3 p-3 mb-4 bg-light">
+                <h5 class="fw-bold mb-2 text-primary"><i class="bi bi-flower1 me-1"></i>Thông tin mỹ phẩm & làm đẹp</h5>
+                <small class="text-muted d-block mb-3">Hiển thị trong bảng thông số chi tiết sản phẩm và tư vấn làm đẹp.</small>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="origin" class="form-label fw-bold">Xuất xứ / Nơi sản xuất</label>
+                        <input type="text" name="origin" id="origin" class="form-control" value="{{ old('origin') }}" placeholder="VD: Hàn Quốc, Nhật Bản, Pháp...">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="expiry_info" class="form-label fw-bold">Hạn sử dụng</label>
+                        <input type="text" name="expiry_info" id="expiry_info" class="form-control" value="{{ old('expiry_info') }}" placeholder="VD: 36 tháng kể từ NSX, 12 tháng sau mở nắp">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Phù hợp loại da</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        @php
+                            $availableSkinTypes = [
+                                'da_dau' => 'Da dầu',
+                                'da_kho' => 'Da khô',
+                                'da_hon_hop' => 'Da hỗn hợp',
+                                'da_nhay_cam' => 'Da nhạy cảm',
+                                'moi_loai_da' => 'Mọi loại da',
+                            ];
+                            $oldSkinTypes = old('skin_types', []);
+                        @endphp
+                        @foreach($availableSkinTypes as $key => $label)
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="skin_types[]" value="{{ $key }}" id="skin_type_{{ $key }}" @checked(in_array($key, $oldSkinTypes, true))>
+                                <label class="form-check-label" for="skin_type_{{ $key }}">{{ $label }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="ingredients" class="form-label fw-bold">Thành phần chi tiết (Ingredients)</label>
+                    <textarea name="ingredients" id="ingredients" rows="3" class="form-control" placeholder="VD: Niacinamide 10%, Zinc PCA 1%, Aqua, Glycerin...">{{ old('ingredients') }}</textarea>
+                </div>
+                <div class="mb-2">
+                    <label for="usage_instructions" class="form-label fw-bold">Hướng dẫn sử dụng (Usage Instructions)</label>
+                    <textarea name="usage_instructions" id="usage_instructions" rows="3" class="form-control" placeholder="VD: Sử dụng sau bước toner, lấy 2-3 giọt thoa đều lên da mặt...">{{ old('usage_instructions') }}</textarea>
+                </div>
+            </div>
+
             <div class="mb-3">
                 <label for="quantity" class="form-label fw-bold">Số lượng</label>
                 <input type="number" name="quantity" id="quantity" class="form-control @error('quantity') is-invalid @enderror" value="{{ old('quantity') }}" required min="0">
@@ -125,22 +170,5 @@
         </form>
     </div>
 </div>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const list = document.getElementById('variations-list');
-    let index = list.querySelectorAll('.variation-row').length;
-    document.getElementById('add-variation').addEventListener('click', function () {
-        list.insertAdjacentHTML('beforeend', `<div class="row g-2 align-items-end variation-row mb-2"><div class="col-md-2"><label class="form-label small">Mã SKU</label><input name="variations[${index}][sku]" class="form-control" placeholder="SON-RED-01"></div><div class="col-md-2"><label class="form-label small">Màu</label><input name="variations[${index}][color]" class="form-control" placeholder="Đỏ"></div><div class="col-md-2"><label class="form-label small">Bộ nhớ / loại</label><input name="variations[${index}][storage]" class="form-control" placeholder="256GB"></div><div class="col-md-2"><label class="form-label small">Khối lượng</label><input type="number" step="0.01" min="0" name="variations[${index}][size_value]" class="form-control" placeholder="250"></div><div class="col-md-1"><label class="form-label small">Đơn vị</label><select name="variations[${index}][size_unit]" class="form-select"><option value="">-</option><option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option></select></div><div class="col-md-1"><label class="form-label small">Giá bán</label><input type="number" min="0" name="variations[${index}][price]" class="form-control" required></div><div class="col-md-1"><label class="form-label small">Tồn</label><input type="number" min="0" name="variations[${index}][stock]" class="form-control" value="0" required></div><div class="col-md-2"><label class="form-label small">Ảnh biến thể</label><input type="file" name="variations[${index}][image]" class="form-control form-control-sm" accept="image/*"></div><div class="col-md-1 variation-actions"><button type="button" class="btn btn-outline-primary duplicate-variation" title="Nhân bản dòng"><i class="bi bi-copy"></i></button><button type="button" class="btn btn-outline-danger remove-variation" title="Xóa dòng"><i class="bi bi-trash"></i></button></div></div>`);
-        index++;
-    });
-    list.addEventListener('click', event => {
-        const row = event.target.closest('.variation-row');
-        if (!row) return;
-        if (event.target.closest('.remove-variation')) row.remove();
-        if (event.target.closest('.duplicate-variation')) list.appendChild(row.cloneNode(true));
-        list.querySelectorAll('.variation-row').forEach((currentRow, rowIndex) => currentRow.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/variations\[\d+\]/, `variations[${rowIndex}]`)));
-        index = list.querySelectorAll('.variation-row').length;
-    });
-});
-</script>
+<script src="{{ asset_v('js/views/admin-products-create-blade-php.js') }}" defer></script>
 @endsection

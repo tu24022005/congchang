@@ -17,7 +17,12 @@ class CartService
 
     public function items(User $user): Collection
     {
-        return $this->forUser($user)->items()->with(['product.category', 'variation'])->get();
+        return $this->forUser($user)->items()->where('saved_for_later', false)->with(['product.category', 'variation'])->get();
+    }
+
+    public function savedItems(User $user): Collection
+    {
+        return $this->forUser($user)->items()->where('saved_for_later', true)->with(['product.category', 'variation'])->get();
     }
 
     public function asArray(User $user): array

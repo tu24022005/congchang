@@ -97,11 +97,11 @@
                                         <tr class="cart-item-row" data-unit-price="{{ $details['price'] }}">
                                             <td class="text-start ps-4">
                                                 <div class="d-flex align-items-center cart-product-cell">
-                                                    <input type="checkbox" class="form-check-input cart-checkbox-input cart-product-select me-3" aria-label="Chọn {{ $details['name'] }}" checked>
+                                                    <input type="checkbox" class="form-check-input cart-checkbox-input cart-product-select me-3" data-key="{{ $id }}" aria-label="Chọn {{ $details['name'] }}" checked>
                                                     @if(isset($details['image']) && $details['image'])
                                                         <img src="{{ asset('storage/' . $details['image']) }}" width="68" height="68" class="img-thumbnail rounded-3 shadow-sm me-3 cart-product-image object-fit-cover" alt="{{ $details['name'] }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                                                     @else
-                                                        <div class="bg-light rounded-3 border me-3 storefront-thumb-placeholder cart-product-image d-flex align-items-center justify-content-center" style="width: 68px; height: 68px;">
+                                                        <div class="bg-light rounded-3 border me-3 storefront-thumb-placeholder cart-product-image d-flex align-items-center justify-content-center view-inline-1">
                                                             <i class="bi bi-flower1 text-muted fs-3"></i>
                                                         </div>
                                                     @endif
@@ -128,7 +128,7 @@
                                                     @method('PATCH')
                                                     <div class="quantity-control d-inline-flex border rounded-3 overflow-hidden bg-white shadow-sm">
                                                         <button type="button" class="btn btn-sm btn-light quantity-step px-2 border-0" data-step="-1">−</button>
-                                                        <input type="number" name="quantity" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center quantity-input border-0 shadow-none" style="width: 48px;" min="1">
+                                                        <input type="number" name="quantity" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center quantity-input border-0 shadow-none view-inline-2" min="1">
                                                         <button type="button" class="btn btn-sm btn-light quantity-step px-2 border-0" data-step="1">+</button>
                                                     </div>
                                                 </form>
@@ -137,13 +137,21 @@
                                                 {{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }} đ
                                             </td>
                                             <td>
-                                                <form action="{{ route('cart.destroy', $id) }}" method="POST" class="cart-remove-form">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Xoá sản phẩm">
-                                                        <i class="bi bi-trash3 me-1"></i>Xoá
-                                                    </button>
-                                                </form>
+                                                <div class="d-flex flex-column gap-1 align-items-center">
+                                                    <form action="{{ route('cart.destroy', $id) }}" method="POST" class="cart-remove-form">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Xoá sản phẩm">
+                                                            <i class="bi bi-trash3 me-1"></i>Xoá
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('cart.save_for_later', $id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-link text-muted small p-0 text-decoration-none" title="Lưu lại để mua sau">
+                                                            <i class="bi bi-bookmark me-1"></i>Lưu mua sau
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -162,7 +170,7 @@
 
             <!-- CỘT PHẢI: TÓM TẮT ĐƠN HÀNG & TIẾN HÀNH THANH TOÁN -->
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4 storefront-panel-card position-sticky" style="top: 90px;">
+                <div class="card border-0 shadow-sm rounded-4 storefront-panel-card position-sticky view-inline-3">
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-4 border-bottom pb-3 text-center">
                             <i class="bi bi-receipt text-primary me-2"></i>TỔNG ĐƠN HÀNG
@@ -242,15 +250,50 @@
         </div>
     @else
         <!-- GIỎ HÀNG TRỐNG -->
-        <div class="text-center py-5 bg-light rounded-4 shadow-sm mt-4 border">
-            <i class="bi bi-cart-x text-muted empty-cart-icon" style="font-size: 4rem;"></i>
-            <h4 class="mt-3 text-muted fw-bold">Giỏ hàng của bạn đang trống</h4>
-            <p class="text-muted">Hãy chọn thêm những sản phẩm yêu thích từ BeatyCare 🌸 nhé!</p>
-            <a href="{{ route('products.index') }}" class="btn btn-primary rounded-pill px-4 mt-2 shadow-sm">
-                <i class="bi bi-bag-plus me-1"></i>Khám phá sản phẩm ngay
-            </a>
+        <div class="card border-0 shadow-sm rounded-4 p-5 mt-4">
+            <x-empty-state 
+                type="cart" 
+                title="Giỏ hàng của bạn đang trống" 
+                description="Khám phá ngay các sản phẩm mỹ phẩm và ưu đãi hấp dẫn đang chờ bạn tại BeatyCare 🌸." 
+                action-label="Khám phá sản phẩm ngay" 
+                action-url="{{ route('products.index') }}" 
+            />
         </div>
     @endif
+
+    <!-- KHỐI ĐÃ LƯU ĐỂ MUA SAU (PROMPT 3.9) -->
+    @if(!empty($savedForLater) && count($savedForLater) > 0)
+        <div class="card border-0 shadow-sm rounded-4 mb-4 mt-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-bookmark-heart text-danger me-2"></i>Đã lưu để mua sau ({{ count($savedForLater) }})</h5>
+                <div class="d-flex flex-column gap-3">
+                    @foreach($savedForLater as $savedKey => $savedItem)
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light-subtle flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="{{ $savedItem['image'] ? asset('storage/' . $savedItem['image']) : asset('images/placeholder.svg') }}" width="56" height="56" class="rounded-3 object-fit-cover shadow-sm" alt="{{ $savedItem['name'] }}" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
+                                <div>
+                                    <a href="{{ route('products.show', $savedItem['slug'] ?? '') }}" class="fw-bold text-dark text-decoration-none small">{{ $savedItem['name'] }}</a>
+                                    @if(!empty($savedItem['variation']))
+                                        <div class="text-muted small">Phân loại: {{ $savedItem['variation'] }}</div>
+                                    @endif
+                                    <div class="text-danger fw-bold small mt-1">{{ number_format($savedItem['price'], 0, ',', '.') }} ₫</div>
+                                </div>
+                            </div>
+                            <form action="{{ route('cart.move_to_cart', $savedKey) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <i class="bi bi-cart-plus me-1"></i>Chuyển lại vào giỏ
+                                </button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- SẢN PHẨM ĐÃ XEM GẦN ĐÂY -->
+    <x-recently-viewed />
 </div>
 
 <!-- MODAL CHỌN VOUCHER -->
@@ -318,153 +361,7 @@
 @endif
 
 @push('scripts')
-<style>
-    #voucherPickerModal { z-index: 2000 !important; }
-    #voucherPickerModal .modal-dialog,
-    #voucherPickerModal .modal-content { position: relative; z-index: 2001; }
-    .modal-backdrop.show { z-index: 1990 !important; }
-</style>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const selectAll = document.getElementById('cart-select-all');
-    const shopSelect = document.querySelector('.cart-shop-select');
-    const productSelects = Array.from(document.querySelectorAll('.cart-product-select'));
-    const btnProceedCheckout = document.getElementById('btn-proceed-checkout');
-    const selectedCountDisplay = document.getElementById('selected-product-count');
-
-    const money = value => new Intl.NumberFormat('vi-VN').format(Math.round(value)) + ' đ';
-    const discountType = @json($discountVoucher['type'] ?? null);
-    const discountValue = Number(@json($discountVoucher['value'] ?? 0));
-
-    function syncSelectAllState() {
-        if (!selectAll || !productSelects.length) return;
-        const selectedCount = productSelects.filter(input => input.checked).length;
-        selectAll.checked = selectedCount === productSelects.length;
-        selectAll.indeterminate = selectedCount > 0 && selectedCount < productSelects.length;
-        if (shopSelect) {
-            shopSelect.checked = selectAll.checked;
-            shopSelect.indeterminate = selectAll.indeterminate;
-        }
-        if (selectedCountDisplay) {
-            selectedCountDisplay.textContent = selectedCount;
-        }
-        if (btnProceedCheckout) {
-            if (selectedCount === 0) {
-                btnProceedCheckout.classList.add('disabled', 'opacity-50');
-            } else {
-                btnProceedCheckout.classList.remove('disabled', 'opacity-50');
-            }
-        }
-    }
-
-    function setProductsSelected(checked) {
-        productSelects.forEach(input => { input.checked = checked; });
-        syncSelectAllState();
-        refreshCartTotals();
-    }
-
-    selectAll?.addEventListener('change', function () {
-        setProductsSelected(this.checked);
-    });
-    shopSelect?.addEventListener('change', function () {
-        setProductsSelected(this.checked);
-    });
-    productSelects.forEach(input => input.addEventListener('change', function () {
-        syncSelectAllState();
-        refreshCartTotals();
-    }));
-
-    // Cập nhật số lượng qua nút bấm + và -
-    document.querySelectorAll('.quantity-step').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const input = this.closest('.quantity-control').querySelector('input');
-            const nextValue = Math.max(1, Number(input.value || 1) + Number(this.dataset.step));
-            input.value = nextValue;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-    });
-
-    function refreshCartTotals() {
-        let subtotal = 0;
-        document.querySelectorAll('.cart-item-row').forEach(function (row) {
-            const input = row.querySelector('.quantity-input');
-            const quantity = Math.max(1, Number(input.value || 1));
-            input.value = quantity;
-            const lineTotal = Number(row.dataset.unitPrice) * quantity;
-            const productSelect = row.querySelector('.cart-product-select');
-            if (productSelect?.checked) subtotal += lineTotal;
-            row.querySelector('.line-total').textContent = money(lineTotal);
-        });
-
-        let discount = 0;
-        if (discountType === 'fixed') discount = discountValue;
-        if (discountType === 'percent') discount = subtotal * discountValue / 100;
-        discount = Math.min(discount, subtotal);
-        const total = Math.max(0, subtotal - discount);
-
-        document.getElementById('cart-subtotal').textContent = money(subtotal);
-        const discountElem = document.getElementById('cart-discount');
-        if (discountElem) discountElem.textContent = new Intl.NumberFormat('vi-VN').format(Math.round(discount));
-        document.getElementById('cart-final-total').textContent = money(total);
-    }
-    window.refreshCartTotals = refreshCartTotals;
-
-    // Tự động submit khi đổi số lượng (có debounce)
-    document.querySelectorAll('.quantity-input').forEach(function (input) {
-        input.addEventListener('input', function () {
-            refreshCartTotals();
-            clearTimeout(input.form.dataset.updateTimer);
-            input.form.dataset.updateTimer = setTimeout(() => input.form.submit(), 600);
-        });
-    });
-
-    // Xử lý modal chọn voucher
-    const voucherModal = document.getElementById('voucherPickerModal');
-    if (voucherModal && voucherModal.parentElement !== document.body) {
-        document.body.appendChild(voucherModal);
-    }
-
-    document.getElementById('apply-voucher-modal')?.addEventListener('click', function () {
-        const code = document.getElementById('voucher-code-modal').value.trim();
-        if (!code) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = @json(route('cart.apply_voucher'));
-        form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}"><input type="hidden" name="voucher_code" value="${code}">`;
-        document.body.appendChild(form);
-        form.submit();
-    });
-
-    document.querySelectorAll('.voucher-choice').forEach(function (choice) {
-        choice.addEventListener('change', function () {
-            if (!this.checked) return;
-            document.querySelectorAll('.voucher-choice[data-voucher-type="' + this.dataset.voucherType + '"]').forEach(function (other) {
-                if (other !== choice) other.checked = false;
-            });
-        });
-    });
-
-    // Hiệu ứng xóa sản phẩm
-    document.querySelectorAll('.cart-remove-form').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const tr = this.closest('tr');
-            if (tr) {
-                tr.classList.add('slide-out-right');
-                setTimeout(() => {
-                    HTMLFormElement.prototype.submit.call(this);
-                }, 350);
-            } else {
-                HTMLFormElement.prototype.submit.call(this);
-            }
-        });
-    });
-
-    // Khởi tạo trạng thái ban đầu
-    productSelects.forEach(input => { input.checked = true; });
-    syncSelectAllState();
-    refreshCartTotals();
-});
-</script>
+<link rel="stylesheet" href="{{ asset_v('css/views/cart-index-blade-php.css') }}">
+<script src="{{ asset_v('js/views/cart-index-blade-php.js') }}" defer></script>
 @endpush
 @endsection

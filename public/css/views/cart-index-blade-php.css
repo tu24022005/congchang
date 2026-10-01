@@ -1,0 +1,11 @@
+/* cart/index.blade.php - ki?u d?ng m?n h?nh */
+#voucherPickerModal { z-index: 2000 !important; }
+    #voucherPickerModal .modal-dialog,
+    #voucherPickerModal .modal-content { position: relative; z-index: 2001; }
+    .modal-backdrop.show { z-index: 1990 !important; }
+
+
+/* cart/index.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { width: 68px; height: 68px; }
+.view-inline-2 { width: 48px; }
+.view-inline-3 { top: 90px; }

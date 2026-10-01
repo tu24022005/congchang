@@ -11,7 +11,7 @@
             <i class="bi bi-shield-check me-1"></i> Quyền lợi khách hàng
         </span>
         <h1 class="display-6 fw-bold text-dark mt-2">Chính sách minh bạch tại BeatyCare 🌸</h1>
-        <p class="text-muted mx-auto" style="max-width: 650px;">
+        <p class="text-muted mx-auto view-inline-1">
             Mọi quy định tại Aloha Beauty đều hướng đến mục tiêu đảm bảo bạn có trải nghiệm mua sắm mỹ phẩm an tâm, hài lòng và trọn vẹn nhất.
         </p>
     </div>

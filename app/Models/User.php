@@ -30,6 +30,8 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
         'role',  
         'google_id', // Đã được gộp chung vào mảng này
         'loyalty_points',
+        'login_attempts',
+        'login_locked_at',
     ]; 
 
     /** 
@@ -52,7 +54,39 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
         return [ 
             'email_verified_at' => 'datetime', 
             'password' => 'hashed', 
+            'login_locked_at' => 'datetime',
         ]; 
+    } 
+
+    public function isLocked(): bool
+    {
+        return !is_null($this->login_locked_at);
+    } 
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (empty($this->avatar_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar_path, 'http://') || str_starts_with($this->avatar_path, 'https://')) {
+            return $this->avatar_path;
+        }
+
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->avatar_path)) {
+            return \Illuminate\Support\Facades\Storage::url($this->avatar_path);
+        }
+
+        return asset('storage/' . ltrim($this->avatar_path, '/'));
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $nameParts = array_values(array_filter(explode(' ', trim($this->name))));
+        if (count($nameParts) >= 2) {
+            return mb_strtoupper(mb_substr($nameParts[0], 0, 1) . mb_substr(end($nameParts), 0, 1));
+        }
+        return mb_strtoupper(mb_substr($this->name, 0, 2));
     } 
 
     // ==========================================
@@ -108,16 +142,27 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
         return $this->hasMany(ActivityLog::class, 'actor_id');
     }
 
-    public static function membershipTierFor(float|int $spend): array
+    public static function membershipTierFor(float|int $spend = 0, int|float $points = 0): array
     {
+        // Hệ thống quy định: 10.000đ mua hàng hoàn thành = 1 điểm tích lũy
+        // Xét hạng dựa trên ĐIỀU KIỆN CAO HƠN giữa Doanh số thực chi và Điểm tích lũy (bao gồm cả điểm được Admin buff/thưởng)
+        $effectiveValue = max((float) $spend, (float) ($points * 10000));
+
         return match (true) {
-            $spend >= 20000000 => ['name' => 'Kim cương', 'class' => 'text-info'],
-            $spend >= 10000000 => ['name' => 'Bạch kim', 'class' => 'text-secondary'],
-            $spend >= 5000000 => ['name' => 'Vàng', 'class' => 'text-warning'],
-            $spend >= 2000000 => ['name' => 'Bạc', 'class' => 'text-secondary'],
-            $spend >= 1000000 => ['name' => 'Thành viên', 'class' => 'text-success'],
-            default => ['name' => 'Mới tham gia', 'class' => 'text-muted'],
+            $effectiveValue >= 20000000 => ['name' => 'Kim cương', 'icon' => '👑', 'class' => 'text-info',      'points_threshold' => 2000, 'spend_threshold' => 20000000],
+            $effectiveValue >= 10000000 => ['name' => 'Bạch kim',  'icon' => '💎', 'class' => 'text-secondary', 'points_threshold' => 1000, 'spend_threshold' => 10000000],
+            $effectiveValue >= 5000000  => ['name' => 'Vàng',      'icon' => '🥇', 'class' => 'text-warning',   'points_threshold' => 500,  'spend_threshold' => 5000000],
+            $effectiveValue >= 2000000  => ['name' => 'Bạc',       'icon' => '🥈', 'class' => 'text-secondary', 'points_threshold' => 200,  'spend_threshold' => 2000000],
+            $effectiveValue >= 1000000  => ['name' => 'Thành viên','icon' => '🥉', 'class' => 'text-success',   'points_threshold' => 100,  'spend_threshold' => 1000000],
+            default                     => ['name' => 'Mới tham gia','icon'=> '🌱','class' => 'text-muted',     'points_threshold' => 0,    'spend_threshold' => 0],
         };
+    }
+
+
+    public function getMembershipTierAttribute(): array
+    {
+        $spend = (float) $this->orders()->whereIn('status', ['paid', 'completed'])->sum('total');
+        return self::membershipTierFor($spend, (int) $this->loyalty_points);
     }
 
     public function roleLabel(): string

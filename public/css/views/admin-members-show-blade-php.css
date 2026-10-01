@@ -1,0 +1,54 @@
+/* admin/members/show.blade.php - ki?u d?ng m?n h?nh */
+.customer-profile-card {
+        border: none;
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+    .profile-avatar-lg {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.6rem;
+        color: #ffffff;
+        background: linear-gradient(135deg, #117c83, #38c47f);
+        margin: 0 auto 1rem;
+        box-shadow: 0 6px 16px rgba(17, 124, 131, 0.25);
+    }
+    .nav-profile-tabs .nav-link {
+        font-weight: 600;
+        font-size: 0.92rem;
+        color: #526b6c;
+        border: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        margin-right: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    .nav-profile-tabs .nav-link:hover {
+        color: #117c83;
+        background: #f0f7f7;
+    }
+    .nav-profile-tabs .nav-link.active {
+        color: #ffffff;
+        background: #117c83;
+        box-shadow: 0 4px 12px rgba(17, 124, 131, 0.2);
+    }
+    .badge-tier-diamond { background: #e0f7fa; color: #00838f; border: 1px solid #b2ebf2; font-weight: 600; }
+    .badge-tier-platinum { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight: 600; }
+    .badge-tier-gold { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-weight: 600; }
+    .badge-tier-silver { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; font-weight: 600; }
+    .badge-tier-member { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 600; }
+    .badge-tier-new { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; font-weight: 500; }
+
+
+/* admin/members/show.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { width: 100%; height: 100%; object-fit: cover; }
+.view-inline-2 { width: 32px; height: 32px; transform: translate(10%, 10%); }
+.view-inline-3 { font-size: 0.85rem; }
+.view-inline-4 { width: 100px; height: 100px; }
+.view-inline-5 { font-size: 2rem; }

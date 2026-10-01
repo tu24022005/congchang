@@ -1,0 +1,7 @@
+
+/* components/mini-cart-drawer.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
+.view-inline-1 { width: min(92vw, 420px); }
+.view-inline-2 { height: 7px; border-radius: 999px; }
+.view-inline-3 { overflow-y: auto; }
+.view-inline-4 { font-size: 0.75rem; }
+.view-inline-5 { min-width: 24px; text-align: center; }

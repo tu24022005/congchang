@@ -19,57 +19,58 @@ document.addEventListener('DOMContentLoaded', function () {
     const preloaderFill = document.querySelector('.preloader-progress-fill');
     
     if (preloader) {
-        if (prefersReducedMotion.matches) {
+        if (prefersReducedMotion.matches || sessionStorage.getItem('beatycare-preloader-shown') === '1') {
             preloader.style.display = 'none';
-            return;
-        }
-
-        let progress = 15;
-        if (preloaderFill) preloaderFill.style.width = '15%';
-
-        // Smooth progress simulation while DOM / assets load
-        const progressInterval = setInterval(() => {
-            if (progress >= 85) {
-                clearInterval(progressInterval);
-            } else {
-                progress += Math.random() * 18;
-                if (preloaderFill) preloaderFill.style.width = Math.min(progress, 88) + '%';
-            }
-        }, 80);
-
-        const dismissPreloader = () => {
-            clearInterval(progressInterval);
-            if (preloaderFill) preloaderFill.style.width = '100%';
-            
-            setTimeout(() => {
-                preloader.classList.add('fade-out');
-                setTimeout(() => {
-                    preloader.style.display = 'none';
-                }, 520);
-            }, 250);
-        };
-
-        // Window loaded
-        if (document.readyState === 'complete') {
-            dismissPreloader();
         } else {
-            window.addEventListener('load', dismissPreloader);
-            // Fallback safety timeout (never stall user past 750ms)
-            setTimeout(dismissPreloader, 750);
-        }
+            sessionStorage.setItem('beatycare-preloader-shown', '1');
 
-        // Fast dismiss on click or Escape key
-        preloader.addEventListener('click', dismissPreloader);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') dismissPreloader();
-        });
+            let progress = 15;
+            if (preloaderFill) preloaderFill.style.width = '15%';
 
-        // Fast history traversal (bfcache)
-        window.addEventListener('pageshow', (event) => {
-            if (event.persisted) {
-                preloader.style.display = 'none';
+            // Smooth progress simulation while DOM / assets load
+            const progressInterval = setInterval(() => {
+                if (progress >= 85) {
+                    clearInterval(progressInterval);
+                } else {
+                    progress += Math.random() * 18;
+                    if (preloaderFill) preloaderFill.style.width = Math.min(progress, 88) + '%';
+                }
+            }, 80);
+
+            const dismissPreloader = () => {
+                clearInterval(progressInterval);
+                if (preloaderFill) preloaderFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    preloader.classList.add('fade-out');
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                    }, 520);
+                }, 250);
+            };
+
+            // Window loaded
+            if (document.readyState === 'complete') {
+                dismissPreloader();
+            } else {
+                window.addEventListener('load', dismissPreloader);
+                // Fallback safety timeout (never stall user past 750ms)
+                setTimeout(dismissPreloader, 750);
             }
-        });
+
+            // Fast dismiss on click or Escape key
+            preloader.addEventListener('click', dismissPreloader);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') dismissPreloader();
+            });
+
+            // Fast history traversal (bfcache)
+            window.addEventListener('pageshow', (event) => {
+                if (event.persisted) {
+                    preloader.style.display = 'none';
+                }
+            });
+        }
     }
 
     // =========================================================================
@@ -145,46 +146,73 @@ document.addEventListener('DOMContentLoaded', function () {
     // =========================================================================
     const revealObserverOptions = {
         root: null,
-        rootMargin: '0px 0px -45px 0px',
-        threshold: 0.08
+        rootMargin: '0px 0px -20px 0px',
+        threshold: 0.05
     };
 
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('in-view');
-                observer.unobserve(entry.target);
+    let revealObserver = null;
+    if ('IntersectionObserver' in window) {
+        revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, revealObserverOptions);
+    }
+
+    function initScrollReveals() {
+        const isInViewport = (el) => {
+            const rect = el.getBoundingClientRect();
+            return rect.top < (window.innerHeight || document.documentElement.clientHeight) + 120 && rect.bottom > -40;
+        };
+
+        // Explicitly declared reveal elements
+        const explicitReveals = document.querySelectorAll(
+            '.reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade, .reveal-blur'
+        );
+        explicitReveals.forEach(el => {
+            if (isInViewport(el) || !revealObserver) {
+                el.classList.add('in-view');
+            } else if (!el.classList.contains('in-view')) {
+                revealObserver.observe(el);
             }
         });
-    }, revealObserverOptions);
 
-    // Observe explicitly declared reveal elements
-    const explicitReveals = document.querySelectorAll(
-        '.reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade, .reveal-blur'
-    );
-    explicitReveals.forEach(el => revealObserver.observe(el));
-
-    // Stagger containers: dynamically assign stagger index to children
-    document.querySelectorAll('.reveal-stagger').forEach(container => {
-        Array.from(container.children).forEach((child, index) => {
-            child.style.setProperty('--stagger-index', index);
+        // Stagger containers: dynamically assign stagger index to children
+        document.querySelectorAll('.reveal-stagger').forEach(container => {
+            Array.from(container.children).forEach((child, index) => {
+                child.style.setProperty('--stagger-index', index);
+            });
+            if (isInViewport(container) || !revealObserver) {
+                container.classList.add('in-view');
+            } else if (!container.classList.contains('in-view')) {
+                revealObserver.observe(container);
+            }
         });
-        revealObserver.observe(container);
-    });
 
-    // Auto-reveal for major storefront components
-    const autoComponents = document.querySelectorAll(
-        '.product-card, .category-card, .flash-sale-card, .hot-product-card, .blog-card, .account-hub-card, .footer-promise'
-    );
-    let autoIndex = 0;
-    autoComponents.forEach((card) => {
-        if (!card.classList.contains('reveal-up') && !card.classList.contains('in-view')) {
-            card.classList.add('reveal-up');
-            card.style.transitionDelay = `${(autoIndex % 4) * 80}ms`;
-            autoIndex++;
-            revealObserver.observe(card);
-        }
-    });
+        // Auto-reveal for major storefront cards (excluding basic product-card to prevent blank space)
+        const autoComponents = document.querySelectorAll(
+            '.category-card, .flash-sale-card, .hot-product-card, .blog-card, .account-hub-card, .footer-promise'
+        );
+        let autoIndex = 0;
+        autoComponents.forEach((card) => {
+            if (!card.classList.contains('reveal-up') && !card.classList.contains('in-view')) {
+                card.classList.add('reveal-up');
+                card.style.transitionDelay = `${(autoIndex % 4) * 70}ms`;
+                autoIndex++;
+                if (isInViewport(card) || !revealObserver) {
+                    card.classList.add('in-view');
+                } else {
+                    revealObserver.observe(card);
+                }
+            }
+        });
+    }
+
+    initScrollReveals();
+    window.refreshScrollReveals = initScrollReveals;
 
     // =========================================================================
     // 5. FLY TO CART PHYSICS & CART BADGE POP ANIMATION
@@ -461,4 +489,67 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // =========================================================================
+    // 13. CONFETTI CELEBRATION (PROMPT 4.4)
+    // =========================================================================
+    window.launchConfetti = function (durationMs = 2800) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed';
+        canvas.style.inset = '0';
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.zIndex = '999999';
+        canvas.style.pointerEvents = 'none';
+        document.body.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width = window.innerWidth;
+        const height = canvas.height = window.innerHeight;
+
+        const colors = ['#ff6b81', '#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#a55eea', '#ff78c4'];
+        const particles = Array.from({ length: 90 }, () => ({
+            x: width * (0.3 + Math.random() * 0.4),
+            y: height * 0.42,
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 1.25) * 16,
+            size: 6 + Math.random() * 6,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rSpeed: (Math.random() - 0.5) * 12,
+            gravity: 0.35 + Math.random() * 0.2,
+            opacity: 1
+        }));
+
+        const startTime = Date.now();
+        function frame() {
+            const elapsed = Date.now() - startTime;
+            if (elapsed > durationMs) {
+                canvas.remove();
+                return;
+            }
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.vx *= 0.98;
+                p.rotation += p.rSpeed;
+                if (elapsed > durationMs - 800) {
+                    p.opacity = Math.max(0, 1 - (elapsed - (durationMs - 800)) / 800);
+                }
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.opacity;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                ctx.restore();
+            });
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    };
 });

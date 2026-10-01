@@ -51,7 +51,7 @@
                             <td class="text-nowrap">{{ $message->created_at->format('d/m/Y H:i') }}</td>
                             <td><strong>{{ $message->user?->name ?? 'Tài khoản đã xóa' }}</strong><small class="d-block text-muted">{{ $message->user?->email }}</small></td>
                             <td><span class="badge {{ $message->is_admin ? 'text-bg-primary' : 'text-bg-light' }}">{{ $message->is_admin ? 'Nhân viên hỗ trợ' : 'Khách hàng' }}</span></td>
-                            <td style="min-width: 280px; white-space: pre-wrap;">{{ $message->message ?: 'Đã gửi tệp đính kèm' }}@if($message->attachment_url)<a href="{{ $message->attachment_url }}" target="_blank" class="d-block small text-primary"><i class="bi bi-paperclip me-1"></i>Xem tệp đính kèm</a>@endif</td>
+                            <td class="view-inline-1">{{ $message->message ?: 'Đã gửi tệp đính kèm' }}@if($message->attachment_url)<a href="{{ $message->attachment_url }}" target="_blank" class="d-block small text-primary"><i class="bi bi-paperclip me-1"></i>Xem tệp đính kèm</a>@endif</td>
                             <td><span class="badge {{ $message->is_read ? 'text-bg-success' : 'text-bg-warning' }}">{{ $message->is_read ? 'Đã đọc' : 'Chưa đọc' }}</span></td>
                         </tr>
                     @empty

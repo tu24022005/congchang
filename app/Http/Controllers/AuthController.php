@@ -153,6 +153,12 @@ class AuthController extends Controller
                 return redirect()->route('verification.notice');
             }
 
+            $intendedPath = parse_url((string) $request->session()->get('url.intended'), PHP_URL_PATH);
+            if (is_string($intendedPath) && str_starts_with($intendedPath, '/chat/')) {
+                $request->session()->forget('url.intended');
+                return redirect()->route('welcome');
+            }
+
             $roleHome = [
                 'admin' => 'admin.dashboard',
                 'manager' => 'admin.dashboard',

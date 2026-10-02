@@ -2,6 +2,10 @@
 @section('title', 'BeatyCare 🌸 - Mỹ phẩm & Chăm sóc sắc đẹp chính hãng Aloha Beauty')
 @section('canonical', route('welcome'))
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset_v('css/views/welcome-blade-php.css') }}">
+@endpush
+
 @section('structured_data')
 @php
     $siteSchema = [

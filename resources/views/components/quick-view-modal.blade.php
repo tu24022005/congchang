@@ -30,6 +30,8 @@
                                     <!-- Thumbs injected by JS -->
                                 </div>
                             </div>
+
+                            <link rel="stylesheet" href="{{ asset_v('css/views/components-quick-view-modal-blade-php.css') }}">
                         </div>
 
                         <!-- CỘT CHI TIẾT SẢN PHẨM -->

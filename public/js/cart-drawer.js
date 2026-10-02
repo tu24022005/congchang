@@ -243,6 +243,17 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentQvProduct = null;
     let selectedQvVariation = null;
 
+    qvModalEl?.querySelector('[data-bs-dismiss="modal"]')?.addEventListener('click', function (event) {
+        event.preventDefault();
+        qvModalInstance?.hide();
+    });
+
+    qvModalEl?.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            qvModalInstance?.hide();
+        }
+    });
+
     window.openQuickView = function (slug) {
         if (!qvModalInstance) return;
         qvModalInstance.show();

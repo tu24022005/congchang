@@ -3,6 +3,10 @@
 @section('meta_description', 'Khám phá câu chuyện thương hiệu Aloha Beauty (BeatyCare). Sứ mệnh tôn vinh vẻ đẹp tự nhiên, cam kết 100% mỹ phẩm chính hãng, đền bù 200% nếu phát hiện hàng giả.')
 @section('canonical', route('pages.about'))
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset_v('css/views/pages-about-blade-php.css') }}">
+@endpush
+
 @section('content')
 <div class="container py-5">
     <!-- HERO HEADER -->
@@ -11,7 +15,7 @@
             <i class="bi bi-flower1 me-1"></i> Câu chuyện thương hiệu Aloha Beauty
         </span>
         <h1 class="display-5 fw-bold text-dark mb-3">Tôn vinh vẻ đẹp tự nhiên & rạng ngời</h1>
-        <p class="lead text-muted mx-auto view-inline-1">
+        <p class="lead text-muted mx-auto about-intro">
             BeatyCare ra đời với khát khao mang đến giải pháp chăm sóc làn da và sắc đẹp an toàn, minh bạch và dịu lành nhất cho phụ nữ Việt Nam.
         </p>
     </div>
@@ -51,7 +55,7 @@
     <!-- SỨ MỆNH & GIÁ TRỊ CỐT LÕI -->
     <div class="row g-4 align-items-center mb-5 reveal-up">
         <div class="col-lg-6">
-            <div class="p-4 p-md-5 rounded-4 shadow-sm view-inline-2">
+            <div class="p-4 p-md-5 rounded-4 shadow-sm about-mission-card">
                 <span class="badge bg-danger rounded-pill px-3 py-1 mb-3">Sứ mệnh của chúng tôi</span>
                 <h2 class="fw-bold mb-3">Vì làn da khỏe mạnh từ gốc</h2>
                 <p class="text-secondary lh-lg mb-3">
@@ -98,7 +102,7 @@
     </div>
 
     <!-- CTA BẮT ĐẦU TRẢI NGHIỆM -->
-    <div class="text-center p-5 rounded-4 shadow-sm reveal-up view-inline-3">
+    <div class="text-center p-5 rounded-4 shadow-sm reveal-up about-cta">
         <h3 class="fw-bold text-dark mb-2">Sẵn sàng nâng niu làn da của bạn hôm nay?</h3>
         <p class="text-muted mb-4">Khám phá hàng ngàn ưu đãi flash sale và quà tặng độc quyền tại BeatyCare.</p>
         <div class="d-flex justify-content-center gap-3">

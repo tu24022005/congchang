@@ -43,22 +43,9 @@
                     </div>
                 @endif
 
-                <form action="{{ route('password.update') }}" method="POST">
+                <form action="{{ route('password.update') }}" method="POST" autocomplete="off">
                     @csrf
                     @method('PUT')
-
-                    <!-- MẬT KHẨU HIỆN TẠI -->
-                    <div class="mb-3">
-                        @if (!$authenticatedWithGoogle)
-                            <label for="current_password" class="form-label fw-semibold">Mật khẩu hiện tại <span class="text-danger">*</span></label>
-                            <input id="current_password" type="password" name="current_password" class="form-control rounded-3" required autocomplete="current-password" placeholder="Nhập mật khẩu hiện tại...">
-                            @error('current_password')<div class="field-error mt-1">{{ $message }}</div>@enderror
-                        @else
-                            <div class="alert alert-info border-0 rounded-4 mb-0 bg-info-subtle text-info-emphasis">
-                                <i class="bi bi-google me-2"></i>Tài khoản đăng nhập qua Google đã được xác thực danh tính. Bạn không cần nhập mật khẩu cũ.
-                            </div>
-                        @endif
-                    </div>
 
                     <!-- MẬT KHẨU MỚI VÀ XÁC NHẬN -->
                     <div class="row g-3">
@@ -80,7 +67,7 @@
                     <!-- KHỐI XÁC THỰC MÃ OTP QUA EMAIL -->
                     <div class="p-3 bg-light rounded-4 border mt-4 mb-4">
                         <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-2">
-                            <label for="otp" class="form-label fw-bold text-dark mb-0">
+                            <label for="verification_code" class="form-label fw-bold text-dark mb-0">
                                 <i class="bi bi-shield-lock-fill me-1 text-primary"></i>Mã xác thực OTP qua Email <span class="text-danger">*</span>
                             </label>
                             <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 text-nowrap">
@@ -95,7 +82,7 @@
                             <div class="col-sm-7 col-md-8">
                                 <div class="input-group">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-key"></i></span>
-                                    <input id="otp" type="text" name="otp" class="form-control border-start-0 font-monospace fs-5 text-center fw-bold letter-spacing-2" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autocomplete="one-time-code" value="{{ old('otp') }}">
+                                    <input id="verification_code" type="text" name="verification_code" class="form-control border-start-0 font-monospace fs-5 text-center fw-bold letter-spacing-2" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="" readonly>
                                 </div>
                             </div>
                             <div class="col-sm-5 col-md-4">
@@ -105,7 +92,7 @@
                                 </button>
                             </div>
                         </div>
-                        @error('otp')<div class="field-error mt-2">{{ $message }}</div>@enderror
+                        @error('verification_code')<div class="field-error mt-2">{{ $message }}</div>@enderror
 
                         <!-- Banner thông báo kết quả gửi OTP -->
                         <div id="otpStatusAlert" class="alert d-none mt-3 mb-0 rounded-3 py-2 px-3 small border-0"></div>

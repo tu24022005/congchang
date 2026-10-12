@@ -1,4 +1,4 @@
-/* admin/staff/index.blade.php - ki?u d?ng m?n h?nh */
+/* Trang admin/staff: khung tiêu đề, thẻ vai trò và bảng nhân viên. */
 .staff-page-header {
         background: linear-gradient(135deg, #f8fbfb 0%, #eef6f5 100%);
         border: 1px solid #e1eceb;
@@ -73,6 +73,7 @@
         overflow: hidden;
     }
 
+    /* Ma trận phân quyền: tiêu đề cột và nút bật/tắt quyền. */
     .matrix-table thead th {
         background-color: #f8fafc;
         font-size: 0.8rem;
@@ -87,7 +88,30 @@
         vertical-align: middle;
         font-size: 0.88rem;
     }
+    .permission-toggle {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #198754;
+        font-size: 1.15rem;
+        line-height: 1;
+        transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .permission-toggle:not([aria-pressed="true"]) {
+        color: #7b8085;
+    }
+    .permission-toggle:hover,
+    .permission-toggle:focus-visible {
+        transform: scale(1.15);
+        opacity: 0.8;
+        outline: 2px solid rgba(17, 124, 131, 0.25);
+        outline-offset: 2px;
+    }
 
+    /* Bảng danh sách nhân viên và các nút thao tác. */
     .staff-table thead th {
         background-color: #f7faf9;
         font-size: 0.8rem;
@@ -131,12 +155,13 @@
     }
 
 
-/* admin/staff/index.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
-.view-inline-1 { width: 35%; }
-.view-inline-2 { width: 16%; }
-.view-inline-3 { width: 100%; height: 100%; object-fit: cover; }
-.view-inline-4 { font-size: 0.72rem; }
-.view-inline-5 { max-width: 250px; }
-.view-inline-6 { width: 28px; height: 28px; }
-.view-inline-7 { width: 32px; height: 32px; }
-.view-inline-8 { min-width: 210px; }
+/* Kích thước các phần tử nhỏ trong bảng nhân viên. */
+.matrix-module-column { width: 35%; }
+.matrix-role-column { width: 16%; }
+.staff-avatar-image { width: 100%; height: 100%; object-fit: cover; }
+.staff-self-badge,
+.staff-validation-error { font-size: 0.72rem; }
+.staff-role-form { max-width: 250px; }
+.staff-role-save { width: 28px; height: 28px; }
+.staff-actions-toggle { width: 32px; height: 32px; }
+.staff-actions-menu { min-width: 210px; }

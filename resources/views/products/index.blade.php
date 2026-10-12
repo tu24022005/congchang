@@ -1,6 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Tất cả sản phẩm - BeatyCare 🌸')
 @section('canonical', route('products.index'))
+@push('styles')
+<link rel="stylesheet" href="{{ asset_v('css/views/products-grid-blade-php.css') }}">
+@endpush
 @if(request()->filled('search') || request()->has('page'))
     @push('head')
         <meta name="robots" content="noindex,follow">

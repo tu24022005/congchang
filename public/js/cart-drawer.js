@@ -8,6 +8,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const drawerInstance = drawerElement && window.bootstrap?.Offcanvas ? bootstrap.Offcanvas.getOrCreateInstance(drawerElement) : null;
     const freeshipThreshold = Number(drawerElement?.dataset.freeshipThreshold || 500000);
 
+    // Tránh các nút nổi che footer của giỏ hàng khi drawer đang mở.
+    function setFloatingWidgetsVisibility(isCartOpen) {
+        const floatingWidgets = document.querySelectorAll('[data-product-advisor], #chat-widget-button, .storefront-admin-chat-dock');
+        floatingWidgets.forEach(widget => {
+            widget.classList.toggle('cart-drawer-widget-hidden', isCartOpen);
+            widget.setAttribute('aria-hidden', isCartOpen ? 'true' : 'false');
+        });
+    }
+
+    if (drawerElement) {
+        drawerElement.addEventListener('show.bs.offcanvas', () => setFloatingWidgetsVisibility(true));
+        drawerElement.addEventListener('hidden.bs.offcanvas', () => setFloatingWidgetsVisibility(false));
+        const drawerObserver = new MutationObserver(() => {
+            setFloatingWidgetsVisibility(drawerElement.classList.contains('show'));
+        });
+        drawerObserver.observe(drawerElement, { attributes: true, attributeFilter: ['class'] });
+        setFloatingWidgetsVisibility(drawerElement.classList.contains('show'));
+    }
+
     // Format currency VND
     function formatVND(amount) {
         return new Intl.NumberFormat('vi-VN').format(Math.round(amount)) + ' ₫';
@@ -72,10 +91,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (items.length === 0) {
             itemsList.innerHTML = `
-                <div class="text-center py-5" id="drawer-empty-msg">
-                    <i class="bi bi-cart-x text-muted display-4"></i>
-                    <p class="text-muted mt-3 mb-3">Giỏ hàng của bạn đang trống</p>
-                    <a href="/products" class="btn btn-sm btn-outline-danger rounded-pill px-4" data-bs-dismiss="offcanvas">
+                <div class="mini-cart-empty text-center" id="drawer-empty-msg">
+                    <div class="mini-cart-empty-icon"><i class="bi bi-bag-x"></i></div>
+                    <h6>Giỏ hàng đang trống</h6>
+                    <p>Thêm một sản phẩm yêu thích để bắt đầu mua sắm nhé.</p>
+                    <a href="/products" class="mini-cart-empty-btn" data-bs-dismiss="offcanvas">
                         Khám phá sản phẩm
                     </a>
                 </div>
@@ -89,17 +109,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const priceFormatted = formatVND(item.price);
             const varLabel = item.variation ? `<div class="text-muted" style="font-size: 0.75rem;">Phân loại: ${escapeHtml(item.variation)}</div>` : '';
             html += `
-                <div class="drawer-item card border-0 shadow-sm p-2 rounded-3" data-cart-key="${escapeHtml(key)}">
+                <div class="drawer-item" data-cart-key="${escapeHtml(key)}">
                     <div class="d-flex align-items-center gap-3">
                         <img src="${imgSrc}" class="rounded-3 object-fit-cover flex-shrink-0" width="64" height="64" alt="${escapeHtml(item.name)}" onerror="this.onerror=null;this.src='/images/placeholder.svg';">
                         <div class="flex-grow-1 min-w-0">
                             <div class="fw-semibold text-truncate text-dark small mb-1" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
-                            ${varLabel}
+                            ${varLabel.replace('text-muted', 'drawer-item-variation')}
                             <div class="text-danger fw-bold small mt-1">${priceFormatted}</div>
                             <div class="d-flex align-items-center justify-content-between mt-2">
                                 <div class="drawer-qty-picker d-inline-flex align-items-center border rounded-2 bg-light">
                                     <button type="button" class="btn btn-sm btn-link text-dark p-0 px-2 text-decoration-none" onclick="window.updateDrawerCartItem('${escapeHtml(key)}', -1)">−</button>
-                                    <span class="px-2 small fw-bold drawer-item-qty" style="min-width: 24px; text-align: center;">${item.quantity}</span>
+                                    <span class="drawer-item-qty">${item.quantity}</span>
                                     <button type="button" class="btn btn-sm btn-link text-dark p-0 px-2 text-decoration-none" onclick="window.updateDrawerCartItem('${escapeHtml(key)}', 1)">+</button>
                                 </div>
                                 <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="window.removeDrawerCartItem('${escapeHtml(key)}')" title="Xóa khỏi giỏ">

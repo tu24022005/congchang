@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentSlug = document.getElementById('recently-viewed-section')?.dataset.currentSlug || null;
     const section = document.getElementById('recently-viewed-section');
     const track = document.getElementById('recently-viewed-track');
+    const productsUrl = section?.dataset.productsUrl || '/products';
+    const placeholderImage = section?.dataset.placeholderImage || '/images/placeholder.svg';
 
     function getRecentlyViewed() {
         try {
@@ -31,8 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
             col.style.scrollSnapAlign = 'start';
             col.innerHTML = `
                 <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden text-center p-2">
-                    <a href="/products/${encodeURIComponent(item.slug)}" class="text-decoration-none text-dark d-block">
-                        <img src="${item.image || '/images/placeholder.svg'}" class="w-100 object-fit-cover rounded-2 mb-2" style="aspect-ratio: 1/1;" alt="${item.name || 'Sản phẩm'}" onerror="this.onerror=null;this.src='/images/placeholder.svg';">
+                    <a href="${productsUrl}/${encodeURIComponent(item.slug)}" class="text-decoration-none text-dark d-block">
+                        <img src="${item.image || placeholderImage}" class="w-100 object-fit-cover rounded-2 mb-2" style="aspect-ratio: 1/1;" alt="${item.name || 'Sản phẩm'}" onerror="this.onerror=null;this.src='${placeholderImage}';">
                         <div class="small fw-bold text-truncate mb-1" title="${item.name || ''}">${item.name || ''}</div>
                         <div class="text-danger small fw-semibold">${item.price || ''}</div>
                     </a>

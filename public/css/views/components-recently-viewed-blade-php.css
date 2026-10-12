@@ -1,3 +1,59 @@
 
-/* components/recently-viewed.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
-.view-inline-1 { scroll-snap-type: x mandatory; }
+/* components/recently-viewed.blade.php - kiểu dáng nổi bật chuẩn hóa */
+
+#recently-viewed-section {
+    width: 100%;
+    margin-top: 2.25rem !important;
+    margin-bottom: 1rem !important;
+    padding: 1.25rem 1.4rem 1rem;
+    border: 1px solid #f0e5e9;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .72);
+    box-shadow: 0 8px 24px rgba(56, 38, 45, .05);
+}
+#recently-viewed-track {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    gap: 1rem;
+    margin: 0;
+    padding: 0 0 .5rem;
+    overflow: visible !important;
+}
+#recently-viewed-track > div {
+    width: auto !important;
+    min-width: 0;
+    padding: 0;
+}
+#recently-viewed-track .card {
+    height: 100%;
+    padding: .65rem !important;
+    border: 1px solid #f0e5e9 !important;
+    background: #fff;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+#recently-viewed-track .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(56, 38, 45, .1) !important;
+}
+#recently-viewed-track img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover;
+    background: #f8f3f4;
+}
+#recently-viewed-track .small {
+    display: block;
+    font-size: .78rem !important;
+}
+body.dark-mode #recently-viewed-section { background: rgba(30, 41, 59, .8); border-color: #334155; }
+body.dark-mode #recently-viewed-track .card { background: #1e293b; border-color: #334155 !important; }
+@media (max-width: 575.98px) {
+    #recently-viewed-section { padding: 1rem .85rem .75rem; }
+    #recently-viewed-track { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+}
+@media (min-width: 576px) and (max-width: 991.98px) {
+    #recently-viewed-track { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

@@ -3,10 +3,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const btnSendOtp = document.getElementById('btnSendOtp');
         const btnSendOtpText = document.getElementById('btnSendOtpText');
         const btnSendOtpIcon = document.getElementById('btnSendOtpIcon');
-        const otpInput = document.getElementById('otp');
+        const otpInput = document.getElementById('verification_code');
         const statusAlert = document.getElementById('otpStatusAlert');
 
         let countdownTimer = null;
+
+        // Không giữ lại mã OTP cũ khi trình duyệt khôi phục form hoặc quay lại trang.
+        if (otpInput) {
+            otpInput.value = '';
+            otpInput.addEventListener('focus', function () {
+                otpInput.removeAttribute('readonly');
+            }, { once: true });
+            window.addEventListener('pageshow', function () {
+                otpInput.value = '';
+            });
+        }
 
         if (btnSendOtp) {
             btnSendOtp.addEventListener('click', function () {

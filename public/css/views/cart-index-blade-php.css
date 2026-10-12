@@ -9,3 +9,43 @@
 .view-inline-1 { width: 68px; height: 68px; }
 .view-inline-2 { width: 48px; }
 .view-inline-3 { top: 90px; }
+
+/* Dùng khoảng trống màn hình tốt hơn ở trang giỏ hàng desktop. */
+.cart-shopee-page {
+    width: min(1320px, calc(100% - 2rem));
+    max-width: none;
+}
+.cart-shopee-page > .row {
+    --bs-gutter-x: 1.5rem;
+}
+.cart-shopee-page .cart-items-card {
+    min-height: 310px;
+}
+.cart-shopee-page .cart-shopee-table {
+    min-width: 760px;
+}
+.cart-shopee-page .cart-summary-card,
+.cart-shopee-page .position-sticky {
+    top: 1.25rem;
+}
+.cart-shopee-page .position-sticky {
+    max-height: none;
+    overflow: visible;
+}
+
+@media (min-width: 1200px) {
+    .cart-shopee-page > .row > .col-lg-8 {
+        flex: 0 0 70%;
+        max-width: 70%;
+    }
+    .cart-shopee-page > .row > .col-lg-4 {
+        flex: 0 0 30%;
+        max-width: 30%;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .cart-shopee-page {
+        width: min(100% - 1.5rem, 760px);
+    }
+}

@@ -9,9 +9,28 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use App\Services\ActivityLogService;
+use App\Models\RolePermission;
 
 class StaffController extends Controller
 {
+    private const ROLES = ['admin', 'manager', 'warehouse_staff', 'customer_service'];
+
+    private const PERMISSION_MATRIX = [
+        ['key' => 'dashboard', 'label' => 'Dashboard & Thống kê kinh doanh', 'icon' => 'bi-speedometer2', 'color' => 'primary'],
+        ['key' => 'reports', 'label' => 'Báo cáo Doanh thu & Xuất CSV', 'icon' => 'bi-bar-chart-fill', 'color' => 'success'],
+        ['key' => 'products.view', 'label' => 'Xem Sản phẩm & Danh mục', 'icon' => 'bi-boxes', 'color' => 'info'],
+        ['key' => 'products.create_delete', 'label' => 'Tạo mới & Xóa Sản phẩm', 'icon' => 'bi-plus-square-fill', 'color' => 'danger'],
+        ['key' => 'products.edit', 'label' => 'Chỉnh sửa Thông tin Sản phẩm', 'icon' => 'bi-pencil-square', 'color' => 'warning'],
+        ['key' => 'inventory.edit', 'label' => 'Điều chỉnh Tồn kho & Biến thể', 'icon' => 'bi-box-seam', 'color' => 'warning'],
+        ['key' => 'inventory.logs', 'label' => 'Nhật ký Xuất / Nhập kho', 'icon' => 'bi-journal-text', 'color' => 'secondary'],
+        ['key' => 'orders.manage', 'label' => 'Xem & Xử lý Trạng thái Đơn hàng', 'icon' => 'bi-truck', 'color' => 'primary'],
+        ['key' => 'refunds.manage', 'label' => 'Duyệt & Xử lý Yêu cầu Hoàn tiền', 'icon' => 'bi-arrow-counterclockwise', 'color' => 'danger'],
+        ['key' => 'chat', 'label' => 'Live Chat Hỗ trợ Khách hàng', 'icon' => 'bi-chat-dots-fill', 'color' => 'primary'],
+        ['key' => 'members.manage', 'label' => 'Quản lý Thành viên & Khách hàng', 'icon' => 'bi-people', 'color' => 'secondary'],
+        ['key' => 'marketing.manage', 'label' => 'Mã giảm giá (Vouchers) & Banners', 'icon' => 'bi-ticket-perforated', 'color' => 'danger'],
+        ['key' => 'staff.manage', 'label' => 'Phân quyền & Quản lý Nhân sự', 'icon' => 'bi-shield-lock-fill', 'color' => 'dark'],
+    ];
+
     public function index(Request $request)
     {
         $filters = $request->validate([
@@ -57,7 +76,38 @@ class StaffController extends Controller
                 'locked' => $lockedCount,
                 'active' => $activeCount,
             ],
+            'permissionMatrix' => self::PERMISSION_MATRIX,
+            'rolePermissions' => RolePermission::query()
+                ->whereIn('role', self::ROLES)
+                ->get()
+                ->groupBy('role')
+                ->map(fn ($permissions) => $permissions->pluck('allowed', 'permission')),
         ]);
+    }
+
+    public function updatePermissions(Request $request)
+    {
+        $validated = $request->validate([
+            'permissions' => ['required', 'array'],
+            'permissions.*' => ['array'],
+            'permissions.*.*' => ['boolean'],
+        ]);
+
+        foreach (self::ROLES as $role) {
+            foreach (self::PERMISSION_MATRIX as $permission) {
+                RolePermission::updateOrCreate(
+                    ['role' => $role, 'permission' => $permission['key']],
+                    ['allowed' => (bool) ($validated['permissions'][$role][$permission['key']] ?? false)]
+                );
+            }
+        }
+
+        ActivityLogService::record(
+            'staff.permissions_updated',
+            'Đã cập nhật ma trận quyền truy cập theo vai trò nhân viên.'
+        );
+
+        return response()->json(['message' => 'Đã lưu ma trận phân quyền thành công.']);
     }
 
     public function store(Request $request)

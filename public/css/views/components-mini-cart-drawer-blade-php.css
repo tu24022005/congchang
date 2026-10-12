@@ -5,3 +5,64 @@
 .view-inline-3 { overflow-y: auto; }
 .view-inline-4 { font-size: 0.75rem; }
 .view-inline-5 { min-width: 24px; text-align: center; }
+
+.mini-cart-drawer { width: min(92vw, 430px); background: #fffafc; }
+.mini-cart-header { padding: 1rem 1.15rem .85rem; background: #fff; border-bottom: 1px solid #f3e5ea; }
+.mini-cart-header .offcanvas-title { color: #29313d; font-size: 1.05rem; }
+.mini-cart-header .offcanvas-title i { color: #ef6680 !important; font-size: 1.25rem !important; }
+#drawer-header-count { min-width: 1.4rem; height: 1.4rem; display: inline-flex; align-items: center; justify-content: center; background: #ef6680 !important; font-size: .7rem; }
+.mini-cart-freeship { padding: .8rem 1.15rem .9rem; background: linear-gradient(135deg, #fff7ed, #fff1f5); border-bottom: 1px solid #f6e1e7; }
+#drawer-freeship-text { gap: .75rem; color: #68717d; font-size: .74rem; line-height: 1.35; }
+#drawer-freeship-text > span:first-child { min-width: 0; }
+.mini-cart-progress { height: 6px; margin-top: .55rem; border-radius: 999px; background: #f1dfe5; }
+.mini-cart-progress .progress-bar { border-radius: inherit; }
+.mini-cart-body { overflow-y: auto; padding: .9rem 1rem 1rem; }
+#drawer-items-list { gap: .65rem !important; }
+.drawer-item { padding: .65rem; border: 1px solid #f0e5e9; border-radius: 14px; background: #fff; box-shadow: 0 4px 14px rgba(73, 42, 52, .06); }
+.drawer-item > .d-flex { gap: .7rem !important; }
+.drawer-item img { width: 62px; height: 62px; border-radius: 11px !important; background: #f7f3f4; }
+.drawer-item .text-dark { color: #303846 !important; }
+.drawer-item-variation { color: #8a929d; font-size: .7rem; }
+.drawer-item .text-danger { color: #e65370 !important; }
+.drawer-qty-picker { border-color: #eadde2 !important; background: #fff8fa !important; }
+.drawer-qty-picker button { color: #e65370 !important; }
+.drawer-item-qty { min-width: 26px; text-align: center; font-size: .78rem; font-weight: 700; }
+.mini-cart-empty { padding: 3.5rem 1.25rem; color: #7c8490; }
+.mini-cart-empty-icon { width: 70px; height: 70px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff0f3; color: #ee7188; font-size: 2rem; }
+.mini-cart-empty h6 { margin: 1rem 0 .35rem; color: #3b4350; font-weight: 700; }
+.mini-cart-empty p { margin: 0 auto 1.2rem; max-width: 220px; font-size: .8rem; line-height: 1.5; }
+.mini-cart-empty-btn { display: inline-flex; padding: .48rem 1.1rem; border: 1px solid #ee7188; border-radius: 999px; color: #df5d76; font-size: .78rem; text-decoration: none; }
+.mini-cart-empty-btn:hover { background: #ee7188; color: #fff; }
+.mini-cart-footer { padding: .85rem 1rem 1rem; background: #fff; border-top: 1px solid #f0e5e9; box-shadow: 0 -8px 20px rgba(73, 42, 52, .05); }
+.mini-cart-footer > .d-flex { margin-bottom: .7rem !important; }
+.mini-cart-footer .text-muted { font-size: .76rem; }
+.mini-cart-footer #drawer-total-price { color: #df4f6c !important; font-size: 1.1rem !important; }
+.mini-cart-footer .btn-success { border: 0; background: linear-gradient(135deg, #ef6680, #db4f6b); padding: .65rem 1rem !important; font-size: .8rem; }
+.mini-cart-footer .btn-success:hover { background: linear-gradient(135deg, #df5873, #cb435e); }
+.mini-cart-footer .btn-outline-secondary { border-color: #e3d9dd; color: #68717d; padding: .48rem 1rem !important; }
+.dark-mode .mini-cart-drawer, .dark-mode .mini-cart-footer, .dark-mode .mini-cart-header { background: #1f202c; }
+.dark-mode .mini-cart-header { border-color: #353646; }
+.dark-mode .mini-cart-header .offcanvas-title, .dark-mode .drawer-item .text-dark, .dark-mode .mini-cart-empty h6 { color: #f1f2f5 !important; }
+.dark-mode .mini-cart-freeship { background: #2b2530; border-color: #403642; }
+.dark-mode .drawer-item { background: #292a39; border-color: #3d3e50; }
+.dark-mode .mini-cart-footer { border-color: #353646; }
+.cart-drawer-widget-hidden {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(10px) !important;
+}
+/* Bootstrap gắn .show sau khi mở offcanvas; CSS này vẫn hoạt động nếu JS tải chậm. */
+body:has(#cartOffcanvasDrawer.show) [data-product-advisor],
+body:has(#cartOffcanvasDrawer.show) #chat-widget-button,
+body:has(#cartOffcanvasDrawer.show) .storefront-admin-chat-dock {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(10px) !important;
+}
+@media (max-width: 575.98px) {
+    .mini-cart-drawer { width: min(94vw, 390px); }
+    .mini-cart-body { padding-inline: .75rem; }
+}

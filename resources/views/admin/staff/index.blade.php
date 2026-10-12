@@ -157,105 +157,113 @@
                     </h5>
                     <small class="text-muted">Chi tiết các tính năng mà từng vai trò được phép hoặc không được phép truy cập.</small>
                 </div>
-                <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#permissionsMatrixCollapse"></button>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small text-success d-none" data-permissions-status></span>
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-save-permissions>
+                        <i class="bi bi-save2 me-1"></i>Lưu thay đổi
+                    </button>
+                    <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#permissionsMatrixCollapse" aria-label="Đóng ma trận"></button>
+                </div>
             </div>
             <div class="table-responsive">
-                <table class="table matrix-table table-hover align-middle mb-0 text-center">
+                <table class="table matrix-table table-hover align-middle mb-0 text-center"
+                    data-update-url="{{ route('admin.staff.permissions.update') }}"
+                    data-permissions='@json($rolePermissions)'>
                     <thead>
                         <tr>
-                            <th class="text-start ps-4 view-inline-1">Chức năng / Module hệ thống</th>
-                            <th class="view-inline-2">Quản trị viên (Admin)</th>
-                            <th class="view-inline-2">Quản lý (Manager)</th>
-                            <th class="view-inline-2">Nhân viên kho</th>
-                            <th class="view-inline-2">Nhân viên CSKH</th>
+                            <th class="text-start ps-4 matrix-module-column">Chức năng / Module hệ thống</th>
+                            <th class="matrix-role-column" data-role="admin">Quản trị viên (Admin)</th>
+                            <th class="matrix-role-column" data-role="manager">Quản lý (Manager)</th>
+                            <th class="matrix-role-column" data-role="warehouse_staff">Nhân viên kho</th>
+                            <th class="matrix-role-column" data-role="customer_service">Nhân viên CSKH</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr data-permission="dashboard">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard & Thống kê kinh doanh</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="reports">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-bar-chart-fill me-2 text-success"></i>Báo cáo Doanh thu & Xuất CSV</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="products.view">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-boxes me-2 text-info"></i>Xem Sản phẩm & Danh mục</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="products.create_delete">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-plus-square-fill me-2 text-danger"></i>Tạo mới & Xóa Sản phẩm</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="products.edit">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-pencil-square me-2 text-warning"></i>Chỉnh sửa Thông tin Sản phẩm</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="inventory.edit">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-box-seam me-2 text-warning"></i>Điều chỉnh Tồn kho & Biến thể</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="inventory.logs">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-journal-text me-2 text-secondary"></i>Nhật ký Xuất / Nhập kho</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="orders.manage">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-truck me-2 text-primary"></i>Xem & Xử lý Trạng thái Đơn hàng</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="refunds.manage">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-arrow-counterclockwise me-2 text-danger"></i>Duyệt & Xử lý Yêu cầu Hoàn tiền</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="chat">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-chat-dots-fill me-2 text-primary"></i>Live Chat Hỗ trợ Khách hàng</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="members.manage">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-people me-2 text-secondary"></i>Quản lý Thành viên & Khách hàng</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="marketing.manage">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-ticket-perforated me-2 text-danger"></i>Mã giảm giá (Vouchers) & Banners</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
                         </tr>
-                        <tr>
+                        <tr data-permission="staff.manage">
                             <td class="text-start ps-4 fw-semibold text-dark"><i class="bi bi-shield-lock-fill me-2 text-dark"></i>Phân quyền & Quản lý Nhân sự</td>
                             <td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>
                             <td><i class="bi bi-dash-circle text-muted fs-5"></i></td>
@@ -368,7 +376,7 @@
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="user-avatar-circle shadow-sm">
                                         @if($member->avatar_url)
-                                            <img src="{{ $member->avatar_url }}" alt="{{ $member->name }}" class="view-inline-3">
+                                            <img src="{{ $member->avatar_url }}" alt="{{ $member->name }}" class="staff-avatar-image">
                                         @else
                                             {{ $member->initials }}
                                         @endif
@@ -377,7 +385,7 @@
                                         <div class="fw-bold text-dark d-flex align-items-center gap-2">
                                             {{ $member->name }}
                                             @if($isSelf)
-                                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-0 small view-inline-4">Bạn</span>
+                                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-0 small staff-self-badge">Bạn</span>
                                             @endif
                                         </div>
                                         <small class="text-muted">Mã NV: #{{ $member->id }}</small>
@@ -395,7 +403,7 @@
 
                             <!-- Vai trò phân quyền (đổi nhanh hoặc hiển thị badge) -->
                             <td>
-                                <form action="{{ route('admin.staff.update', $member) }}" method="POST" class="d-flex align-items-center gap-2 view-inline-5">
+                                <form action="{{ route('admin.staff.update', $member) }}" method="POST" class="d-flex align-items-center gap-2 staff-role-form">
                                     @csrf
                                     @method('PATCH')
                                     <select name="role" class="form-select form-select-sm rounded-pill fw-semibold {{ $currentBadge['class'] }}" {{ $isSelf ? 'disabled' : '' }}>
@@ -405,7 +413,7 @@
                                         <option value="customer_service" @selected($member->role === 'customer_service')>💬 Nhân viên CSKH</option>
                                     </select>
                                     @if(!$isSelf)
-                                        <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle p-1" title="Lưu vai trò mới" class="view-inline-6">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle p-1 staff-role-save" title="Lưu vai trò mới">
                                             <i class="bi bi-check2"></i>
                                         </button>
                                     @endif
@@ -418,7 +426,7 @@
                                     <span class="badge bg-danger rounded-pill px-3 py-1">
                                         <i class="bi bi-lock-fill me-1"></i>Bị khóa
                                     </span>
-                                    <div class="small text-danger mt-1 view-inline-4">
+                                    <div class="small text-danger mt-1 staff-validation-error">
                                         {{ $member->login_locked_at?->format('d/m/Y H:i') }}
                                     </div>
                                 @else
@@ -443,10 +451,10 @@
 
                                     <!-- Menu thao tác 3 chấm gọn gàng -->
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-light border rounded-circle d-flex align-items-center justify-content-center text-secondary shadow-sm" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" class="view-inline-7" title="Thao tác khác">
+                                        <button class="btn btn-sm btn-light border rounded-circle d-flex align-items-center justify-content-center text-secondary shadow-sm staff-actions-toggle" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Thao tác khác">
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 py-2 mt-1 view-inline-8">
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 py-2 mt-1 staff-actions-menu">
                                             <li>
                                                 <button type="button" class="dropdown-item py-2 d-flex align-items-center text-dark" data-bs-toggle="modal" data-bs-target="#resetPasswordModal{{ $member->id }}">
                                                     <i class="bi bi-key-fill me-2 text-warning fs-6"></i>Đổi mật khẩu

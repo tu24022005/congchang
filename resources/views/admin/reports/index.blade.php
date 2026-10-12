@@ -2,6 +2,27 @@
 @section('title', 'Báo cáo & Thống kê - Aloha Beauty')
 
 @push('head')
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js"></script>
+    @php
+        $reportChartData = [
+            'monthly' => collect($yearlyMonthlyStats)->values()->map(fn ($stat) => [
+                'label' => $stat['month_label'],
+                'revenue' => $stat['revenue'],
+                'orders' => $stat['successful_orders'],
+            ])->values(),
+            'daily' => $dailyStats,
+            'payment' => [$successfulCodRevenue, $successfulPayosRevenue],
+            'status' => [$successfulOrders, $activeOrders, $cancelledOrders],
+            'cashFlow' => [$successfulRevenue, $cancelledRevenue, $grossOrderValue],
+            'categories' => $revenueByCategory->map(fn ($category) => [
+                'name' => $category->name,
+                'revenue' => (float) $category->total_revenue,
+            ])->values(),
+        ];
+    @endphp
+    <script>
+        window.reportChartData = {!! json_encode($reportChartData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};
+    </script>
     <script src="{{ asset_v('js/views/admin-reports-index-blade-php.js') }}" defer></script>
 @endpush
 

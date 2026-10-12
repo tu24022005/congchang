@@ -1,15 +1,16 @@
-﻿/* admin/reports/index.blade.php - h?nh vi m?n h?nh */
+﻿/* admin/reports/index.blade.php - hành vi màn hình */
 document.addEventListener('DOMContentLoaded', function () {
-    if (!window.ApexCharts) return;
+    if (!window.ApexCharts || !window.reportChartData) return;
 
-    const formatCurrency = value => new Intl.NumberFormat('vi-VN').format(value) + ' Ä‘';
+    const chartData = window.reportChartData;
+    const formatCurrency = value => new Intl.NumberFormat('vi-VN').format(value) + ' đ';
 
-    // 1. BIá»‚U Äá»’ 12 THÃNG NÄ‚M (DOANH THU & ÄÆ N HÃ€NG)
+    // 1. BIỂU ĐỒ 12 THÁNG NĂM (DOANH THU & ĐƠN HÀNG)
     const monthlyElement = document.getElementById('monthlyRevenueAndOrdersChart');
     if (monthlyElement) {
-        const monthlyCategories = [];
-        const monthlyRevenues = [];
-        const monthlyOrders = [];
+        const monthlyCategories = chartData.monthly.map(item => item.label);
+        const monthlyRevenues = chartData.monthly.map(item => item.revenue);
+        const monthlyOrders = chartData.monthly.map(item => item.orders);
 
         new ApexCharts(monthlyElement, {
             chart: {
@@ -20,12 +21,12 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             series: [
                 {
-                    name: 'Doanh thu (VNÄ)',
+                    name: 'Doanh thu (VNĐ)',
                     type: 'column',
                     data: monthlyRevenues
                 },
                 {
-                    name: 'Sá»‘ Ä‘Æ¡n thÃ nh cÃ´ng',
+                    name: 'Số đơn thành công',
                     type: 'line',
                     data: monthlyOrders
                 }
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             yaxis: [
                 {
-                    title: { text: 'Doanh thu (VNÄ)', style: { color: '#117c83' } },
+                    title: { text: 'Doanh thu (VNĐ)', style: { color: '#117c83' } },
                     labels: {
                         formatter: val => formatCurrency(val),
                         style: { colors: '#64748b' }
@@ -55,9 +56,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 {
                     opposite: true,
-                    title: { text: 'Sá»‘ Ä‘Æ¡n thÃ nh cÃ´ng', style: { color: '#ea580c' } },
+                    title: { text: 'Số đơn thành công', style: { color: '#ea580c' } },
                     labels: {
-                        formatter: val => Math.round(val) + ' Ä‘Æ¡n',
+                        formatter: val => Math.round(val) + ' đơn',
                         style: { colors: '#64748b' }
                     }
                 }
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 y: {
                     formatter: function (y, { seriesIndex }) {
                         if (seriesIndex === 0) return formatCurrency(y);
-                        return Math.round(y) + ' Ä‘Æ¡n hÃ ng';
+                        return Math.round(y) + ' đơn hàng';
                     }
                 }
             },
@@ -83,10 +84,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }).render();
     }
 
-    // 2. BIá»‚U Äá»’ BIáº¾N Äá»˜NG DOANH THU THEO NGÃ€Y TRONG THÃNG (Náº¾U ÄANG CHá»ŒN 1 THÃNG)
+    // 2. BIỂU ĐỒ BIẾN ĐỘNG DOANH THU THEO NGÀY TRONG THÁNG (NẾU ĐANG CHỌN 1 THÁNG)
     const dailyElement = document.getElementById('dailyRevenueChart');
     if (dailyElement) {
-        const dailyData = null;
+        const dailyData = chartData.daily;
         if (dailyData && dailyData.length > 0) {
             new ApexCharts(dailyElement, {
                 chart: {
@@ -96,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     fontFamily: 'DM Sans, sans-serif'
                 },
                 series: [{
-                    name: 'Doanh thu ngÃ y',
+                    name: 'Doanh thu ngày',
                     data: dailyData.map(d => d.revenue)
                 }],
                 xaxis: {
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 3. BIá»‚U Äá»’ PHÆ¯Æ NG THá»¨C THANH TOÃN (DONUT)
+    // 3. BIỂU ĐỒ PHƯƠNG THỨC THANH TOÁN (DONUT)
     const paymentElement = document.getElementById('paymentMethodChart');
     if (paymentElement) {
         new ApexCharts(paymentElement, {
@@ -135,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 height: 220,
                 fontFamily: 'DM Sans, sans-serif'
             },
-            series: [null, null],
-            labels: ['Tiá»n máº·t (COD)', 'Chuyá»ƒn khoáº£n (PayOS)'],
+            series: chartData.payment,
+            labels: ['Tiền mặt (COD)', 'Chuyển khoản (PayOS)'],
             colors: ['#16a34a', '#2563eb'],
             legend: { position: 'bottom' },
             dataLabels: { enabled: true },
@@ -146,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }).render();
     }
 
-    // 4. BIá»‚U Äá»’ PHÃ‚N Bá»” TRáº NG THÃI ÄÆ N HÃ€NG (DONUT)
+    // 4. BIỂU ĐỒ PHÂN BỔ TRẠNG THÁI ĐƠN HÀNG (DONUT)
     const statusElement = document.getElementById('orderStatusChart');
     if (statusElement) {
         new ApexCharts(statusElement, {
@@ -155,22 +156,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 height: 220,
                 fontFamily: 'DM Sans, sans-serif'
             },
-            series: [
-                null,
-                null,
-                null
-            ],
-            labels: ['ThÃ nh cÃ´ng', 'Äang xá»­ lÃ½', 'ÄÃ£ há»§y'],
+            series: chartData.status,
+            labels: ['Thành công', 'Đang xử lý', 'Đã hủy'],
             colors: ['#16a34a', '#ea580c', '#dc2626'],
             legend: { position: 'bottom' },
             dataLabels: { enabled: true },
             tooltip: {
-                y: { formatter: val => val + ' Ä‘Æ¡n hÃ ng' }
+                y: { formatter: val => val + ' đơn hàng' }
             }
         }).render();
     }
 
-    // 5. BIá»‚U Äá»’ CÃ‚N Äá»I DÃ’NG TIá»€N (BAR CHART)
+    // 5. BIỂU ĐỒ CÂN ĐỐI DÒNG TIỀN (BAR CHART)
     const cashFlowElement = document.getElementById('cashFlowBarChart');
     if (cashFlowElement) {
         new ApexCharts(cashFlowElement, {
@@ -181,11 +178,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 fontFamily: 'DM Sans, sans-serif'
             },
             series: [{
-                name: 'GiÃ¡ trá»‹',
-                data: [null, null, null]
+                name: 'Giá trị',
+                data: chartData.cashFlow
             }],
             xaxis: {
-                categories: ['Doanh thu thá»±c thu', 'Tá»•n tháº¥t Ä‘Æ¡n há»§y', 'Tá»•ng GMV Ä‘áº·t hÃ ng'],
+                categories: ['Doanh thu thực thu', 'Tổn thất đơn hủy', 'Tổng GMV đặt hàng'],
                 labels: { style: { colors: '#64748b' } }
             },
             yaxis: {
@@ -214,11 +211,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }).render();
     }
 
-    // 6. BIá»‚U Äá»’ DOANH THU THEO DANH Má»¤C (DONUT)
+    // 6. BIỂU ĐỒ DOANH THU THEO DANH MỤC (DONUT)
     const categoryElement = document.getElementById('categoryRevenueChart');
     if (categoryElement) {
-        const catNames = null;
-        const catRevenues = [];
+        const catNames = chartData.categories.map(item => item.name);
+        const catRevenues = chartData.categories.map(item => item.revenue);
 
         if (catNames.length > 0) {
             new ApexCharts(categoryElement, {
@@ -238,6 +235,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
-
-
 

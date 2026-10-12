@@ -162,7 +162,7 @@
                                 <div class="rc-points">{{ number_format($reward['points']) }} điểm</div>
                                 <div class="rc-label">{{ $reward['label'] }}</div>
                                 @if($canAfford)
-                                    <form action="{{ route('loyalty.redeem') }}" method="POST" class="view-inline-5">
+                                    <form action="{{ route('loyalty.redeem') }}" method="POST" class="loyalty-reward-form">
                                         @csrf
                                         <input type="hidden" name="points" value="{{ $reward['points'] }}">
                                         <button type="submit" class="rc-btn"
@@ -179,8 +179,8 @@
                             </div>
                         @endforeach
                     </div>
-                    <div class="mt-3 p-3 rounded-3 d-flex align-items-center gap-2 view-inline-6">
-                        <i class="bi bi-lightbulb-fill fs-5 view-inline-7"></i>
+                    <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-2 loyalty-voucher-note">
+                        <i class="bi bi-lightbulb-fill fs-5 loyalty-voucher-note-icon"></i>
                         <span>Voucher được tạo tự động và gửi vào kho voucher của bạn. Mỗi mã dùng được 1 lần cho đơn hàng bất kỳ.</span>
                     </div>
                 </div>

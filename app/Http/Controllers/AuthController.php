@@ -397,25 +397,16 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
-        $authenticatedWithGoogle = $request->session()->get('authenticated_with_google', false);
-
         $request->validate([
-            'current_password' => $authenticatedWithGoogle ? 'nullable' : 'required',
             'new_password' => 'required|min:8|confirmed',
-            'otp' => 'required|digits:6',
+            'verification_code' => 'required|digits:6',
         ], [
-            'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
             'new_password.required' => 'Vui lòng nhập mật khẩu mới.',
             'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
             'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
-            'otp.required' => 'Vui lòng nhập mã OTP đã nhận qua email.',
-            'otp.digits' => 'Mã xác thực OTP phải gồm 6 chữ số.',
+            'verification_code.required' => 'Vui lòng nhập mã OTP đã nhận qua email.',
+            'verification_code.digits' => 'Mã xác thực OTP phải gồm 6 chữ số.',
         ]);
-
-        // Kiểm tra mật khẩu cũ có đúng không
-        if (!$authenticatedWithGoogle && !Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không chính xác.'])->withInput();
-        }
 
         // Kiểm tra mã OTP
         $sessionOtp = session('change_password_otp');
@@ -429,7 +420,7 @@ class AuthController extends Controller
             return back()->withErrors(['otp' => 'Mã OTP đã hết hạn hoặc chưa được tạo. Vui lòng bấm "Gửi mã OTP" để nhận mã mới.'])->withInput();
         }
 
-        if ((string) $request->otp !== (string) $validOtp) {
+        if ((string) $request->verification_code !== (string) $validOtp) {
             return back()->withErrors(['otp' => 'Mã OTP không chính xác. Vui lòng kiểm tra lại email.'])->withInput();
         }
 

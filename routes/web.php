@@ -127,6 +127,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/customers/{user}/avatar', [\App\Http\Controllers\Admin\MemberController::class, 'updateAvatar'])->middleware('role:admin,manager')->name('customers.avatar');
     Route::delete('/customers/{user}', [\App\Http\Controllers\Admin\MemberController::class, 'destroy'])->middleware('role:admin,manager')->name('customers.destroy');
     Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->middleware('role:admin')->name('staff.index');
+    Route::put('/staff/permissions', [\App\Http\Controllers\Admin\StaffController::class, 'updatePermissions'])->middleware('role:admin')->name('staff.permissions.update');
     Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->middleware('role:admin')->name('staff.store');
     Route::match(['patch', 'put'], '/staff/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->middleware('role:admin')->name('staff.update');
     Route::patch('/staff/{user}/reset-password', [\App\Http\Controllers\Admin\StaffController::class, 'resetPassword'])->middleware('role:admin')->name('staff.reset-password');

@@ -288,10 +288,10 @@
         <div class="card product-card text-center h-100 shadow-sm">
             <div class="card-body p-4 d-flex flex-column">
                 
-                <div class="mb-3 shine-sweep rounded-3 position-relative overflow-hidden view-inline-2">
+                <div class="mb-3 shine-sweep rounded-3 position-relative overflow-hidden welcome-product-image-wrap">
                     <a href="{{ route('products.show', ['product' => $product->slug]) }}" class="d-block w-100 h-100">
                         @if($product->image)
-                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-100 h-100 object-fit-cover rounded product-list-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
+                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-100 h-100 object-fit-cover rounded welcome-product-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
                         @else
                             <div class="d-flex align-items-center justify-content-center w-100 h-100 rounded-3 bg-light product-icon-placeholder">
                                 <i class="bi bi-bag-heart text-primary fs-3"></i>

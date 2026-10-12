@@ -7,6 +7,22 @@
             .home-admin-chat-dock .home-chat-badge { position: absolute; top: -7px; left: -7px; min-width: 20px; padding: .2rem .35rem; color: #fff; background: #e63950; border: 2px solid #fff; border-radius: 999px; font-size: .65rem; text-align: center; }
 
 
-/* welcome.blade.php - ki?u d?ng n?i tuy?n ?? chu?n h?a */
-.view-inline-1 { object-fit: cover; }
-.view-inline-2 { aspect-ratio: 1 / 1; }
+/* welcome.blade.php */
+.welcome-product-image-wrap {
+    width: 100%;
+    height: 150px;
+    min-width: 0;
+    display: block;
+}
+.welcome-product-image-wrap > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.welcome-product-image-wrap .welcome-product-image {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
+}

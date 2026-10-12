@@ -9,7 +9,7 @@
         <div class="card product-card text-center h-100 shadow-sm border-0">
             <div class="card-body p-3 p-md-4 d-flex flex-column">
                 
-                <div class="mb-3 shine-sweep rounded-3 position-relative overflow-hidden view-inline-1">
+                <div class="mb-3 shine-sweep rounded-3 position-relative overflow-hidden product-grid-image-wrap">
                     <a href="{{ route('products.show', ['product' => $product->slug]) }}" class="d-block w-100 h-100">
                         @if($product->image)
                             <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-100 h-100 object-fit-cover rounded product-list-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/placeholder.svg') }}';">
@@ -41,9 +41,9 @@
                 </div>
                 
                 <div class="d-flex justify-content-center gap-1 flex-wrap mb-2">
-                    <span class="badge text-primary rounded-pill product-category-badge view-inline-2">{{ $product->category->name ?? 'Mỹ phẩm' }}</span>
+                    <span class="badge text-primary rounded-pill product-category-badge product-grid-badge">{{ $product->category->name ?? 'Mỹ phẩm' }}</span>
                     @if($product->brand)
-                        <span class="badge bg-light text-dark rounded-pill view-inline-2">{{ $product->brand->name }}</span>
+                        <span class="badge bg-light text-dark rounded-pill product-grid-badge">{{ $product->brand->name }}</span>
                     @endif
                 </div>
 
@@ -56,14 +56,14 @@
                     @auth
                         <form action="{{ route('wishlist.toggle', $product) }}" method="POST" class="wishlist-toggle-form flex-shrink-0">
                             @csrf
-                            <button type="submit" class="btn btn-sm wishlist-toggle-btn {{ ($wishlistProductIds ?? collect())->contains($product->id) ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle p-0 view-inline-3" title="{{ ($wishlistProductIds ?? collect())->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ ($wishlistProductIds ?? collect())->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}">
+                            <button type="submit" class="btn btn-sm wishlist-toggle-btn {{ ($wishlistProductIds ?? collect())->contains($product->id) ? 'btn-danger' : 'btn-outline-danger' }} rounded-circle p-0 product-grid-wishlist" title="{{ ($wishlistProductIds ?? collect())->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}" aria-label="{{ ($wishlistProductIds ?? collect())->contains($product->id) ? 'Bỏ khỏi yêu thích' : 'Lưu vào yêu thích' }}">
                                 <i class="bi bi-heart{{ ($wishlistProductIds ?? collect())->contains($product->id) ? '-fill' : '' }}"></i>
                             </button>
                         </form>
                     @endauth
                 </div>
 
-                <p class="text-muted small mb-2 flex-grow-1 product-description line-clamp-2 view-inline-4">
+                <p class="text-muted small mb-2 flex-grow-1 product-description line-clamp-2 product-grid-description">
                     {{ $product->description ?? 'Sản phẩm chăm sóc chất lượng cho vẻ đẹp rạng ngời mỗi ngày.' }}
                 </p>
 

@@ -1,5 +1,5 @@
 /**
- * BEATYCARE 🌸 - COMPREHENSIVE LUXURY ANIMATION ENGINE
+ * BEAUTYCARE 🌸 - COMPREHENSIVE LUXURY ANIMATION ENGINE
  * Handles: Preloader, Scroll-Driven Reading Tracker, Circular Back-to-Top,
  * Scroll Reveal Cascade, Fly-to-Cart Physics, Dynamic Glass Navbar, 
  * Micro-interactions, Tactile Steppers & Modern Toasts.

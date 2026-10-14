@@ -38,7 +38,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <span class="order-detail-eyebrow"><i class="bi bi-bag-heart me-1"></i> BeatyCare 🌸 / TRUNG TÂM ĐƠN HÀNG</span>
+            <span class="order-detail-eyebrow"><i class="bi bi-bag-heart me-1"></i> BeautyCare 🌸 / TRUNG TÂM ĐƠN HÀNG</span>
             <h3 class="fw-bold mb-1 storefront-title"><i class="bi bi-receipt text-primary me-2"></i>Đơn hàng #{{ $order->id }}</h3>
             <p class="text-muted mb-0">Đặt lúc {{ $order->created_at->format('d/m/Y \l\ú\c H:i') }}</p>
         </div>

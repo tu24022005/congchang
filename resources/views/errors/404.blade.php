@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', '404 - Không tìm thấy trang | BeatyCare 🌸')
+@section('title', '404 - Không tìm thấy trang | BeautyCare 🌸')
 
 @section('content')
 <div class="container py-5 text-center my-auto view-inline-1">

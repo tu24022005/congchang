@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Liên hệ - Aloha Beauty | BeatyCare 🌸')
-@section('meta_description', 'Liên hệ với BeatyCare (Aloha Beauty) qua hotline 0338 054 668, email contact@phungthanhtuc.com hoặc ghé thăm showroom để được trải nghiệm và tư vấn sắc đẹp trực tiếp.')
+@section('title', 'Liên hệ - Aloha Beauty | BeautyCare 🌸')
+@section('meta_description', 'Liên hệ với BeautyCare (Aloha Beauty) qua hotline 0338 054 668, email contact@phungthanhtuc.com hoặc ghé thăm showroom để được trải nghiệm và tư vấn sắc đẹp trực tiếp.')
 @section('canonical', route('pages.contact'))
 
 @section('content')
@@ -9,7 +9,7 @@
         <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-bold text-uppercase mb-2">
             <i class="bi bi-chat-heart me-1"></i> Trung tâm hỗ trợ khách hàng
         </span>
-        <h1 class="display-6 fw-bold text-dark mt-2">BeatyCare 🌸 luôn sẵn sàng lắng nghe</h1>
+        <h1 class="display-6 fw-bold text-dark mt-2">BeautyCare 🌸 luôn sẵn sàng lắng nghe</h1>
         <p class="text-muted mx-auto view-inline-1">
             Dù bạn cần tư vấn chu trình dưỡng da hay thắc mắc về đơn hàng, đội ngũ Aloha Beauty luôn có mặt hỗ trợ nhanh chóng nhất.
         </p>

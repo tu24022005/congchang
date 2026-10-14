@@ -20,7 +20,7 @@ class NewsletterConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🌸 Xác nhận đăng ký nhận tin từ BeatyCare (Aloha Beauty)',
+            subject: '🌸 Xác nhận đăng ký nhận tin từ BeautyCare (Aloha Beauty)',
         );
     }
 

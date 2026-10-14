@@ -1,6 +1,6 @@
-# Quy tắc & Ngữ cảnh Dự án BeatyCare (Aloha Beauty)
+# Quy tắc & Ngữ cảnh Dự án BeautyCare (Aloha Beauty)
 
-Bạn đang làm việc trên project Laravel 12 tên "BeatyCare" (thương hiệu hiển thị trong footer là "Aloha Beauty"), web bán mỹ phẩm bằng tiếng Việt.
+Bạn đang làm việc trên project Laravel 12 tên "BeautyCare" (thương hiệu hiển thị trong footer là "Aloha Beauty"), web bán mỹ phẩm bằng tiếng Việt.
 
 ## STACK THỰC TẾ
 - Backend: Laravel 12, Blade, Sanctum, Socialite (Google), PayOS, Pusher (chat), spatie/laravel-backup.

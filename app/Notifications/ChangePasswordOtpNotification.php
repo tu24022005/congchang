@@ -23,7 +23,7 @@ class ChangePasswordOtpNotification extends Notification
         return (new MailMessage)
             ->subject('[Aloha Beauty] ' . $this->otp . ' là mã OTP đổi mật khẩu của bạn')
             ->greeting('Xin chào ' . ($notifiable->name ?? 'quý khách') . ',')
-            ->line('Bạn vừa yêu cầu đổi mật khẩu tài khoản trên hệ thống Aloha Beauty / BeatyCare.')
+            ->line('Bạn vừa yêu cầu đổi mật khẩu tài khoản trên hệ thống Aloha Beauty / BeautyCare.')
             ->line('Mã xác thực OTP của bạn là: **' . $this->otp . '**')
             ->line('Mã này có hiệu lực trong vòng ' . $this->expiresMinutes . ' phút.')
             ->line('Tuyệt đối không chia sẻ mã này cho bất kỳ ai, kể cả nhân viên hỗ trợ.')

@@ -35,9 +35,9 @@ async function handleContactSubmit(event) {
             btn.classList.replace('btn-primary', 'btn-success');
             
             if (typeof window.showToast === 'function') {
-                window.showToast(data.message || `Cảm ơn bạn ${name}! BeatyCare đã nhận được thông tin và sẽ phản hồi sớm nhất.`, 'success');
+                window.showToast(data.message || `Cảm ơn bạn ${name}! BeautyCare đã nhận được thông tin và sẽ phản hồi sớm nhất.`, 'success');
             } else {
-                alert(`Cảm ơn bạn ${name}! BeatyCare đã nhận được thông tin và sẽ phản hồi sớm nhất.`);
+                alert(`Cảm ơn bạn ${name}! BeautyCare đã nhận được thông tin và sẽ phản hồi sớm nhất.`);
             }
             
             document.getElementById('contact-form').reset();

@@ -56,7 +56,7 @@
                     <i class="bi bi-flower1"></i>
                 </div>
             </div>
-            <div class="preloader-brand-title">BeatyCare <span class="preloader-sparkle">🌸</span></div>
+            <div class="preloader-brand-title">BeautyCare <span class="preloader-sparkle">🌸</span></div>
             <p class="preloader-tagline">Vẻ đẹp rạng ngời &bull; Chăm sóc tự nhiên</p>
             <div class="preloader-progress-track">
                 <div class="preloader-progress-fill"></div>
@@ -71,7 +71,7 @@
     <nav class="navbar navbar-expand-lg glass-navbar shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold logo-hover" href="{{ url('/') }}">
-                <i class="bi bi-flower1"></i> BeatyCare 🌸
+                <i class="bi bi-flower1"></i> BeautyCare 🌸
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -96,7 +96,7 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown me-3">
-                        <a class="nav-link dropdown-toggle text-nowrap fw-semibold {{ request()->routeIs('pages.*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Về BeatyCare</a>
+                        <a class="nav-link dropdown-toggle text-nowrap fw-semibold {{ request()->routeIs('pages.*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Về BeautyCare</a>
                         <ul class="dropdown-menu border-0 shadow-sm">
                             <li><a class="dropdown-item" href="{{ route('pages.about') }}">Giới thiệu</a></li>
                             <li><a class="dropdown-item" href="{{ route('pages.contact') }}">Liên hệ</a></li>
@@ -289,7 +289,7 @@
                     <span>SKINCARE</span><strong>GIẢM 20%</strong><small>Cho đơn từ 399K</small><b>NHẬN NGAY <i class="bi bi-arrow-up-right"></i></b>
                 </a>
                 <a href="{{ route('products.index') }}" class="side-promo-card side-promo-teal" aria-label="Mua sắm sản phẩm được miễn phí vận chuyển">
-                    <span>BEATYCARE 🌸</span><strong>FREESHIP</strong><small>Toàn quốc từ 299K</small><b>MUA SẮM <i class="bi bi-arrow-up-right"></i></b>
+                    <span>BEAUTYCARE 🌸</span><strong>FREESHIP</strong><small>Toàn quốc từ 299K</small><b>MUA SẮM <i class="bi bi-arrow-up-right"></i></b>
                 </a>
             </aside>
             <aside class="home-side-rail home-side-rail-right">

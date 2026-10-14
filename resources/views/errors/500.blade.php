@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', '500 - Sự cố máy chủ | BeatyCare 🌸')
+@section('title', '500 - Sự cố máy chủ | BeautyCare 🌸')
 
 @section('content')
 <div class="container py-5 text-center my-auto view-inline-1">
@@ -14,7 +14,7 @@
     <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-semibold mb-2">Sự cố kỹ thuật</span>
     <h1 class="display-6 fw-bold text-dark mt-2 mb-3">Đã xảy ra sự cố ngoài ý muốn 🛠️</h1>
     <p class="text-muted mx-auto mb-4 view-inline-2">
-        Thành thật xin lỗi bạn vì sự gián đoạn này. Đội ngũ kỹ thuật của BeatyCare đã ghi nhận và đang khẩn trương xử lý. Bạn có thể thử tải lại trang hoặc liên hệ hotline để được hỗ trợ tức thì.
+        Thành thật xin lỗi bạn vì sự gián đoạn này. Đội ngũ kỹ thuật của BeautyCare đã ghi nhận và đang khẩn trương xử lý. Bạn có thể thử tải lại trang hoặc liên hệ hotline để được hỗ trợ tức thì.
     </p>
     <div class="d-flex flex-wrap justify-content-center gap-3">
         <button type="button" onclick="window.location.reload()" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">

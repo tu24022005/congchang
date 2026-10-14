@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Tra c?u h�nh tr�nh don h�ng - BeatyCare ??')
+@section('title', 'Tra c?u h�nh tr�nh don h�ng - BeautyCare ??')
 @section('canonical', route('orders.track'))
 
 @section('content')

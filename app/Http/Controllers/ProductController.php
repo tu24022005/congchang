@@ -419,7 +419,7 @@ class ProductController extends Controller
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
-            'category_name' => $product->category?->name ?? 'BeatyCare 🌸',
+            'category_name' => $product->category?->name ?? 'BeautyCare 🌸',
             'brand_name' => $product->brand?->name ?? '',
             'description' => \Illuminate\Support\Str::limit(strip_tags($product->description ?: 'Sản phẩm chăm sóc da và cơ thể chính hãng Aloha Beauty.'), 180),
             'price' => (float) $effectivePrice,

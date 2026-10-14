@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- * BEATYCARE 🌸 - COMPREHENSIVE PAGE TRANSITIONS & INTERACTION FEEDBACK
+ * BEAUTYCARE 🌸 - COMPREHENSIVE PAGE TRANSITIONS & INTERACTION FEEDBACK
  * High-performance Vanilla JS Engine:
  * 1. Page Entrance (fade-in + slide-up on DOMContentLoaded)
  * 2. Page Exit (fade-out on internal navigation with 200ms smooth delay)

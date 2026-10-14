@@ -1,8 +1,8 @@
 @extends('layouts.app')
-@section('title', $product->name . ' - BeatyCare')
-@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeatyCare')), 155))
+@section('title', $product->name . ' - BeautyCare')
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeautyCare')), 155))
 @section('og_title', $product->name)
-@section('og_description', \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeatyCare')), 155))
+@section('og_description', \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeautyCare')), 155))
 @section('og_image', $product->image ? asset('storage/' . $product->image) : asset('images/placeholder.svg'))
 @section('og_type', 'product')
 @section('canonical', route('products.show', ['product' => $product->slug]))
@@ -27,7 +27,7 @@
         '@type' => 'Product',
         'name' => $product->name,
         'image' => array_values(array_unique($galleryUrls)),
-        'description' => \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeatyCare')), 200),
+        'description' => \Illuminate\Support\Str::limit(strip_tags($product->description ?: ($product->name . ' chính hãng tại BeautyCare')), 200),
         'sku' => $product->product_code ?: ($product->sku ?? ('BC-' . $product->id)),
         'mpn' => 'BC-' . $product->id,
         'brand' => [
@@ -62,7 +62,7 @@
                 '@type' => 'Review',
                 'author' => [
                     '@type' => 'Person',
-                    'name' => $rev->reviewer_name ?: ($rev->user?->name ?: 'Khách hàng BeatyCare'),
+                    'name' => $rev->reviewer_name ?: ($rev->user?->name ?: 'Khách hàng BeautyCare'),
                 ],
                 'datePublished' => $rev->created_at->toDateString(),
                 'reviewBody' => $rev->comment ?: ('Đánh giá ' . $rev->rating . ' sao'),
@@ -184,7 +184,7 @@
             </div>
 
             <div class="col-lg-6">
-                <div class="detail-kicker mb-2">{{ $product->category?->name ?? 'BeatyCare 🌸' }}</div>
+                <div class="detail-kicker mb-2">{{ $product->category?->name ?? 'BeautyCare 🌸' }}</div>
                 <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
                     <h1 class="detail-title fw-bold mb-0">{{ $product->name }}</h1>
                     @auth
@@ -200,7 +200,7 @@
                         <a href="{{ route('login') }}" class="btn btn-outline-danger rounded-circle flex-shrink-0" title="Đăng nhập để lưu yêu thích" aria-label="Đăng nhập để lưu yêu thích"><i class="bi bi-heart"></i></a>
                     @endauth
                 </div>
-                <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span><span class="text-muted small">Được lựa chọn bởi khách hàng BeatyCare</span></div>
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-4"><span class="detail-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span><span class="text-muted small">Được lựa chọn bởi khách hàng BeautyCare</span></div>
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-4">@if($product->isFlashSaleActive())<span class="badge bg-danger"><i class="bi bi-lightning-charge-fill"></i> FLASH SALE</span><span class="detail-price">{{ number_format($product->effectivePrice(), 0, ',', '.') }} đ</span><span class="text-muted text-decoration-line-through">{{ number_format($product->price, 0, ',', '.') }} đ</span><small class="text-danger">Đến {{ $product->flash_sale_ends_at->format('d/m H:i') }}</small>@else<span class="detail-price">{{ number_format($product->price, 0, ',', '.') }} đ</span>@endif<span class="{{ $product->quantity > 0 ? 'detail-stock' : 'detail-stock out' }}"><i class="bi bi-{{ $product->quantity > 0 ? 'check-circle' : 'x-circle' }} me-1"></i>{{ $product->quantity > 0 ? 'Còn ' . $product->quantity . ' sản phẩm' : 'Hết hàng' }}</span></div>
                 <p class="detail-copy mb-4">{{ $product->description ?: 'Một lựa chọn chăm sóc cá nhân dịu nhẹ, phù hợp cho chu trình làm đẹp hằng ngày.' }}</p>
 
@@ -363,7 +363,7 @@
                 <article class="review-item" data-review-rating="{{ $review->rating }}" data-review-media="{{ !empty($review->media_paths) ? '1' : '0' }}" data-review-comment="{{ filled($review->comment) ? '1' : '0' }}">
                     <div class="review-avatar">{{ strtoupper(substr($review->reviewer_name ?: $review->user?->name ?: 'A', 0, 1)) }}</div>
                     <div class="flex-grow-1">
-                        <strong>{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng BeatyCare' }}</strong>
+                        <strong>{{ $review->reviewer_name ?: $review->user?->name ?: 'Khách hàng BeautyCare' }}</strong>
                         <div class="review-stars">{{ str_repeat('★', $review->rating) }}<span class="text-muted">{{ str_repeat('★', 5 - $review->rating) }}</span></div>
                         <div class="review-meta">{{ $review->created_at->format('d/m/Y H:i') }} @if($review->variant_label) | Phân loại hàng: {{ $review->variant_label }} @endif</div>
                         @if($review->is_verified_purchase)<div class="review-verified"><i class="bi bi-patch-check-fill me-1"></i>Đã mua hàng</div>@endif

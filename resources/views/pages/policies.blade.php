@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Chính sách mua hàng & Bảo mật - Aloha Beauty | BeatyCare 🌸')
-@section('meta_description', 'Xem chi tiết chính sách đổi trả hoàn tiền 7 ngày, miễn phí vận chuyển từ 500.000đ, chính sách đồng kiểm và bảo mật thông tin tại BeatyCare (Aloha Beauty).')
+@section('title', 'Chính sách mua hàng & Bảo mật - Aloha Beauty | BeautyCare 🌸')
+@section('meta_description', 'Xem chi tiết chính sách đổi trả hoàn tiền 7 ngày, miễn phí vận chuyển từ 500.000đ, chính sách đồng kiểm và bảo mật thông tin tại BeautyCare (Aloha Beauty).')
 @section('canonical', route('pages.policies'))
 
 @section('content')
@@ -10,7 +10,7 @@
         <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-bold text-uppercase mb-2">
             <i class="bi bi-shield-check me-1"></i> Quyền lợi khách hàng
         </span>
-        <h1 class="display-6 fw-bold text-dark mt-2">Chính sách minh bạch tại BeatyCare 🌸</h1>
+        <h1 class="display-6 fw-bold text-dark mt-2">Chính sách minh bạch tại BeautyCare 🌸</h1>
         <p class="text-muted mx-auto view-inline-1">
             Mọi quy định tại Aloha Beauty đều hướng đến mục tiêu đảm bảo bạn có trải nghiệm mua sắm mỹ phẩm an tâm, hài lòng và trọn vẹn nhất.
         </p>
@@ -33,7 +33,7 @@
                 <ul class="text-secondary lh-lg mb-0 ps-3">
                     <li><strong>Điều kiện đổi trả:</strong> Sản phẩm còn nguyên tem niêm phong, chưa qua sử dụng, còn đầy đủ vỏ hộp, phụ kiện và quà tặng kèm (nếu có).</li>
                     <li><strong>Trường hợp được đổi trả miễn phí:</strong> Sản phẩm bị vỡ, hỏng hóc do vận chuyển; giao sai phân loại/mẫu mã; sản phẩm có lỗi từ nhà sản xuất.</li>
-                    <li><strong>Cam kết dị ứng mỹ phẩm:</strong> Nếu có chỉ định kích ứng từ bác sĩ da liễu trong 3 ngày đầu sử dụng, BeatyCare hỗ trợ thu hồi và đổi sản phẩm phù hợp.</li>
+                    <li><strong>Cam kết dị ứng mỹ phẩm:</strong> Nếu có chỉ định kích ứng từ bác sĩ da liễu trong 3 ngày đầu sử dụng, BeautyCare hỗ trợ thu hồi và đổi sản phẩm phù hợp.</li>
                     <li><strong>Thời gian hoàn tiền:</strong> Từ 1 - 3 ngày làm việc qua tài khoản ngân hàng sau khi kho tiếp nhận và thẩm định hàng hoàn.</li>
                 </ul>
             </article>
@@ -61,7 +61,7 @@
                         </ul>
                     </li>
                     <li><strong>Đối tác vận chuyển uy tín:</strong> Giao Hàng Nhanh (GHN), Giao Hàng Tiết Kiệm (GHTK), Viettel Post với mã vận đơn tra cứu trực tuyến.</li>
-                    <li><strong>Đóng gói chuyên dụng:</strong> Chống sốc 3 lớp bọt khí và dán băng keo niêm phong thương hiệu BeatyCare.</li>
+                    <li><strong>Đóng gói chuyên dụng:</strong> Chống sốc 3 lớp bọt khí và dán băng keo niêm phong thương hiệu BeautyCare.</li>
                 </ul>
             </article>
         </div>
@@ -102,7 +102,7 @@
                 <hr class="my-3 opacity-25">
                 <ul class="text-secondary lh-lg mb-0 ps-3">
                     <li><strong>Thu thập thông tin:</strong> Tên, số điện thoại, email và địa chỉ nhận hàng chỉ được sử dụng cho mục đích giao hàng và chăm sóc hậu mãi.</li>
-                    <li><strong>Tuyệt đối không chia sẻ:</strong> BeatyCare cam kết không bán, chia sẻ dữ liệu khách hàng cho bên thứ ba vì bất kỳ mục đích quảng cáo rác nào.</li>
+                    <li><strong>Tuyệt đối không chia sẻ:</strong> BeautyCare cam kết không bán, chia sẻ dữ liệu khách hàng cho bên thứ ba vì bất kỳ mục đích quảng cáo rác nào.</li>
                     <li><strong>Mã hóa an toàn:</strong> Dữ liệu thanh toán ngân hàng được bảo mật theo tiêu chuẩn quốc tế và mã hóa qua cổng PayOS.</li>
                 </ul>
             </article>

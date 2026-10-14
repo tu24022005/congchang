@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Thanh toán đơn hàng - BeatyCare 🌸')
+@section('title', 'Thanh toán đơn hàng - BeautyCare 🌸')
 @push('head')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="{{ asset_v('css/views/cart-checkout-blade-php.css') }}">
@@ -24,7 +24,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
             <span class="text-uppercase fw-bold small text-primary tracking-wide">
-                <i class="bi bi-shield-check me-1"></i>BEATYCARE 🌸 / THANH TOÁN
+                <i class="bi bi-shield-check me-1"></i>BEAUTYCARE 🌸 / THANH TOÁN
             </span>
             <h2 class="fw-bold mb-1 mt-1 text-dark">
                 <i class="bi bi-credit-card-2-front text-primary me-2"></i>Thanh toán đơn hàng
@@ -346,7 +346,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4 shadow-lg">
             <div class="modal-header border-bottom">
-                <h5 class="modal-title fw-bold"><i class="bi bi-ticket-perforated text-warning me-2"></i>Kho Voucher BeatyCare 🌸</h5>
+                <h5 class="modal-title fw-bold"><i class="bi bi-ticket-perforated text-warning me-2"></i>Kho Voucher BeautyCare 🌸</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body p-4">

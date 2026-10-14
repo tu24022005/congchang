@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'BeatyCare 🌸 - Mỹ phẩm & Chăm sóc sắc đẹp chính hãng Aloha Beauty')
+@section('title', 'BeautyCare 🌸 - Mỹ phẩm & Chăm sóc sắc đẹp chính hãng Aloha Beauty')
 @section('canonical', route('welcome'))
 
 @push('styles')
@@ -34,7 +34,7 @@
                 '@type' => 'WebSite',
                 '@id' => url('/#website'),
                 'url' => url('/'),
-                'name' => 'BeatyCare',
+                'name' => 'BeautyCare',
                 'description' => config('shop.seo.default_description'),
                 'publisher' => [
                     '@id' => url('/#organization'),
@@ -164,7 +164,7 @@
 
 <!-- LỜI CHÀO -->
 <div class="text-center mb-5 animate__animated animate__fadeInUp">
-    <h2 class="fw-bold product-page-title">BEATYCARE 🌸 MÙA HÈ RỰC RỠ</h2>
+    <h2 class="fw-bold product-page-title">BEAUTYCARE 🌸 MÙA HÈ RỰC RỠ</h2>
     <p class="text-muted">Khám phá không gian mua sắm thư giãn cho làn da và cơ thể</p>
 </div>
 

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Tất cả sản phẩm - BeatyCare 🌸')
+@section('title', 'Tất cả sản phẩm - BeautyCare 🌸')
 @section('canonical', route('products.index'))
 @push('styles')
 <link rel="stylesheet" href="{{ asset_v('css/views/products-grid-blade-php.css') }}">
@@ -13,7 +13,7 @@
 @section('content')
 <!-- LỜI CHÀO -->
 <div class="text-center mb-4 animate__animated animate__fadeInDown">
-    <h1 class="fw-bold product-page-title fs-2">BEATYCARE 🌸 KHÁM PHÁ SẢN PHẨM</h1>
+    <h1 class="fw-bold product-page-title fs-2">BEAUTYCARE 🌸 KHÁM PHÁ SẢN PHẨM</h1>
     <p class="text-muted">Khám phá mỹ phẩm và sản phẩm chăm sóc cá nhân chính hãng dành cho bạn</p>
 </div>
 

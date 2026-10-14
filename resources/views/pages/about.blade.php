@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Về chúng tôi - Aloha Beauty | BeatyCare 🌸')
-@section('meta_description', 'Khám phá câu chuyện thương hiệu Aloha Beauty (BeatyCare). Sứ mệnh tôn vinh vẻ đẹp tự nhiên, cam kết 100% mỹ phẩm chính hãng, đền bù 200% nếu phát hiện hàng giả.')
+@section('title', 'Về chúng tôi - Aloha Beauty | BeautyCare 🌸')
+@section('meta_description', 'Khám phá câu chuyện thương hiệu Aloha Beauty (BeautyCare). Sứ mệnh tôn vinh vẻ đẹp tự nhiên, cam kết 100% mỹ phẩm chính hãng, đền bù 200% nếu phát hiện hàng giả.')
 @section('canonical', route('pages.about'))
 
 @push('styles')
@@ -16,7 +16,7 @@
         </span>
         <h1 class="display-5 fw-bold text-dark mb-3">Tôn vinh vẻ đẹp tự nhiên & rạng ngời</h1>
         <p class="lead text-muted mx-auto about-intro">
-            BeatyCare ra đời với khát khao mang đến giải pháp chăm sóc làn da và sắc đẹp an toàn, minh bạch và dịu lành nhất cho phụ nữ Việt Nam.
+            BeautyCare ra đời với khát khao mang đến giải pháp chăm sóc làn da và sắc đẹp an toàn, minh bạch và dịu lành nhất cho phụ nữ Việt Nam.
         </p>
     </div>
 
@@ -62,7 +62,7 @@
                     Chúng tôi tin rằng mỹ phẩm không chỉ giúp che khuyết điểm mà là chiếc chìa khóa nuôi dưỡng sự tự tin vốn có. Aloha Beauty nói KHÔNG với các sản phẩm trôi nổi, kém chất lượng và corticoid độc hại.
                 </p>
                 <p class="text-secondary lh-lg mb-0">
-                    Từng thỏi son, giọt serum hay hũ kem dưỡng tại BeatyCare đều được kiểm định nguồn gốc xuất xứ nghiêm ngặt từ các thương hiệu uy tín toàn cầu (Hàn Quốc, Nhật Bản, Pháp, Mỹ...).
+                    Từng thỏi son, giọt serum hay hũ kem dưỡng tại BeautyCare đều được kiểm định nguồn gốc xuất xứ nghiêm ngặt từ các thương hiệu uy tín toàn cầu (Hàn Quốc, Nhật Bản, Pháp, Mỹ...).
                 </p>
             </div>
         </div>
@@ -84,7 +84,7 @@
                     </div>
                     <div>
                         <h5 class="fw-bold mb-1">Tư vấn cá nhân hóa chu trình</h5>
-                        <p class="text-muted small mb-0">Trợ lý ảo BeatyCare AI & đội ngũ chuyên viên sẵn sàng phân tích tình trạng da giúp bạn chọn đúng sản phẩm.</p>
+                        <p class="text-muted small mb-0">Trợ lý ảo BeautyCare AI & đội ngũ chuyên viên sẵn sàng phân tích tình trạng da giúp bạn chọn đúng sản phẩm.</p>
                     </div>
                 </div>
 
@@ -104,7 +104,7 @@
     <!-- CTA BẮT ĐẦU TRẢI NGHIỆM -->
     <div class="text-center p-5 rounded-4 shadow-sm reveal-up about-cta">
         <h3 class="fw-bold text-dark mb-2">Sẵn sàng nâng niu làn da của bạn hôm nay?</h3>
-        <p class="text-muted mb-4">Khám phá hàng ngàn ưu đãi flash sale và quà tặng độc quyền tại BeatyCare.</p>
+        <p class="text-muted mb-4">Khám phá hàng ngàn ưu đãi flash sale và quà tặng độc quyền tại BeautyCare.</p>
         <div class="d-flex justify-content-center gap-3">
             <a href="{{ route('products.index') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
                 <i class="bi bi-bag-heart me-2"></i>Mua sắm ngay

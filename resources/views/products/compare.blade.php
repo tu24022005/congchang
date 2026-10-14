@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'So sánh sản phẩm - BeatyCare 🌸')
+@section('title', 'So sánh sản phẩm - BeautyCare 🌸')
 @section('canonical', route('products.compare'))
 
 @section('content')
@@ -66,7 +66,7 @@
                         <tr>
                             <td class="fw-semibold text-muted sticky-col bg-light-subtle">Thương hiệu</td>
                             @foreach($products as $product)
-                                <td class="text-center">{{ $product->brand->name ?? 'BeatyCare Chính Hãng' }}</td>
+                                <td class="text-center">{{ $product->brand->name ?? 'BeautyCare Chính Hãng' }}</td>
                             @endforeach
                         </tr>
                         <tr>

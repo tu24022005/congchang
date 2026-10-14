@@ -53,7 +53,7 @@ class NewsletterController extends Controller
         $subscriber->confirmed_at = now();
         $subscriber->save();
 
-        return redirect()->route('welcome')->with('success', 'Xác nhận đăng ký nhận tin thành công! Cảm ơn bạn đã đồng hành cùng BeatyCare 🌸');
+        return redirect()->route('welcome')->with('success', 'Xác nhận đăng ký nhận tin thành công! Cảm ơn bạn đã đồng hành cùng BeautyCare 🌸');
     }
 
     public function unsubscribe(string $token)

@@ -22,10 +22,10 @@ class ContactController extends Controller
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Cảm ơn bạn đã liên hệ! BeatyCare đã nhận tin nhắn và sẽ phản hồi sớm nhất.',
+                'message' => 'Cảm ơn bạn đã liên hệ! BeautyCare đã nhận tin nhắn và sẽ phản hồi sớm nhất.',
             ]);
         }
 
-        return back()->with('success', 'Cảm ơn bạn đã liên hệ! BeatyCare đã nhận tin nhắn và sẽ phản hồi sớm nhất.');
+        return back()->with('success', 'Cảm ơn bạn đã liên hệ! BeautyCare đã nhận tin nhắn và sẽ phản hồi sớm nhất.');
     }
 }

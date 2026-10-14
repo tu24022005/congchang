@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Câu hỏi thường gặp - BeatyCare 🌸')
-@section('meta_description', 'Giải đáp các thắc mắc thường gặp về đặt hàng, thanh toán COD, giao hàng toàn quốc và chính sách tại BeatyCare (Aloha Beauty).')
+@section('title', 'Câu hỏi thường gặp - BeautyCare 🌸')
+@section('meta_description', 'Giải đáp các thắc mắc thường gặp về đặt hàng, thanh toán COD, giao hàng toàn quốc và chính sách tại BeautyCare (Aloha Beauty).')
 @section('canonical', route('pages.faq'))
 
 @php
     $faqItems = [
-        ['q' => 'Bạn có thể thanh toán bằng hình thức nào?', 'a' => 'BeatyCare 🌸 hỗ trợ thanh toán khi nhận hàng (COD) và thanh toán online an toàn qua cổng PayOS.'],
+        ['q' => 'Bạn có thể thanh toán bằng hình thức nào?', 'a' => 'BeautyCare 🌸 hỗ trợ thanh toán khi nhận hàng (COD) và thanh toán online an toàn qua cổng PayOS.'],
         ['q' => 'Bao lâu thì đơn hàng được giao?', 'a' => 'Thời gian dự kiến là 2-5 ngày làm việc tùy khu vực và đơn vị vận chuyển.'],
         ['q' => 'Tôi có thể lưu nhiều địa chỉ giao hàng không?', 'a' => 'Có. Vào Tài khoản của tôi, mở Sổ địa chỉ giao hàng để thêm, sửa, xóa hoặc đặt địa chỉ mặc định.'],
         ['q' => 'Làm thế nào để đổi trả sản phẩm?', 'a' => 'Xem chi tiết tại trang Chính sách đổi trả và vận chuyển, hoặc liên hệ bộ phận CSKH kèm mã đơn hàng trong vòng 7 ngày kể từ khi nhận hàng.'],

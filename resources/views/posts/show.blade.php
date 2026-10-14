@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', ($post->meta_title ?: $post->title) . ' - Blog BeatyCare')
+@section('title', ($post->meta_title ?: $post->title) . ' - Blog BeautyCare')
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($post->meta_description ?: ($post->excerpt ?: $post->title)), 155))
 @section('og_title', $post->title)
 @section('og_description', \Illuminate\Support\Str::limit(strip_tags($post->meta_description ?: ($post->excerpt ?: $post->title)), 155))

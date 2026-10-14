@@ -25,7 +25,7 @@ class ProductQuestionController extends Controller
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Câu hỏi của bạn đã được gửi. BeatyCare sẽ phản hồi sớm nhất!',
+                'message' => 'Câu hỏi của bạn đã được gửi. BeautyCare sẽ phản hồi sớm nhất!',
                 'question' => [
                     'id' => $question->id,
                     'user_name' => Auth::check() ? Auth::user()->name : 'Khách hàng',
@@ -35,7 +35,7 @@ class ProductQuestionController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Câu hỏi của bạn đã được gửi. BeatyCare sẽ phản hồi sớm nhất!');
+        return back()->with('success', 'Câu hỏi của bạn đã được gửi. BeautyCare sẽ phản hồi sớm nhất!');
     }
 
     // Admin methods

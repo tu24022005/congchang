@@ -1,5 +1,5 @@
 @extends('layouts.app') 
-@section('title', 'BeatyCare 🌸 - Đăng nhập') 
+@section('title', 'BeautyCare 🌸 - Đăng nhập')
 @push('styles')
     <link rel="stylesheet" href="{{ asset_v('css/auth.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/views/auth-login-blade-php.css') }}">
@@ -18,8 +18,8 @@
     <div class="chill-card">
         
         <div class="chill-header">
-            <h3>BeatyCare 🌸!</h3>
-            <p>Chào mừng bạn trở lại tại BeatyCare 🌸</p>
+            <h3>BeautyCare 🌸!</h3>
+            <p>Chào mừng bạn trở lại tại BeautyCare 🌸</p>
         </div>
 
         {{-- Thông báo --}}

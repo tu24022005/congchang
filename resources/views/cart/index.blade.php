@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Giỏ hàng của bạn - BeatyCare 🌸')
+@section('title', 'Giỏ hàng của bạn - BeautyCare 🌸')
 
 @section('content')
 <div class="container py-4 cart-shopee-page">
@@ -19,7 +19,7 @@
     <!-- TIÊU ĐỀ TRANG GIỎ HÀNG -->
     <div class="cart-page-heading mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <span class="cart-eyebrow">BEATYCARE 🌸 / GIỎ HÀNG</span>
+            <span class="cart-eyebrow">BEAUTYCARE 🌸 / GIỎ HÀNG</span>
             <h2 class="fw-bold storefront-title mb-1">
                 <i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn
             </h2>
@@ -86,7 +86,7 @@
                                     <tr class="cart-shop-row">
                                         <td colspan="5" class="text-start ps-4 py-2 bg-light-subtle">
                                             <input type="checkbox" class="form-check-input cart-checkbox-input cart-shop-select me-2" checked>
-                                            <strong class="text-dark">BeatyCare 🌸</strong>
+                                            <strong class="text-dark">BeautyCare 🌸</strong>
                                             <span class="badge bg-danger-subtle text-danger ms-2">Yêu thích</span>
                                         </td>
                                     </tr>
@@ -254,7 +254,7 @@
             <x-empty-state 
                 type="cart" 
                 title="Giỏ hàng của bạn đang trống" 
-                description="Khám phá ngay các sản phẩm mỹ phẩm và ưu đãi hấp dẫn đang chờ bạn tại BeatyCare 🌸." 
+                description="Khám phá ngay các sản phẩm mỹ phẩm và ưu đãi hấp dẫn đang chờ bạn tại BeautyCare 🌸."
                 action-label="Khám phá sản phẩm ngay" 
                 action-url="{{ route('products.index') }}" 
             />
